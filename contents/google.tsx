@@ -45,7 +45,7 @@ export const getRootContainer = () => {
 const PlasmoPricingExtra = () => {
   return (
     <div className="border-[1px] rounded-md border-gray-300 flex flex-col p-4 gap-[5px] justify-start">
-      <span className="text-lg text-blue-400 tooltip" data-tip="hello">
+      <span className="text-lg text-blue-400">
         <a
           href="http://www.mafengwo.cn/i/953039788.html"
           target="_blank"
