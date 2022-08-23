@@ -7,39 +7,34 @@ export const config: PlasmoContentScript = {
   all_frames: false
 }
 
-console.log("sss")
-
 let rootContainerID = ""
 let queryWordId = ""
 const thisURL = window.location.href
+console.log("thisurl:  ",thisURL)
 // regexp jusge if thisURL is https://www.google.com/*
 const isGoogle = () => {
-  return thisURL.match(/https:\/\/www.google.com\/*/)
+  const reg = /^https:\/\/www.google.com\/*/g
+  // console.log("reg",reg.test(thisURL))
+  return reg.test(thisURL)
 }
 // regexp jusge if thisURL is https://*.bing.com/*
 const isBing = () => {
-  return thisURL.match(/https:\/\/cn.bing.com\/*/)
+  const reg = /^https:\/\/cn.bing.com\/*/g
+  return reg.test(thisURL)
+ 
 }
 
 const isBaidu = () => {
-  return thisURL.match(/https:\/\/www.baidu.com\/*/)
+  const reg = /^https:\/\/www.baidu.com\/*/g
+  return reg.test(thisURL)
 }
-if(isGoogle) {
-  rootContainerID="center_col"
-  queryWordId = "[name='q']"
-} else if(isBing) {
-  rootContainerID="b_results"
-} else if(isBaidu) {
-  rootContainerID="content_left"
-  queryWordId = "[name='wd']"
-}
+
 
 let showSearchResult = "true"
 const key = 'fulltextbookmark';
 chrome.storage.local.get([`persist:${key}`], (items) => {
   const rootParsed = JSON.parse(items[`persist:${key}`]);
   showSearchResult = rootParsed.searchEngineAdaption;
-  console.log("ssssss", showSearchResult);
 });
 
 interface SearchResult {
@@ -52,8 +47,22 @@ let searchResult: SearchResult | null = null
 
 window.addEventListener("load", () => {
   console.log("content script loaded")
+  if(isGoogle()) {
+    console.log("google")
+    rootContainerID="center_col"
+    queryWordId = "[name='q']"
+  } else if(isBing()) {
+    console.log("bing")
+    rootContainerID="b_results"
+  } else if(isBaidu()) {
+    console.log("baidu")
+    rootContainerID="content_left"
+    queryWordId = "#kw"
+  } else {
+    console.log("no match page")
+  }
   const originContainer = document.getElementById(rootContainerID)
-  console.log("ppppppp", showSearchResult);
+  console.log("showSearchResult?:", showSearchResult);
   if(showSearchResult==="false") {
     createAndInsertEmptyResultBox(originContainer)
     return
@@ -61,6 +70,7 @@ window.addEventListener("load", () => {
   // createAndInsertResultBox(originContainer)
   // get google search bar value
   const searchInput = document.querySelector(queryWordId)
+  console.log(  searchInput)
   // @ts-ignore
   const s = searchInput.value
   console.log("get google search input value: ", s)
