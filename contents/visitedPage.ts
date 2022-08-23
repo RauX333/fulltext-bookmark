@@ -11,13 +11,13 @@ export const config: PlasmoContentScript = {
 // exclude google/bing/baidu urls
 const excludeURLs = [
   "https://www.google.com/*",
-  "https://www.bing.com/*",
+  "https://cn.bing.com/*",
   "https://www.baidu.com/*"
 ]
 const pageId = uuidv4()
 
 window.addEventListener("load", () => {
-  newBookmarkListener()
+  // newBookmarkListener()
   if (!isExcludeURL(window.location.href)) {
     parsePageAndSend()
   }

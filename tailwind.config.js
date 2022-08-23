@@ -10,5 +10,5 @@ module.exports = {
     }
   },
   variants: { extend: { typography: ["dark"] } },
-  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/typography"),require("daisyui")]
+  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/typography")]
 }

@@ -1,17 +1,18 @@
-import "../style.css"
-import { useState } from "react"
+import { PersistGate } from "@plasmohq/redux-persist/integration/react"
+import { Provider } from "react-redux"
+
+import { SettingView } from "~settings"
+import { persistor, store } from "~store"
+
 
 function OptionsIndex() {
-  const [data, setData] = useState("")
 
   return (
-    <div>
-      <h1>
-        Welcome to your <a href="https://www.plasmo.com">Plasmo</a> Extension!
-      </h1>
-      <h2>OOOOOOOOOOOOOOOOOO</h2>
-      <input onChange={(e) => setData(e.target.value)} value={data} />
-    </div>
+    <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <SettingView />
+    </PersistGate>
+  </Provider>
   )
 }
 
