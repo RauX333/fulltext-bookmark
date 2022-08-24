@@ -11,6 +11,7 @@ interface SearchResult {
   title: string
   url: string
   date: number
+  ok: boolean
 }
 
 
@@ -29,8 +30,11 @@ let searchFinished=0
 // get user options to decide whether to show search result
 chrome.storage.local.get([`persist:${storageKey}`], (items) => {
   if(items[`persist:${storageKey}`]) {
+    console.log("persist result",items[`persist:${storageKey}`])
     const rootParsed = JSON.parse(items[`persist:${storageKey}`]);
     showSearchResult = rootParsed?.searchEngineAdaption;
+  }  else {
+    console.log("no persist result")
   }
   prepare()
 });
@@ -194,7 +198,7 @@ function prepare(){
       .then((v) => {
         console.log("google_result message response:", v)
         searchResult = v
-        if(searchResult) {
+        if(searchResult && searchResult.ok!==false) {
           resultElement = createResult()
         } else {
           searchFinished = -1

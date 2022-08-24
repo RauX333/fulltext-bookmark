@@ -15,18 +15,43 @@ const excludeURLs = [
   "https://www.baidu.com/*"
 ]
 const pageId = uuidv4()
+const storageKey = 'fulltextbookmark';
+let options = {
+  storeEveryPage: true,
+  bookmarkAdaption: true,
+}
+
 
 window.addEventListener("load", () => {
-  // newBookmarkListener()
   if (!isExcludeURL(window.location.href)) {
-    parsePageAndSend()
-  }
+  chrome.storage.local.get([`persist:${storageKey}`], (items) => {
+    if(items[`persist:${storageKey}`]) {
+      console.log("persist result",items[`persist:${storageKey}`])
+      options = JSON.parse(items[`persist:${storageKey}`]);
+    }  else {
+      console.log("no persist result")
+    }
+    if(options.bookmarkAdaption.toString() === "true") {
+      newBookmarkListener()
+    }
+    
+    if(options.storeEveryPage.toString() === "true") {
+      console.log("store every page")
+      parsePageAndSend()
+    }
+  });
+}
 })
 
 const newBookmarkListener = (): void => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.command === "bookmark") {
-      sendResponse({ pageId: pageId })
+      if(options.storeEveryPage.toString() === "true") {
+        sendResponse({ pageId: pageId,stored: true })
+      } else {
+        const article = parsePage()
+        sendResponse({ data: article, pageId: pageId,stored:false })
+      }
     } else {
       sendResponse({})
     }
@@ -44,7 +69,19 @@ const isExcludeURL = (url: string): boolean => {
   console.log("not exclude url:", url)
   return false
 }
-const parsePageAndSend = (): void => {
+
+function parsePageAndSend (){
+  const article = parsePage()
+  // send to background script
+  chrome.runtime
+    .sendMessage({ command: "store", data: article, pageId: pageId })
+    .then((v) => {
+      console.log(`${pageId} store message response: ${v}`)
+    })
+}
+
+
+function parsePage(){
   // get content of page
   var article: any
   var documentClone = document.cloneNode(true)
@@ -68,10 +105,5 @@ const parsePageAndSend = (): void => {
       date: Date.now()
     }
   }
-  // send to background script
-  chrome.runtime
-    .sendMessage({ command: "store", data: article, pageId: pageId })
-    .then((v) => {
-      console.log(`${pageId} store message response: ${v}`)
-    })
+  return article
 }
