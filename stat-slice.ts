@@ -25,7 +25,7 @@ const statSlice = createSlice({
     remoteStoreURL: null,
     remoteStoreKey: null,
     maxResults: 20,
-    tempPageExpireTime: 60 * 60 * 24 * 60 // 60 days
+    tempPageExpireTime: 60 * 60 * 24 * 60 * 1000 // 60 days
   },
   reducers: {
     toggleSearchEngineAdaption: (state) => {

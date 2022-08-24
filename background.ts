@@ -1,7 +1,9 @@
 import Dexie from "dexie"
 import { Segment, useDefault } from "segmentit"
-import { persistor, store } from "~store";
-export {};
+
+import { persistor, store } from "~store"
+
+export {}
 // let userOptions = null;
 // // // console.log("init useroptions",userOptions);
 // persistor.subscribe(() => {
@@ -14,8 +16,7 @@ export {};
 // Dexie.delete("PageDatabase")
 const db = new Dexie("PageDatabase")
 db.version(1).stores({
-  pages:
-    "++id,url,*contentWords,title,*titleWords,date,pageId,isBookmarked"
+  pages: "++id,url,*contentWords,title,*titleWords,date,pageId,isBookmarked"
 })
 // // @ts-ignore
 // db.pages.hook("creating", function (primKey, obj, trans) {
@@ -50,6 +51,15 @@ db.version(1).stores({
 //   }
 // })
 db.open()
+
+
+// delete outdated records
+const userOps = store.getState()
+// @ts-ignore
+db.pages
+  .where("date")
+  .below(Date.now() - userOps.tempPageExpireTime)
+  .delete()
 // ====================================================================================================
 
 interface PageData {
@@ -69,6 +79,8 @@ interface Message {
   pageId: string
 }
 
+// ====================================================================================================
+// listeners
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.command) {
     case "store":
@@ -86,18 +98,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "google_result":
       console.log("google result", message.search)
       ;(async () => {
-        const userOptions = store.getState()
-        console.log("ss oprion", userOptions)
-        const result = await searchStringWithAllMatch(message.search)
+        const result = await searchString(message.search)
         console.log("search result", result)
-        if(result && result.length > 0){
+        if (result && result.length > 0) {
           const matchedFirst = result[0]
-        sendResponse({
-          title: matchedFirst.title || "",
-          url: matchedFirst.url || "",
-          date: matchedFirst.date || 0,
-          ok: true
-        })
+          sendResponse({
+            title: matchedFirst.title || "",
+            url: matchedFirst.url || "",
+            date: matchedFirst.date || 0,
+            ok: true
+          })
         } else {
           sendResponse({
             title: "",
@@ -106,7 +116,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             ok: false
           })
         }
-        
       })()
       return true
     default:
@@ -114,14 +123,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 })
 
+// bookmark linstener
 chrome.bookmarks.onCreated.addListener((id, bm) => {
   console.log("bookmarks created:", id, bm)
+  const userOptions = store.getState()
+  console.log("ss oprion", userOptions)
+  if (!userOptions.bookmarkAdaption) {
+    return
+  }
   chrome.tabs.query({ active: true }, (tabs) => {
     chrome.tabs.sendMessage(
       tabs[0].id,
       { command: "bookmark", data: "create" },
       (resp) => {
-        // console.log(resp)
+        console.log("book resp",resp)
         // change archive status in db
         if (resp.stored === true) {
           bookmark(resp.pageId)
@@ -132,12 +147,39 @@ chrome.bookmarks.onCreated.addListener((id, bm) => {
             await saveToDatabase({ ...resp.data, pageId: resp.pageId })
           })()
         }
+        return true
       }
     )
   })
 })
 
-const bookmark = (pageId: string) => {
+chrome.bookmarks.onRemoved.addListener(
+  (id,removeInfo)=>{
+    let removedURLs = []
+    console.log("removed",id,removeInfo);
+    // if removeInfo node has children, then get all the children's url
+    if(removeInfo.node.children){ 
+      removeInfo.node.children.forEach(child=>{
+        console.log("child",child.url);
+        removedURLs.push(child.url)
+      } )
+    } 
+    // if delete single bookmark, then get the url of the bookmark
+    else {
+      removedURLs.push(removeInfo.node.url)
+    }
+    // delete from database matching the removedURLs
+    db.pages.where("url").anyOf(removedURLs).modify({isBookmarked:false}).then(()=>{
+      console.log("unbookmarked");
+    })
+  }
+)
+
+// ====================================================================================================
+
+// ====================================================================================================
+// database functions
+function bookmark (pageId: string) {
   // @ts-ignore
   db.transaction("rw", db.pages, async () => {
     // @ts-ignore
@@ -149,7 +191,7 @@ const bookmark = (pageId: string) => {
   })
 }
 
-const saveToDatabase = async (data: PageData) => {
+async function saveToDatabase  (data: PageData) {
   data.contentWords = wordSplit(data.content)
   data.titleWords = wordSplit(data.title)
   delete data.content
@@ -171,7 +213,7 @@ const saveToDatabase = async (data: PageData) => {
       // @ts-ignore
       await db.pages.update(id, data)
       // @ts-ignore
-      console.log("existed,update",await db.pages.where({ id: id }).toArray())
+      console.log("existed,update", await db.pages.where({ id: id }).toArray())
       return
     }
 
@@ -184,7 +226,106 @@ const saveToDatabase = async (data: PageData) => {
   })
 }
 
-const wordSplit = (str: string): string[] => {
+// a search method that give the most possible result
+function findAndSort(prefixes, field): Promise<any[]> {
+  // @ts-ignore
+  return db.transaction("r", db.pages, function* () {
+    // Parallell search for all prefixes - just select resulting primary keys
+    const results = yield Dexie.Promise.all(
+      prefixes.map((prefix) =>
+        // @ts-ignore
+        db.pages.where(field).startsWith(prefix).primaryKeys()
+      )
+    )
+    // faltten the array => sort => count
+
+    const flatten = results.flat()
+    const sorted = flatten.sort()
+    // count frequency of each primary key
+    const counts = sorted.reduce((acc, curr) => {
+      acc[curr] = (acc[curr] || 0) + 1
+      return acc
+    }, {})
+    // sort by counts
+    let sortedCounts = Object.keys(counts).sort((a, b) => {
+      return counts[b] - counts[a]
+    })
+    let intArray = [] as number[]
+    sortedCounts.forEach((e) => {
+      intArray.push(parseInt(e.toString()))
+    })
+
+    // if bookmarked priority option is enabled, then sort by bookmark status
+    const userOptions = store.getState()
+    if (userOptions.showOnlyBookmarkedResults === true) {
+      console.log("show only bookmarked results")
+
+      if (intArray.length > 300) {
+        // @ts-ignore
+        const bookmarked = yield db.pages
+          .where("isBookmarked")
+          .equals(1)
+          .primaryKeys()
+        const set = new Set(bookmarked)
+        intArray = intArray.filter((e) => set.has(e))
+      } else {
+        // get from db where id is in intarray and isBookmarked is true
+        // @ts-ignore
+        intArray = yield db.pages
+          .where(":id")
+          .anyOf(intArray)
+          .filter((e) => {
+            return e.isBookmarked === true
+          })
+          .primaryKeys()
+      }
+    }
+    // if the result is too long, cut some
+    if (intArray.length > userOptions.maxResults) {
+      intArray = intArray.slice(0, userOptions.maxResults)
+    }
+
+    // @ts-ignore
+    return yield yield db.pages.bulkGet(intArray)
+  })
+}
+
+async function searchString  (search: string) {
+  console.log("precise search")
+  if (!search) {
+    return []
+  }
+  const splitSearch = wordSplit(search)
+  const titleResult = await findAndSort(splitSearch, "titleWords")
+  // @ts-ignore
+  if (titleResult && titleResult.length > 0) {
+    return titleResult
+  }
+  const wordResult = await findAndSort(splitSearch, "contentWords")
+  console.log("wordResult", wordResult)
+  // @ts-ignore
+  if (wordResult && wordResult.length > 0) {
+    return wordResult
+  }
+  console.log("precise search no match")
+  return []
+}
+
+async function showEstimatedQuota() {
+  if (navigator.storage && navigator.storage.estimate) {
+    const estimation = await navigator.storage.estimate()
+    console.log(`Quota: ${estimation.quota}`)
+    console.log(`Usage: ${estimation.usage}`)
+  } else {
+    console.error("StorageManager not found")
+  }
+}
+
+// ============================================================================================
+
+// ============================================================================================
+// word split functions
+function wordSplit(str: string): string[] {
   console.log("start word split")
   str = str.toLowerCase()
   const segmentit = useDefault(new Segment())
@@ -220,12 +361,12 @@ const wordSplit = (str: string): string[] => {
   }
 }
 
-const judgeChineseChar = (str: string) => {
+function judgeChineseChar(str: string) {
   const reg = /[\u4E00-\u9FA5]/g
   return reg.test(str)
 }
 
-const judgeJapaneseChar = (str: string) => {
+function judgeJapaneseChar(str: string) {
   const reg = /[\u3040-\u30FF]/g
   return reg.test(str)
 }
@@ -237,94 +378,4 @@ function palindrome(str: string): string {
   )
   return arr
 }
-
-// a search method that give the most possible result
-function preciseFind(prefixes, field): Promise<any[]> {
-  // @ts-ignore
-  return db.transaction("r", db.pages, function* () {
-    // Parallell search for all prefixes - just select resulting primary keys
-    const results = yield Dexie.Promise.all(
-      prefixes.map((prefix) =>
-        // @ts-ignore
-        db.pages.where(field).startsWith(prefix).primaryKeys()
-      )
-    )
-    // TODO: faltten the array => sort => count
-    
-    const flatten = results.flat()
-    const sorted = flatten.sort()
-    // count frequency of each primary key
-    const counts = sorted.reduce((acc, curr) => {
-      acc[curr] = (acc[curr] || 0) + 1
-      return acc
-    }, {})
-    // sort by counts
-    let sortedCounts = Object.keys(counts).sort((a, b) => {
-      return counts[b] - counts[a]
-    })
-    let intArray = [] as number[]
-    sortedCounts.forEach((e) => {
-      intArray.push(parseInt(e.toString()))
-    })
-   
-
-    // if bookmarked priority option is enabled, then sort by bookmark status
-    const userOptions = store.getState()
-    if(userOptions.showOnlyBookmarkedResults === true){
-      console.log("show only bookmarked results")
-      
-      if(intArray.length > 300){
-        // @ts-ignore
-        const bookmarked = yield db.pages.where("isBookmarked").equals(1).primaryKeys();
-        const set = new Set(bookmarked)
-        intArray = intArray.filter(e => set.has(e))
-      } else {
-        // get from db where id is in intarray and isBookmarked is true
-        // @ts-ignore
-        intArray = yield db.pages.where(":id").anyOf(intArray).filter(e=>{
-          return e.isBookmarked === true
-        }).primaryKeys()
-      }
-
-    }
-    // if the result is too long, cut some
-    if (intArray.length > userOptions.maxResults) {
-      intArray = intArray.slice(0, userOptions.maxResults)
-    }
-
-
-    // @ts-ignore
-    return yield yield db.pages.bulkGet(intArray)
-  })
-}
-
-const searchStringWithAllMatch = async (search: string) => {
-  console.log("precise search")
-  if (!search) {
-    return []
-  }
-  const splitSearch = wordSplit(search)
-  const titleResult = await preciseFind(splitSearch, "titleWords")
-  // @ts-ignore
-  if (titleResult && titleResult.length > 0) {
-    return titleResult
-  } 
-  const wordResult = await preciseFind(splitSearch, "contentWords")
-  console.log("wordResult",wordResult)
-  // @ts-ignore
-  if (wordResult && wordResult.length > 0) {
-    return wordResult
-  }
-  console.log("precise search no match")
-  return []
-}
-
-async function showEstimatedQuota() {
-  if (navigator.storage && navigator.storage.estimate) {
-    const estimation = await navigator.storage.estimate();
-    console.log(`Quota: ${estimation.quota}`);
-    console.log(`Usage: ${estimation.usage}`);
-  } else {
-    console.error("StorageManager not found");
-  }
-}
+// ============================================================================================

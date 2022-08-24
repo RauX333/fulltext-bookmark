@@ -1,8 +1,8 @@
 {
-  "name": "fulltext-bookmark",
-  "displayName": "Fulltext bookmark",
+  "name": "__MSG_extensionName__",
+  "displayName": "__MSG_extensionName__",
   "version": "0.0.0",
-  "description": "A basic Plasmo extension.",
+  "description": "__MSG_extensionDescription__",
   "author": "dongxiajun",
   "scripts": {
     "dev": "plasmo dev",
@@ -49,6 +49,7 @@
       "tabs",
       "bookmarks",
       "storage"
-    ]
+    ],
+    "default_locale": "zh"
   }
 }

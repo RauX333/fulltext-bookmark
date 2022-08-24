@@ -52,9 +52,12 @@ const newBookmarkListener = (): void => {
         const article = parsePage()
         sendResponse({ data: article, pageId: pageId,stored:false })
       }
+    
     } else {
       sendResponse({})
+      
     }
+    return true
   })
 }
 // judge if the url is in the exclude url pattern list

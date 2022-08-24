@@ -1,0 +1,14 @@
+{
+    "extensionName": {
+      "message": "全文书签",
+      "description": "Name of the extension."
+    },
+    "extensionDescription": {
+      "message": "可以全文搜索的书签",
+      "description": "Description of the extension."
+    },
+    "test": {
+      "message": "测试信息",
+      "description": "Popup message."
+    }
+  }
