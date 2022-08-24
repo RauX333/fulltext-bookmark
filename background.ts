@@ -257,6 +257,11 @@ function preciseFind(prefixes, filed): Promise<any[]> {
         db.pages.where(filed).startsWith(prefix).primaryKeys()
       )
     )
+    // TODO: faltten the array => sort => count
+
+
+    // TODO: if bookmarked priority option is enabled, then sort by bookmark status
+    
     // Intersect result set of primary keys
     const reduced = results.reduce((a, b) => {
       const set = new Set(b)
