@@ -6,7 +6,7 @@ export const config: PlasmoContentScript = {
   // run_at: "document_start",
   all_frames: false
 }
-
+console.log("content script loaded")
 interface SearchResult {
   title: string
   url: string
@@ -21,6 +21,9 @@ let showSearchResult = "true"
 const thisURL = window.location.href
 const storageKey = 'fulltextbookmark';
 let searchResult: SearchResult | null = null
+let queryWord = ""
+let resultElement=null
+let searchFinished=0
 
 
 // get user options to decide whether to show search result
@@ -29,82 +32,52 @@ chrome.storage.local.get([`persist:${storageKey}`], (items) => {
     const rootParsed = JSON.parse(items[`persist:${storageKey}`]);
     showSearchResult = rootParsed?.searchEngineAdaption;
   }
+  prepare()
 });
-
 
 // do work
 window.addEventListener("load", () => {
-  console.log("content script loaded")
-
-  // get search word from url
-  if(isGoogle()) {
-    console.log("google")
-    rootContainerID="center_col"
-    queryWordId = "[name='q']"
-  } else if(isBing()) {
-    console.log("bing")
-    rootContainerID="b_results"
-    // TODO:add querywordid
-  } else if(isBaidu()) {
-    console.log("baidu")
-    rootContainerID="content_left"
-    queryWordId = "#kw"
-  } else {
-    console.log("no match page")
-    return
-  }
+  console.log("window loaded")
   const originContainer = document.getElementById(rootContainerID)
   if(!originContainer) {
     console.log("originContainer not exist")
+    searchFinished = -1
     return
   }
-  console.log("showSearchResult?:", showSearchResult);
-  if(showSearchResult==="false") {
-    // createAndInsertEmptyResultBox(originContainer)
+  if(showSearchResult!=="true") {
+    searchFinished = -1
     return
   }
-  // createAndInsertResultBox(originContainer)
-  // get google search bar value
-  const searchInput = document.querySelector(queryWordId)
-  if(!searchInput) {
-    console.log("searchInput not exist")
-    return
-  }
-  // @ts-ignore
-  const s = searchInput.value
-  console.log("get search input value: ", s)
-  
-  // listen backend search result
-  if(s&&s!=="") {
-    chrome.runtime
-    .sendMessage({ command: "google_result", search: s })
-    .then((v) => {
-      console.log("google_result message response:", v)
-      searchResult = v
-      createResult(originContainer)
-    })
+  if(resultElement) { 
+    originContainer.insertBefore(resultElement, originContainer.firstChild)
+  } else {
+    
+    if(searchFinished === -1) {
+      return
+    } else {
+      console.log("wait for resultElement to be ready")
+      let i=0
+      const a = setInterval(()=>{
+        if(i++>=50) {
+          console.log("wait timeout")
+          clearInterval(a)
+        }
+        if(searchFinished === -1) {
+          clearInterval(a)
+        }
+        if(resultElement) {
+          originContainer.insertBefore(resultElement, originContainer.firstChild)
+          console.log(i)
+          clearInterval(a)
+        }
+      },20)
+    }
   }
 })
 
-function createAndInsertResultBox(el) {
-  const newEl = document.createElement("div")
-  newEl.setAttribute("id", "fulltext-bookmark-mount-point")
-  newEl.style.height = "130px"
-  newEl.style.marginTop = "5px"
-  newEl.style.marginBottom = "15px"
-  // newEl.style.display = "none"
-  el.insertBefore(newEl, el.firstChild)
-}
 
-function createAndInsertEmptyResultBox(el) {
-  const newEl = document.createElement("div")
-  newEl.setAttribute("id", "fulltext-bookmark-mount-point")
-  newEl.style.display = "none"
-  el.insertBefore(newEl, el.firstChild)
-}
-
-
-function createResult (el){
+function createResult (){
+  console.log("createResultelemnent")
   // mount-point
   const newEl = document.createElement("div")
   newEl.setAttribute("id", "fulltext-bookmark-mount-point")
@@ -116,23 +89,27 @@ function createResult (el){
   // box
   const box = document.createElement("div")
   newEl.appendChild(box)
-  
+  box.style.maxHeight = "130px"
   box.style.borderWidth="2px"
   box.style.borderStyle = "solid"
-  box.style.borderRadius="0.375rem"
+  // box.style.borderRadius="0.375rem"
+  box.style.setProperty("border-radius","calc(min(0.375rem,6px))")
   box.style.borderColor="#D1D5DB"
   box.style.display="flex"
   box.style.flexDirection="column"
   box.style.justifyContent="flex-start"
-  box.style.padding="1rem"
-  box.style.paddingBottom="0.5rem"
+  box.style.setProperty("padding","calc(min(1rem,16px))")
+  // box.style.padding="1rem"
+  box.style.setProperty("padding-bottom","calc(min(0.5rem,8px))")
   box.style.gap="5px"
 
   // title
   const firstChild = document.createElement("span")
   box.appendChild(firstChild)
-  firstChild.style.fontSize="1.125rem"
-  firstChild.style.lineHeight="1.75rem"
+  firstChild.style.setProperty("font-size","calc(min(1.125rem,18px))")
+  // firstChild.style.fontSize="1.125rem"
+  // firstChild.style.lineHeight="1.75rem"
+  firstChild.style.setProperty("line-height","calc(min(1.75rem,28px))")
   firstChild.style.color="#60a5fa"
   const urla = document.createElement("a")
   firstChild.appendChild(urla)
@@ -144,33 +121,148 @@ function createResult (el){
   // url
   const secondChild = document.createElement("span")
   box.appendChild(secondChild)
-  secondChild.style.fontSize="0.875rem"
-  secondChild.style.lineHeight="1.25rem"
+  // secondChild.style.fontSize="0.875rem"
+  secondChild.style.setProperty("font-size","calc(min(0.875rem,14px))")
+  secondChild.style.setProperty("line-height","calc(min(1.25rem,20px))")
+  // secondChild.style.lineHeight="1.25rem"
   secondChild.style.color="black"
   secondChild.textContent=truncateText(searchResult?.url, 60)
 
   // date
-  const thirdChild = document.createElement("span")
+  const thirdChild = document.createElement("div")
   box.appendChild(thirdChild)
-  thirdChild.style.fontSize="0.875rem"
-  thirdChild.style.lineHeight="1.25rem"
+  // thirdChild.style.fontSize="0.875rem"
+  // thirdChild.style.lineHeight="1.25rem"
+  thirdChild.style.setProperty("font-size","calc(min(0.875rem,14px))")
+  thirdChild.style.setProperty("line-height","calc(min(1.25rem,20px))")
   thirdChild.style.color="#6B7280"
   thirdChild.style.display="flex"
   thirdChild.style.flexDirection="row"
-  thirdChild.style.justifyContent="flex-between"
+  thirdChild.style.justifyContent="space-between"
   const dateSpan = document.createElement("span")
   thirdChild.appendChild(dateSpan)
   dateSpan.textContent=new Date(searchResult?.date).toLocaleDateString()
   const watermarkSpan = document.createElement("span")
   thirdChild.appendChild(watermarkSpan)
   watermarkSpan.textContent="by fulltext-bookmark"
-  watermarkSpan.style.fontSize="0.75rem"
-  watermarkSpan.style.lineHeight="1rem"
-  watermarkSpan.style.paddingTop="1rem"
+  // watermarkSpan.style.fontSize="0.75rem"
+  // watermarkSpan.style.lineHeight="1rem"
+  watermarkSpan.style.setProperty("font-size","calc(min(0.75rem,12px))")
+  watermarkSpan.style.setProperty("line-height","calc(min(1rem,16px))")
+  // watermarkSpan.style.paddingTop="1rem"
+  watermarkSpan.style.setProperty("padding-top","calc(min(1rem,16px))")
   watermarkSpan.style.color="#E5E7EB"
-
-  el.insertBefore(newEl, el.firstChild)
+  return newEl
+  // el.insertBefore(newEl, el.firstChild)
 }
+
+function prepare(){
+  if(!thisURL) {
+    searchFinished = -1
+    return
+  }
+  if (showSearchResult!=="true"){
+    searchFinished = -1
+    return
+  }
+  if(isGoogle(thisURL)) {
+    console.log("google")
+    rootContainerID="center_col"
+    queryWordId = "q"
+  } else if(isBing(thisURL)) {
+    console.log("bing")
+    rootContainerID="b_results"
+    queryWordId = "q"
+    // TODO:add querywordid
+  } else if(isBaidu(thisURL)) {
+    console.log("baidu")
+    rootContainerID="content_left"
+    queryWordId = "wd"
+  } else {
+    console.log("no match page")
+    searchFinished = -1
+  }
+  
+  if(queryWordId && queryWordId!=="") {
+    queryWord = getUrlVars(thisURL)[queryWordId]
+    console.log("queryWord:", queryWord)
+  }
+  
+  if(queryWord && rootContainerID) {
+    chrome.runtime
+      .sendMessage({ command: "google_result", search: queryWord })
+      .then((v) => {
+        console.log("google_result message response:", v)
+        searchResult = v
+        if(searchResult) {
+          resultElement = createResult()
+        } else {
+          searchFinished = -1
+        }
+      })
+  }
+}
+
+
+function truncateText (text: string, maxLength: number) {
+  if(!text) {
+    return ""
+  }
+  if (text.length > maxLength) {
+    return text.substring(0, maxLength) + "..."
+  }
+  return text
+}
+
+// get url vars
+function getUrlVars  (url) {
+  const vars = {}
+  const parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, (m, key, value) => {
+    vars[key] = decodeURI(value)
+  }).split("?")
+  return vars
+}
+
+function isGoogle (url) {
+  const reg = /^https:\/\/www.google.com\/search\/*/g
+  // console.log("reg",reg.test(thisURL))
+  return reg.test(url)
+}
+// regexp jusge if thisURL is https://*.bing.com/*
+function isBing (url) {
+  const reg = /^https:\/\/cn.bing.com\/search\/*/g
+  return reg.test(url)
+ 
+}
+
+const isBaidu = (url) => {
+  const reg = /^https:\/\/www.baidu.com\/s\/*/g
+  return reg.test(url)
+}
+
+// HELPER
+const waitForElements = (selector) => {
+  return new Promise((resolve) => {
+    if (document.querySelector(selector)) {
+      return resolve(document.querySelector(selector))
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      if (document.querySelector(selector)) {
+        resolve(document.querySelector(selector))
+        observer.disconnect()
+      }
+    })
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    })
+  })
+}
+
+
+
 
 // export const getRootContainer = async () => {
 //   const el = await waitForElements("#fulltext-bookmark-mount-point")
@@ -201,52 +293,21 @@ function createResult (el){
 //   )
 // }
 
-const truncateText = (text: string, maxLength: number) => {
-  if(!text) {
-    return ""
-  }
-  if (text.length > maxLength) {
-    return text.substring(0, maxLength) + "..."
-  }
-  return text
-}
+// function createAndInsertResultBox(el) {
+//   const newEl = document.createElement("div")
+//   newEl.setAttribute("id", "fulltext-bookmark-mount-point")
+//   newEl.style.height = "130px"
+//   newEl.style.marginTop = "5px"
+//   newEl.style.marginBottom = "15px"
+//   // newEl.style.display = "none"
+//   el.insertBefore(newEl, el.firstChild)
+// }
 
-// HELPER
-const waitForElements = (selector) => {
-  return new Promise((resolve) => {
-    if (document.querySelector(selector)) {
-      return resolve(document.querySelector(selector))
-    }
-
-    const observer = new MutationObserver((mutations) => {
-      if (document.querySelector(selector)) {
-        resolve(document.querySelector(selector))
-        observer.disconnect()
-      }
-    })
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    })
-  })
-}
-
-const isGoogle = () => {
-  const reg = /^https:\/\/www.google.com\/*/g
-  // console.log("reg",reg.test(thisURL))
-  return reg.test(thisURL)
-}
-// regexp jusge if thisURL is https://*.bing.com/*
-const isBing = () => {
-  const reg = /^https:\/\/cn.bing.com\/*/g
-  return reg.test(thisURL)
- 
-}
-
-const isBaidu = () => {
-  const reg = /^https:\/\/www.baidu.com\/*/g
-  return reg.test(thisURL)
-}
+// function createAndInsertEmptyResultBox(el) {
+//   const newEl = document.createElement("div")
+//   newEl.setAttribute("id", "fulltext-bookmark-mount-point")
+//   newEl.style.display = "none"
+//   el.insertBefore(newEl, el.firstChild)
+// }
 
 // export default SearchResult
