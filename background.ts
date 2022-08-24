@@ -169,6 +169,7 @@ chrome.bookmarks.onRemoved.addListener(
       removedURLs.push(removeInfo.node.url)
     }
     // delete from database matching the removedURLs
+    // @ts-ignore
     db.pages.where("url").anyOf(removedURLs).modify({isBookmarked:false}).then(()=>{
       console.log("unbookmarked");
     })
