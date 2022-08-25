@@ -35,9 +35,9 @@ export const SettingView = () => {
   const tempPageExpireTime = useSelector(
     (state: AppStat) => state.tempPageExpireTime
   )
-  //   const storeEveryPage = useSelector((state: AppStat) => state.storeEveryPage)
-  //   const remoteStore = useSelector((state: AppStat) => state.remoteStore)
-  //     const bookmarkAdaption = useSelector((state: AppStat) => state.bookmarkAdaption)
+  const dontRemoteStoreEveryPage = useSelector(
+    (state: AppStat) => state.dontRemoteStoreEveryPage
+  )
 
   return (
     <div className="w-96 p-4 flex flex-col gap-4 h-96">
@@ -83,6 +83,12 @@ export const SettingView = () => {
       <Toggle
         defaultChecked={remoteStore}
         onChange={() => dispatch(toggleRemoteStore())}
+      />
+
+    <span className="text-sm">Dont Send Every Page To Remote API</span>
+      <Toggle
+        defaultChecked={dontRemoteStoreEveryPage}
+        onChange={() => dispatch(toggleDontRemoteStoreEveryPage())}
       />
     </div>
   )

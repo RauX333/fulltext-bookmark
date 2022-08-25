@@ -1,0 +1,14 @@
+{
+    "extensionName": {
+      "message": "Fulltext Bookmark",
+      "description": "Name of the extension."
+    },
+    "extensionDescription": {
+      "message": "fulltext-search all the browsing history/bookmarks",
+      "description": "Description of the extension."
+    },
+    "test": {
+      "message": "test message",
+      "description": "Popup message."
+    }
+  }

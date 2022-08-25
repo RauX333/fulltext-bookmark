@@ -92,6 +92,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // save to database
       ;(async () => {
         await saveToDatabase({ ...message.data, pageId: message.pageId })
+        
         sendResponse("ok")
       })()
       return true
@@ -168,11 +169,8 @@ chrome.bookmarks.onRemoved.addListener(
     else {
       removedURLs.push(removeInfo.node.url)
     }
-    // delete from database matching the removedURLs
-    // @ts-ignore
-    db.pages.where("url").anyOf(removedURLs).modify({isBookmarked:false}).then(()=>{
-      console.log("unbookmarked");
-    })
+    unBookmarked(removedURLs)
+    
   }
 )
 
@@ -180,6 +178,15 @@ chrome.bookmarks.onRemoved.addListener(
 
 // ====================================================================================================
 // database functions
+function unBookmarked(urls:string[]):void{
+    // delete from database matching the removedURLs
+    // @ts-ignore
+  db.pages.where("url").anyOf(urls).modify({isBookmarked:false}).then(()=>{
+    console.log("unbookmarked");
+  })
+}
+
+
 function bookmark (pageId: string) {
   // @ts-ignore
   db.transaction("rw", db.pages, async () => {
@@ -188,6 +195,11 @@ function bookmark (pageId: string) {
     if (existed && existed.id) {
       // @ts-ignore
       await db.pages.update(existed.id, { isBookmarked: true })
+      const options = store.getState()
+      if (options.remoteStore) {
+        console.log("bookmark remote 1")
+        sendToRemote({...existed,isBookmarked:true})
+      }
     }
   })
 }
@@ -196,6 +208,14 @@ async function saveToDatabase  (data: PageData) {
   data.contentWords = wordSplit(data.content)
   data.titleWords = wordSplit(data.title)
   delete data.content
+  const options = store.getState()
+    if(options.remoteStore){
+      if(!options.dontRemoteStoreEveryPage) {
+        sendToRemote(data)
+      } else if(data.isBookmarked) {
+        sendToRemote(data)
+      }
+    }
   // @ts-ignore
   db.transaction("rw", db.pages, async () => {
     // @ts-ignore
@@ -222,6 +242,8 @@ async function saveToDatabase  (data: PageData) {
     const id = await db.pages.add(data)
     // @ts-ignore
     console.log("db saved: ", id, await db.pages.where({ id: id }).toArray())
+
+    
   }).catch((e) => {
     alert(e.stack || e)
   })
@@ -323,6 +345,38 @@ async function showEstimatedQuota() {
 }
 
 // ============================================================================================
+
+
+// ============================================================================================
+function sendToRemote (data: PageData) {
+  
+  (async () => {
+    const postData = {
+      url: data.url,
+      title: data.title,
+      date: data.date,
+      isBookmarked: data.isBookmarked,
+    }
+    console.log("sendToRemote",postData)
+  
+    const userOptions = store.getState()
+    console.log("sendToRemote options",userOptions.remoteStoreURL,userOptions)
+    const rawRes = await fetch(userOptions.remoteStoreURL || "https://maker.ifttt.com/trigger/fulltext_bookmark/json/with/key/bz2RFiQJ-6TKl_7QBvmo-3", {        
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(postData)     
+      });      
+      // const res = await rawRes.json();
+      console.log(rawRes);
+  })();
+  
+}
+
+// ============================================================================================
+
 
 // ============================================================================================
 // word split functions

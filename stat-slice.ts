@@ -22,8 +22,8 @@ const statSlice = createSlice({
     remoteStore: false,
     showOnlyBookmarkedResults: false,
     dontRemoteStoreEveryPage: true,
-    remoteStoreURL: null,
-    remoteStoreKey: null,
+    remoteStoreURL: "http://localhost:9531/api",
+    remoteStoreKey: "123",
     maxResults: 20,
     tempPageExpireTime: 60 * 60 * 24 * 60 * 1000 // 60 days
   },

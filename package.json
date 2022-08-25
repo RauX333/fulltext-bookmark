@@ -42,7 +42,8 @@
   },
   "manifest": {
     "host_permissions": [
-      "https://*/*"
+      "https://*/*",
+      "http://*/*"
     ],
     "permissions": [
       "activeTab",
@@ -50,6 +51,6 @@
       "bookmarks",
       "storage"
     ],
-    "default_locale": "zh"
+    "default_locale": "en"
   }
 }
