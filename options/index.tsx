@@ -1,8 +1,8 @@
 import { PersistGate } from "@plasmohq/redux-persist/integration/react"
 import { Provider } from "react-redux"
 
-import { SettingView } from "~settings"
-import { persistor, store } from "~store"
+import { SettingView } from "~options/settings"
+import { persistor, store } from "~store/store"
 
 
 function OptionsIndex() {

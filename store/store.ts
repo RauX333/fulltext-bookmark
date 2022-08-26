@@ -13,7 +13,7 @@ import {
   import { configureStore } from "@reduxjs/toolkit"
   import { localStorage } from "redux-persist-webextension-storage"
   
-  import statSlice from "~stat-slice"
+  import statSlice from "~store/stat-slice"
   
   const rootReducer = statSlice
   

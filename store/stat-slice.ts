@@ -5,12 +5,13 @@ export interface AppStat {
   storeEveryPage: boolean
   bookmarkAdaption: boolean
   remoteStore: boolean
-  remoteStoreURL: string | null
-  remoteStoreKey: string | null
+  remoteStoreURL: string
+  remoteStoreKey: string
   showOnlyBookmarkedResults: boolean
-  dontRemoteStoreEveryPage: boolean
+  remoteStoreEveryPage: boolean
   tempPageExpireTime: number
   maxResults: number
+  forbiddenURLs: string[]
 }
 
 const statSlice = createSlice({
@@ -21,10 +22,11 @@ const statSlice = createSlice({
     bookmarkAdaption: true,
     remoteStore: false,
     showOnlyBookmarkedResults: false,
-    dontRemoteStoreEveryPage: true,
-    remoteStoreURL: "http://localhost:9531/api",
+    remoteStoreEveryPage: false,
+    remoteStoreURL: "https://maker.ifttt.com/trigger/fulltext_bookmark/json/with/key/bz2RFiQJ-6TKl_7QBvmo-3",
     remoteStoreKey: "123",
     maxResults: 20,
+    forbiddenURLs: ["https://www.google.com/*","https://cn.bing.com/*","https://www.baidu.com/*","https://*.baidu.com/*"],
     tempPageExpireTime: 60 * 60 * 24 * 60 * 1000 // 60 days
   },
   reducers: {
@@ -43,8 +45,8 @@ const statSlice = createSlice({
     toggleShowOnlyBookmarkedResults: (state) => {
       state.showOnlyBookmarkedResults = !state.showOnlyBookmarkedResults
     },
-    toggleDontRemoteStoreEveryPage: (state) => {
-      state.dontRemoteStoreEveryPage = !state.dontRemoteStoreEveryPage
+    toggleRemoteStoreEveryPage: (state) => {
+      state.remoteStoreEveryPage = !state.remoteStoreEveryPage
     },
     setRemoteStoreURL: (state, action) => {
       state.remoteStoreURL = action.payload
@@ -54,6 +56,9 @@ const statSlice = createSlice({
     },
     setTempPageExpireTime: (state, action) => {
       state.tempPageExpireTime = action.payload
+    },
+    setForbiddenURLs: (state, action) => {
+      state.forbiddenURLs = action.payload
     }
   }
 })
@@ -64,10 +69,11 @@ export const {
   toggleStoreEveryPage,
   toggleRemoteStore,
   toggleShowOnlyBookmarkedResults,
-  toggleDontRemoteStoreEveryPage,
+  toggleRemoteStoreEveryPage,
   setRemoteStoreURL,
   setRemoteStoreKey,
-  setTempPageExpireTime
+  setTempPageExpireTime,
+  setForbiddenURLs
 } = statSlice.actions
 
 export default statSlice.reducer

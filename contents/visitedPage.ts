@@ -9,6 +9,7 @@ export const config: PlasmoContentScript = {
   run_at: "document_start"
 }
 // exclude google/bing/baidu urls
+// TODO: add more basic forbidden urls
 const excludeURLs = [
   "https://www.google.com/*",
   "https://cn.bing.com/*",
@@ -19,22 +20,35 @@ const storageKey = 'fulltextbookmark';
 let options = {
   storeEveryPage: true,
   bookmarkAdaption: true,
+  forbiddenURLs: ""
 }
 
 
 window.addEventListener("load", () => {
-  if (!isExcludeURL(window.location.href)) {
+  if (!isExcludeURL(excludeURLs,window.location.href)) {
   chrome.storage.local.get([`persist:${storageKey}`], (items) => {
+    
     if(items[`persist:${storageKey}`]) {
       console.log("persist result",items[`persist:${storageKey}`])
       options = JSON.parse(items[`persist:${storageKey}`]);
     }  else {
       console.log("no persist result")
     }
+    // TODO:forbid urls from useroptions
+    if(isExcludeURL(JSON.parse(options.forbiddenURLs),window.location.href)) {
+     
+      console.log("sdsdasdasdasdasd");
+      
+      return
+    }
+
+    // listen to new bookmark event
     if(options.bookmarkAdaption.toString() === "true") {
+      console.log("aaaaa")
       newBookmarkListener()
     }
     
+    // parse page and send to background script
     if(options.storeEveryPage.toString() === "true") {
       console.log("store every page")
       parsePageAndSend()
@@ -61,9 +75,15 @@ const newBookmarkListener = (): void => {
   })
 }
 // judge if the url is in the exclude url pattern list
-const isExcludeURL = (url: string): boolean => {
-  for (let i = 0; i < excludeURLs.length; i++) {
-    const re = new RegExp(excludeURLs[i])
+function isExcludeURL (patterns:string[],url: string): boolean {
+  if(!patterns || patterns.length < 1) {
+    return false
+  }
+  for (let i = 0; i < patterns.length; i++) {
+    const re = new RegExp(patterns[i])
+    if(!re) {
+      continue
+    }
     if (re.test(url)) {
       console.log("exclude url:", url)
       return true

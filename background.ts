@@ -1,7 +1,7 @@
 import Dexie from "dexie"
 import { Segment, useDefault } from "segmentit"
 
-import { persistor, store } from "~store"
+import { persistor, store } from "~store/store"
 
 export {}
 // let userOptions = null;
@@ -52,7 +52,6 @@ db.version(1).stores({
 // })
 db.open()
 
-
 // delete outdated records
 const userOps = store.getState()
 // @ts-ignore
@@ -92,7 +91,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // save to database
       ;(async () => {
         await saveToDatabase({ ...message.data, pageId: message.pageId })
-        
+
         sendResponse("ok")
       })()
       return true
@@ -137,7 +136,7 @@ chrome.bookmarks.onCreated.addListener((id, bm) => {
       tabs[0].id,
       { command: "bookmark", data: "create" },
       (resp) => {
-        console.log("book resp",resp)
+        console.log("book resp", resp)
         // change archive status in db
         if (resp.stored === true) {
           bookmark(resp.pageId)
@@ -154,40 +153,40 @@ chrome.bookmarks.onCreated.addListener((id, bm) => {
   })
 })
 
-chrome.bookmarks.onRemoved.addListener(
-  (id,removeInfo)=>{
-    let removedURLs = []
-    console.log("removed",id,removeInfo);
-    // if removeInfo node has children, then get all the children's url
-    if(removeInfo.node.children){ 
-      removeInfo.node.children.forEach(child=>{
-        console.log("child",child.url);
-        removedURLs.push(child.url)
-      } )
-    } 
-    // if delete single bookmark, then get the url of the bookmark
-    else {
-      removedURLs.push(removeInfo.node.url)
-    }
-    unBookmarked(removedURLs)
-    
+chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
+  let removedURLs = []
+  console.log("removed", id, removeInfo)
+  // if removeInfo node has children, then get all the children's url
+  if (removeInfo.node.children) {
+    removeInfo.node.children.forEach((child) => {
+      console.log("child", child.url)
+      removedURLs.push(child.url)
+    })
   }
-)
+  // if delete single bookmark, then get the url of the bookmark
+  else {
+    removedURLs.push(removeInfo.node.url)
+  }
+  unBookmarked(removedURLs)
+})
 
 // ====================================================================================================
 
 // ====================================================================================================
 // database functions
-function unBookmarked(urls:string[]):void{
-    // delete from database matching the removedURLs
-    // @ts-ignore
-  db.pages.where("url").anyOf(urls).modify({isBookmarked:false}).then(()=>{
-    console.log("unbookmarked");
-  })
+function unBookmarked(urls: string[]): void {
+  // delete from database matching the removedURLs
+  // @ts-ignore
+  db.pages
+    .where("url")
+    .anyOf(urls)
+    .modify({ isBookmarked: false })
+    .then(() => {
+      console.log("unbookmarked")
+    })
 }
 
-
-function bookmark (pageId: string) {
+function bookmark(pageId: string) {
   // @ts-ignore
   db.transaction("rw", db.pages, async () => {
     // @ts-ignore
@@ -198,24 +197,24 @@ function bookmark (pageId: string) {
       const options = store.getState()
       if (options.remoteStore) {
         console.log("bookmark remote 1")
-        sendToRemote({...existed,isBookmarked:true})
+        sendToRemote({ ...existed, isBookmarked: true })
       }
     }
   })
 }
 
-async function saveToDatabase  (data: PageData) {
+async function saveToDatabase(data: PageData) {
   data.contentWords = wordSplit(data.content)
   data.titleWords = wordSplit(data.title)
   delete data.content
   const options = store.getState()
-    if(options.remoteStore){
-      if(!options.dontRemoteStoreEveryPage) {
-        sendToRemote(data)
-      } else if(data.isBookmarked) {
-        sendToRemote(data)
-      }
+  if (options.remoteStore) {
+    if (options.remoteStoreEveryPage) {
+      sendToRemote(data)
+    } else if (data.isBookmarked) {
+      sendToRemote(data)
     }
+  }
   // @ts-ignore
   db.transaction("rw", db.pages, async () => {
     // @ts-ignore
@@ -242,8 +241,6 @@ async function saveToDatabase  (data: PageData) {
     const id = await db.pages.add(data)
     // @ts-ignore
     console.log("db saved: ", id, await db.pages.where({ id: id }).toArray())
-
-    
   }).catch((e) => {
     alert(e.stack || e)
   })
@@ -313,7 +310,7 @@ function findAndSort(prefixes, field): Promise<any[]> {
   })
 }
 
-async function searchString  (search: string) {
+async function searchString(search: string) {
   console.log("precise search")
   if (!search) {
     return []
@@ -346,37 +343,37 @@ async function showEstimatedQuota() {
 
 // ============================================================================================
 
-
 // ============================================================================================
-function sendToRemote (data: PageData) {
-  
-  (async () => {
+function sendToRemote(data: PageData) {
+  ;(async () => {
     const postData = {
       url: data.url,
       title: data.title,
       date: data.date,
-      isBookmarked: data.isBookmarked,
+      isBookmarked: data.isBookmarked
     }
-    console.log("sendToRemote",postData)
-  
+    console.log("sendToRemote", postData)
+
     const userOptions = store.getState()
-    console.log("sendToRemote options",userOptions.remoteStoreURL,userOptions)
-    const rawRes = await fetch(userOptions.remoteStoreURL || "https://maker.ifttt.com/trigger/fulltext_bookmark/json/with/key/bz2RFiQJ-6TKl_7QBvmo-3", {        
-      method: 'POST',
+    console.log("sendToRemote options", userOptions.remoteStoreURL, userOptions)
+    if (!userOptions.remoteStoreURL) {
+      console.log("no remote store url")
+      return
+    }
+    const rawRes = await fetch(userOptions.remoteStoreURL, {
+      method: "POST",
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        Accept: "application/json",
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify(postData)     
-      });      
-      // const res = await rawRes.json();
-      console.log(rawRes);
-  })();
-  
+      body: JSON.stringify(postData)
+    })
+    // const res = await rawRes.json();
+    console.log(rawRes)
+  })()
 }
 
 // ============================================================================================
-
 
 // ============================================================================================
 // word split functions
