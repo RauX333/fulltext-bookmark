@@ -26,7 +26,7 @@ const statSlice = createSlice({
     remoteStoreURL: "https://maker.ifttt.com/trigger/fulltext_bookmark/json/with/key/bz2RFiQJ-6TKl_7QBvmo-3",
     remoteStoreKey: "123",
     maxResults: 20,
-    forbiddenURLs: ["https://www.google.com/*","https://cn.bing.com/*","https://www.baidu.com/*","https://*.baidu.com/*"],
+    forbiddenURLs: ["https://www.google.com/*","https://cn.bing.com/*","https://www.baidu.com/*","https://.*.baidu.com/*"],
     tempPageExpireTime: 60 * 60 * 24 * 60 * 1000 // 60 days
   },
   reducers: {
