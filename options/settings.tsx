@@ -58,10 +58,12 @@ export const SettingView = () => {
   }
 
   // page expire time stats
-  const [temptempPageExpireTime, setPageExpireTime] = useState(tempPageExpireTime/1000/60/60/24)
+  const [temptempPageExpireTime, setPageExpireTime] = useState(
+    tempPageExpireTime / 1000 / 60 / 60 / 24
+  )
   const handlePageExpireTimeChange = (e) => {
     console.log(e.target.value)
-    if(e.target.value === "") {
+    if (e.target.value === "") {
       // @ts-ignore
       setPageExpireTime("")
       return
@@ -74,12 +76,19 @@ export const SettingView = () => {
     setPageExpireTime(a)
   }
   const handlePageExpireTimeSubmit = () => {
-    if(!temptempPageExpireTime || typeof temptempPageExpireTime !=="number" || temptempPageExpireTime<0 || temptempPageExpireTime>365*100) {
+    if (
+      !temptempPageExpireTime ||
+      typeof temptempPageExpireTime !== "number" ||
+      temptempPageExpireTime < 0 ||
+      temptempPageExpireTime > 365 * 100
+    ) {
       setPageExpireTime(60)
-      dispatch(setTempPageExpireTime(60*1000*60*60*24))
+      dispatch(setTempPageExpireTime(60 * 1000 * 60 * 60 * 24))
       return
     }
-    dispatch(setTempPageExpireTime(temptempPageExpireTime*1000*60*60*24))
+    dispatch(
+      setTempPageExpireTime(temptempPageExpireTime * 1000 * 60 * 60 * 24)
+    )
   }
 
   // forbidden urls stats
@@ -180,10 +189,15 @@ export const SettingView = () => {
               <p></p>
               <SettingItemCol
                 description={"Store Duration of Non-Bookmarked Page "}
-                notes={
-                  `non-bookmarked page reocords will be outdated after this time, while bookmarked page will be stored forever.\ndefaults to 60 days, maxium 36500 days`
-                }>
-                <input type="text" className="w-32 h-6" value={temptempPageExpireTime} onChange={handlePageExpireTimeChange} onBlur={handlePageExpireTimeSubmit}/> Days
+                notes={`non-bookmarked page reocords will be outdated after this time, while bookmarked page will be stored forever.\ndefaults to 60 days, maxium 36500 days`}>
+                <input
+                  type="text"
+                  className="w-32 h-6"
+                  value={temptempPageExpireTime}
+                  onChange={handlePageExpireTimeChange}
+                  onBlur={handlePageExpireTimeSubmit}
+                />{" "}
+                Days
               </SettingItemCol>
               <p></p>
               <SettingItemCol
@@ -191,9 +205,13 @@ export const SettingView = () => {
                 notes={
                   "urls in this list will not be indexed ( one address per line)"
                 }>
-                  <p>
-                    <a href="https://developer.chrome.com/extensions/proxy#bypass_list" className="text-blue-300 mb-2">{"matching pattern rules reference"}</a>
-                  </p>
+                <p>
+                  <a
+                    href="https://developer.chrome.com/extensions/proxy#bypass_list"
+                    className="text-blue-300 mb-2">
+                    {"matching pattern rules reference"}
+                  </a>
+                </p>
                 <textarea
                   className="w-96"
                   onChange={(e) => {
@@ -207,8 +225,6 @@ export const SettingView = () => {
                 />
               </SettingItemCol>
             </SettingBlock>
-
-            
           </>
         )}
 
@@ -249,6 +265,31 @@ export const SettingView = () => {
 
         {navPage === 2 && (
           <>
+            <SettingBlock title={"Features"}>
+              <p>
+                💾&nbsp;&nbsp;store and index the bookmarked page for later
+                fulltext search,
+              </p>
+              <p>
+                🔍&nbsp;&nbsp;actually it can index any page you visit, so you
+                can use it as a better broswing history search tool.
+              </p>
+              <p>
+                📎&nbsp;&nbsp;best matched search result will be dispalyed in
+                the search engine page as you search (google/bing/baidu),
+              </p>
+              <p>
+                📜&nbsp;&nbsp;or in the extension popup page for more results.
+              </p>
+              <p>
+                😺&nbsp;&nbsp;all data stored in local storage, no privacy
+                issues.
+              </p>
+              <p>
+                ✉️&nbsp;&nbsp;send your bookmark/browsing history to custom
+                remote api as you like.
+              </p>
+            </SettingBlock>
             <SettingBlock title={"About"}>
               <p>
                 Developed by:{" "}
@@ -279,6 +320,27 @@ export const SettingView = () => {
                 <a className="text-blue-300" href="paypal.me/dongxiajun">
                   paypal.me/dongxiajun
                 </a>
+              </p>
+            </SettingBlock>
+
+            <SettingBlock title={"About"}>
+              <p>
+                Developed by:{" "}
+                <a className="text-blue-300" href="https://github.com/RauX333">
+                  RauX333
+                </a>
+              </p>
+
+              <p>
+                Email:{" "}
+                <a href="xenoncancer@gmail.com" className="text-blue-300">
+                  xenoncancer@gmail.com
+                </a>
+              </p>
+
+              <p>
+                if you have any issues or suggestions, please feel free to
+                connect me.
               </p>
             </SettingBlock>
           </>
