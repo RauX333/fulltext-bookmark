@@ -1,9 +1,12 @@
 import Dexie from "dexie"
 import { Segment, useDefault } from "segmentit"
 
+import debounce from "~lib/debounce"
 import { persistor, store } from "~store/store"
 
 export {}
+
+const segmentit = useDefault(new Segment())
 // let userOptions = null;
 // // // console.log("init useroptions",userOptions);
 // persistor.subscribe(() => {
@@ -16,7 +19,8 @@ export {}
 // Dexie.delete("PageDatabase")
 const db = new Dexie("PageDatabase")
 db.version(1).stores({
-  pages: "++id,url,*contentWords,title,*titleWords,date,pageId,isBookmarked"
+  pages: "++id,url,title,date,pageId,isBookmarked",
+  contents: "&pid,*contentWords,*titleWords"
 })
 // // @ts-ignore
 // db.pages.hook("creating", function (primKey, obj, trans) {
@@ -54,17 +58,29 @@ db.open()
 
 // delete outdated records
 const userOps = store.getState()
+
+// delete content table
 // @ts-ignore
-db.pages
-  .where("date")
-  .below(Date.now() - userOps.tempPageExpireTime)
-  .delete()
+db.transaction("rw", db.pages, db.contents, async () => {
+  // @ts-ignore
+  const delIDs = await db.pages
+    .where("date")
+    .below(Date.now() - userOps.tempPageExpireTime)
+    .primaryKeys()
+  if (delIDs && delIDs.length > 0) {
+    // @ts-ignore
+    await db.pages.where("id").anyOf(delIDs).delete()
+    // @ts-ignore
+    await db.contents.where("pid").anyOf(delIDs).delete()
+  }
+})
+
 // ====================================================================================================
 
 interface PageData {
-  pageId: string
+  pageId?: string
   url: string
-  content: string
+  content?: string
   title: string
   date: number
   isBookmarked?: boolean
@@ -98,7 +114,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "google_result":
       console.log("google result", message.search)
       ;(async () => {
-        const result = await searchString(message.search)
+        const result = await searchString(message.search,"short")
         console.log("search result", result)
         if (result && result.length > 0) {
           const matchedFirst = result[0]
@@ -170,6 +186,56 @@ chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
   unBookmarked(removedURLs)
 })
 
+// chrome.omnibox.setDefaultSuggestion(
+//   {description:"search fulltext bookmark/history "},
+// )
+
+// chrome.omnibox.onInputStarted.addListener(() => {
+//   console.log("start omnibox input")
+// })
+
+const omniboxSearch = debounce(
+  async (text, suggest) => {
+    console.log("input changed", text)
+    const result = await searchString(text,"long")
+    // slice to length 5
+    const resultSlice = result.slice(0, 5)
+    const sug = resultSlice.map((e) => {
+      return {
+        content: e.url,
+        description: `${e.title} - <url>${e.url} </url>`
+      }
+    })
+    suggest(sug)
+  },
+  500,
+  { leading: true, trailing: true }
+)
+
+chrome.omnibox.onInputChanged.addListener((text, suggest) => {
+  omniboxSearch(text, suggest)
+})
+
+chrome.omnibox.onInputEntered.addListener((text, disposition) => {
+  if (disposition == "newForegroundTab") {
+    console.log("newForegroundTab")
+    // create a new tab and load the url
+    chrome.tabs.create({ url: text })
+  }
+  if (disposition == "newBackgroundTab") {
+    console.log("newBackgroundTab")
+    // create a new background tab and load the url
+    chrome.tabs.create({ url: text, active: false })
+  }
+  if(disposition=="currentTab"){
+    console.log("currentTab")
+    // redirect current tab to the url
+    chrome.tabs.query({active:true},(tabs)=>{
+      chrome.tabs.update(tabs[0].id,{url:text})
+    })
+  }
+})
+
 // ====================================================================================================
 
 // ====================================================================================================
@@ -204,43 +270,69 @@ function bookmark(pageId: string) {
 }
 
 async function saveToDatabase(data: PageData) {
+  console.time("saveToDatabase")
+  console.time("save split")
   data.contentWords = wordSplit(data.content)
   data.titleWords = wordSplit(data.title)
+  console.timeEnd("save split")
   delete data.content
+  const indexData = {
+    url: data.url,
+    title: data.title,
+    date: data.date,
+    isBookmarked: data.isBookmarked,
+    pageId: data.pageId
+  }
+  const largeData = {
+    contentWords: data.contentWords,
+    titleWords: data.titleWords
+  }
   const options = store.getState()
   if (options.remoteStore) {
-    if (options.remoteStoreEveryPage) {
-      sendToRemote(data)
-    } else if (data.isBookmarked) {
-      sendToRemote(data)
+    if (options.remoteStoreEveryPage || data.isBookmarked) {
+      sendToRemote(indexData)
     }
   }
   // @ts-ignore
-  db.transaction("rw", db.pages, async () => {
+  db.transaction("rw", db.pages, db.contents, async () => {
+    console.time("db save")
     // @ts-ignore
     const existedId = await db.pages.where("pageId").equals(data.pageId).first()
     if (existedId && existedId.id) {
-      const id = existedId.id
+      // const id = existedId.id
       console.log("existed,update")
       // @ts-ignore
-      await db.pages.update(id, data)
+      // await db.pages.update(id, indexData)
+      console.timeEnd("db save")
+      console.timeEnd("saveToDatabase")
       return
     }
     // @ts-ignore
     const existed = await db.pages.where("url").equals(data.url).first()
     if (existed && existed.id) {
       const id = existed.id
+      await Promise.all([
+        db.pages.update(id, indexData),
+        db.contents.where("pid").equals(id).modify(largeData)
+      ])
       // @ts-ignore
-      await db.pages.update(id, data)
+
       // @ts-ignore
-      console.log("existed,update", await db.pages.where({ id: id }).toArray())
+      console.log("existed,update")
+      console.timeEnd("db save")
+      console.timeEnd("saveToDatabase")
       return
     }
 
     // @ts-ignore
-    const id = await db.pages.add(data)
+    const id = await db.pages.add(indexData)
+
     // @ts-ignore
-    console.log("db saved: ", id, await db.pages.where({ id: id }).toArray())
+    await db.contents.add({ pid: id, ...largeData })
+    // @ts-ignore
+    console.log("db saved: ", id)
+    console.timeEnd("db save")
+    console.timeEnd("saveToDatabase")
   }).catch((e) => {
     alert(e.stack || e)
   })
@@ -249,14 +341,16 @@ async function saveToDatabase(data: PageData) {
 // a search method that give the most possible result
 function findAndSort(prefixes, field): Promise<any[]> {
   // @ts-ignore
-  return db.transaction("r", db.pages, function* () {
+  return db.transaction("r", db.contents, db.pages, function* () {
     // Parallell search for all prefixes - just select resulting primary keys
+
     const results = yield Dexie.Promise.all(
       prefixes.map((prefix) =>
         // @ts-ignore
-        db.pages.where(field).startsWith(prefix).primaryKeys()
+        db.contents.where(field).startsWith(prefix).primaryKeys()
       )
     )
+
     // faltten the array => sort => count
 
     const flatten = results.flat()
@@ -306,28 +400,34 @@ function findAndSort(prefixes, field): Promise<any[]> {
     }
 
     // @ts-ignore
-    return yield yield db.pages.bulkGet(intArray)
+    return yield db.pages.bulkGet(intArray)
   })
 }
 
-async function searchString(search: string) {
-  console.log("precise search")
+async function searchString(search: string,type:string) {
   if (!search) {
     return []
   }
   const splitSearch = wordSplit(search)
   const titleResult = await findAndSort(splitSearch, "titleWords")
+  console.log("titleResult", titleResult)
   // @ts-ignore
   if (titleResult && titleResult.length > 0) {
-    return titleResult
+    if(type === "short"){
+      return titleResult
+    }
   }
   const wordResult = await findAndSort(splitSearch, "contentWords")
   console.log("wordResult", wordResult)
   // @ts-ignore
   if (wordResult && wordResult.length > 0) {
+    if(titleResult && titleResult.length > 0) {
+      return [...titleResult,...wordResult]
+    }
     return wordResult
   }
   console.log("precise search no match")
+  
   return []
 }
 
@@ -378,17 +478,22 @@ function sendToRemote(data: PageData) {
 // ============================================================================================
 // word split functions
 function wordSplit(str: string): string[] {
-  console.log("start word split")
+
   str = str.toLowerCase()
-  const segmentit = useDefault(new Segment())
+
+
   if (judgeChineseChar(str)) {
     console.log("chinese char")
+    // console.time("seg")
+
+    // console.timeEnd("seg")
     const result = segmentit.doSegment(str)
-    return result
+    const a = result
       .map((e) => {
         return palindrome(e.w)
       })
       .filter((e) => e !== "" && e !== null && e !== undefined)
+    return a
   } else if (judgeJapaneseChar(str)) {
     const result = Array.from(
       new Intl.Segmenter("js-JP", { granularity: "word" }).segment(str)
@@ -401,6 +506,7 @@ function wordSplit(str: string): string[] {
 
     return c
   } else {
+
     const result = Array.from(
       new Intl.Segmenter("en", { granularity: "word" }).segment(str)
     )
@@ -409,18 +515,24 @@ function wordSplit(str: string): string[] {
       return palindrome(e.segment)
     })
     const c = b.filter((e) => e !== "" && e !== null && e !== undefined)
+
     return c
   }
 }
 
 function judgeChineseChar(str: string) {
+
   const reg = /[\u4E00-\u9FA5]/g
-  return reg.test(str)
+  const a = reg.test(str)
+
+  return a
 }
 
 function judgeJapaneseChar(str: string) {
+
   const reg = /[\u3040-\u30FF]/g
-  return reg.test(str)
+  const a = reg.test(str)
+  return a
 }
 
 function palindrome(str: string): string {

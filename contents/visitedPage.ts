@@ -114,17 +114,17 @@ function parsePage(){
     article = new Readability(documentClone).parse()
     console.log(article)
     article = {
-      title: article.title,
-      content: article.textContent,
-      url: window.location.href,
+      title: article.title || "",
+      content: article.textContent || "",
+      url: window.location.href || "",
       date: Date.now()
     }
   } else {
     console.log("not readable")
     article = {
-      title: document.title,
-      url: window.location.href,
-      content: document.body.innerText,
+      title: document.title || "",
+      url: window.location.href || "",
+      content: document.body.innerText || "",
       date: Date.now()
     }
   }

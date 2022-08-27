@@ -267,23 +267,28 @@ export const SettingView = () => {
           <>
             <SettingBlock title={"Features"}>
               <p>
-                💾&nbsp;&nbsp;store and index the bookmarked page for later
-                fulltext search,
+                🔍&nbsp;&nbsp;a a better bookmark/broswing history search tool.
               </p>
               <p>
-                🔍&nbsp;&nbsp;actually it can index any page you visit, so you
-                can use it as a better broswing history search tool.
+                💾&nbsp;&nbsp;store and index bookmarked page or any page you
+                visit, so you can later fulltext search them.
+              </p>
+
+              <p>
+                🥇&nbsp;&nbsp;best matched search result will be dispalyed in
+                the search engine page as you search (google/bing/baidu).
               </p>
               <p>
-                📎&nbsp;&nbsp;best matched search result will be dispalyed in
-                the search engine page as you search (google/bing/baidu),
+                📎&nbsp;&nbsp;search in the chrome searchbar by typing "kw"
+                first(short for 'keyword').
               </p>
               <p>
-                📜&nbsp;&nbsp;or in the extension popup page for more results.
+                📜&nbsp;&nbsp;or search in the extension popup page for more
+                results.
               </p>
               <p>
-                😺&nbsp;&nbsp;all data stored in local storage, no privacy
-                issues.
+                😺&nbsp;&nbsp;everything stored in local storage, no accounts,
+                no cloud, no privacy issues, totally free.
               </p>
               <p>
                 ✉️&nbsp;&nbsp;send your bookmark/browsing history to custom
