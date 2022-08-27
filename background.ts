@@ -119,9 +119,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (result && result.length > 0) {
           const matchedFirst = result[0]
           sendResponse({
-            title: matchedFirst.title || "",
-            url: matchedFirst.url || "",
-            date: matchedFirst.date || 0,
+            ...matchedFirst,
             ok: true
           })
         } else {
@@ -134,8 +132,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
       })()
       return true
+    case "popsearch":
+      console.log("popsearch", message.search)
+      ;(async () => {
+        const result = await searchString(message.search,"long")
+        console.log("search result", result)
+        sendResponse(result)
+      })()
+      return true
     default:
       sendResponse("invalid command")
+      break;
   }
 })
 
@@ -209,7 +216,7 @@ const omniboxSearch = debounce(
     suggest(sug)
   },
   500,
-  { leading: true, trailing: true }
+  { leading: false, trailing: true }
 )
 
 chrome.omnibox.onInputChanged.addListener((text, suggest) => {
@@ -295,7 +302,6 @@ async function saveToDatabase(data: PageData) {
   }
   // @ts-ignore
   db.transaction("rw", db.pages, db.contents, async () => {
-    console.time("db save")
     // @ts-ignore
     const existedId = await db.pages.where("pageId").equals(data.pageId).first()
     if (existedId && existedId.id) {
@@ -303,8 +309,6 @@ async function saveToDatabase(data: PageData) {
       console.log("existed,update")
       // @ts-ignore
       // await db.pages.update(id, indexData)
-      console.timeEnd("db save")
-      console.timeEnd("saveToDatabase")
       return
     }
     // @ts-ignore
@@ -312,15 +316,15 @@ async function saveToDatabase(data: PageData) {
     if (existed && existed.id) {
       const id = existed.id
       await Promise.all([
+        // @ts-ignore
         db.pages.update(id, indexData),
+        // @ts-ignore
         db.contents.where("pid").equals(id).modify(largeData)
       ])
       // @ts-ignore
 
       // @ts-ignore
       console.log("existed,update")
-      console.timeEnd("db save")
-      console.timeEnd("saveToDatabase")
       return
     }
 
@@ -331,8 +335,6 @@ async function saveToDatabase(data: PageData) {
     await db.contents.add({ pid: id, ...largeData })
     // @ts-ignore
     console.log("db saved: ", id)
-    console.timeEnd("db save")
-    console.timeEnd("saveToDatabase")
   }).catch((e) => {
     alert(e.stack || e)
   })
@@ -429,16 +431,6 @@ async function searchString(search: string,type:string) {
   console.log("precise search no match")
   
   return []
-}
-
-async function showEstimatedQuota() {
-  if (navigator.storage && navigator.storage.estimate) {
-    const estimation = await navigator.storage.estimate()
-    console.log(`Quota: ${estimation.quota}`)
-    console.log(`Usage: ${estimation.usage}`)
-  } else {
-    console.error("StorageManager not found")
-  }
 }
 
 // ============================================================================================

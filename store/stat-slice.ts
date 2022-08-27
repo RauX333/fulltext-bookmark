@@ -59,6 +59,9 @@ const statSlice = createSlice({
     },
     setForbiddenURLs: (state, action) => {
       state.forbiddenURLs = action.payload
+    },
+    setMaxResults: (state, action) => {
+      state.maxResults = action.payload
     }
   }
 })
@@ -73,7 +76,8 @@ export const {
   setRemoteStoreURL,
   setRemoteStoreKey,
   setTempPageExpireTime,
-  setForbiddenURLs
+  setForbiddenURLs,
+  setMaxResults
 } = statSlice.actions
 
 export default statSlice.reducer

@@ -1,4 +1,5 @@
 import type { PlasmoContentScript } from "plasmo"
+import {truncateText} from "~/lib/util"
 // import "../style.css"
 
 export const config: PlasmoContentScript = {
@@ -208,15 +209,7 @@ function prepare(){
 }
 
 
-function truncateText (text: string, maxLength: number) {
-  if(!text) {
-    return ""
-  }
-  if (text.length > maxLength) {
-    return text.substring(0, maxLength) + "..."
-  }
-  return text
-}
+
 
 // get url vars
 function getUrlVars  (url) {

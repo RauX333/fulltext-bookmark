@@ -2,6 +2,7 @@ import rabbitImg from "data-base64:~assets/icon512.png"
 import { useDispatch, useSelector } from "react-redux"
 import Toggle from "react-toggle"
 
+import { byteConvert } from "~/lib/util"
 import { NavButton } from "~components/NavButton"
 import { SettingBlock } from "~components/SettingBlock"
 import { SettingItem } from "~components/SettingItem"
@@ -22,7 +23,8 @@ import {
   toggleRemoteStoreEveryPage,
   toggleSearchEngineAdaption,
   toggleShowOnlyBookmarkedResults,
-  toggleStoreEveryPage
+  toggleStoreEveryPage,
+  setMaxResults
 } from "~store/stat-slice"
 
 export const SettingView = () => {
@@ -48,6 +50,7 @@ export const SettingView = () => {
     (state: AppStat) => state.remoteStoreEveryPage
   )
   const forbiddenURLs = useSelector((state: AppStat) => state.forbiddenURLs)
+  const maxResults = useSelector((state: AppStat) => state.maxResults)
 
   // nav page states
   const [navPage, setNavPage] = useState(0)
@@ -90,6 +93,33 @@ export const SettingView = () => {
       setTempPageExpireTime(temptempPageExpireTime * 1000 * 60 * 60 * 24)
     )
   }
+   // max searc result stats
+  const [tempMaxResults, setMaxResultsChange] = useState(maxResults)
+  const handleMaxResultsChange = (e) => {
+    console.log(e.target.value)
+    if (e.target.value === "") {
+      // @ts-ignore
+      setMaxResultsChange("")
+      return
+    }
+    const a = parseInt(e.target.value)
+    setMaxResultsChange(a)
+  }
+  const handleMaxResultsSubmit = () => {
+    if (
+      !tempMaxResults ||
+      typeof tempMaxResults !== "number" ||
+      tempMaxResults < 0 ||
+      tempMaxResults > 100
+    ) {
+      setMaxResultsChange(20)
+      dispatch(setMaxResults(20))
+      return
+    }
+    dispatch(setMaxResults(tempMaxResults))
+  }
+
+
 
   // forbidden urls stats
   const [tempforbiddenURLs, changeforbiddenURLs] = useState(
@@ -110,6 +140,23 @@ export const SettingView = () => {
   }
   const handleBlurRemoteStoreURL = (e) => {
     dispatch(setRemoteStoreURL(tempRemoteStoreURL))
+  }
+
+  // store
+  const [storeSize, setStoreSize] = useState({
+    quota: "0",
+    usage: "0"
+  })
+  async function showEstimatedQuota() {
+    if (navigator.storage && navigator.storage.estimate) {
+      const estimation = await navigator.storage.estimate()
+      return {
+        quota: byteConvert(estimation.quota),
+        usage: byteConvert(estimation.usage)
+      }
+    } else {
+      console.error("StorageManager not found")
+    }
   }
 
   return (
@@ -141,7 +188,7 @@ export const SettingView = () => {
           </div>
         </div>
       </div>
-      <div className="p-4 flex flex-col gap-4 lg:pl-[19.5rem] pt-10">
+      <div className="p-4 flex flex-col gap-8 lg:pl-[19.5rem] pt-10">
         {navPage === 0 && (
           <>
             <SettingBlock title={"Display"}>
@@ -163,9 +210,38 @@ export const SettingView = () => {
                   onChange={() => dispatch(toggleShowOnlyBookmarkedResults())}
                 />
               </SettingItem>
+              <p></p>
+              <SettingItemCol
+                description={"Maxium Number Of Popup Page Search Results"}
+                notes={`default 20, max 100`}>
+                <input
+                  type="text"
+                  className="w-32 h-6"
+                  value={tempMaxResults}
+                  onChange={handleMaxResultsChange}
+                  onBlur={handleMaxResultsSubmit}
+                />{" "}
+                
+              </SettingItemCol>
             </SettingBlock>
 
             <SettingBlock title={"Index"}>
+              <SettingItemCol
+                description={"Store Size"}
+                notes={"the estimated size of indexd data"}>
+                <button
+                  className="text-blue-500 mr-8"
+                  onClick={async () => {
+                    const a = await showEstimatedQuota()
+                    setStoreSize(a)
+                  }}>
+                  Get Size
+                </button>
+                <span>
+                  {storeSize.usage}/{storeSize.quota}
+                </span>
+              </SettingItemCol>
+              <p></p>
               <SettingItem
                 description={"Index Every Page You Visited"}
                 notes={
@@ -267,7 +343,7 @@ export const SettingView = () => {
           <>
             <SettingBlock title={"Features"}>
               <p>
-                🔍&nbsp;&nbsp;a a better bookmark/broswing history search tool.
+                🔍&nbsp;&nbsp;a better bookmark/broswing history search tool.
               </p>
               <p>
                 💾&nbsp;&nbsp;store and index bookmarked page or any page you
