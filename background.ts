@@ -277,11 +277,15 @@ function bookmark(pageId: string) {
 }
 
 async function saveToDatabase(data: PageData) {
-  console.time("saveToDatabase")
-  console.time("save split")
+   // @ts-ignore
+   const existedId = await db.pages.where("pageId").equals(data.pageId).first()
+   if (existedId && existedId.id) {
+     console.log("existed,update")
+     return
+   }
   data.contentWords = wordSplit(data.content)
   data.titleWords = wordSplit(data.title)
-  console.timeEnd("save split")
+
   delete data.content
   const indexData = {
     url: data.url,
@@ -303,15 +307,6 @@ async function saveToDatabase(data: PageData) {
   // @ts-ignore
   db.transaction("rw", db.pages, db.contents, async () => {
     // @ts-ignore
-    const existedId = await db.pages.where("pageId").equals(data.pageId).first()
-    if (existedId && existedId.id) {
-      // const id = existedId.id
-      console.log("existed,update")
-      // @ts-ignore
-      // await db.pages.update(id, indexData)
-      return
-    }
-    // @ts-ignore
     const existed = await db.pages.where("url").equals(data.url).first()
     if (existed && existed.id) {
       const id = existed.id
@@ -324,7 +319,7 @@ async function saveToDatabase(data: PageData) {
       // @ts-ignore
 
       // @ts-ignore
-      console.log("existed,update")
+      console.log("same url, update")
       return
     }
 
@@ -424,7 +419,15 @@ async function searchString(search: string,type:string) {
   // @ts-ignore
   if (wordResult && wordResult.length > 0) {
     if(titleResult && titleResult.length > 0) {
-      return [...titleResult,...wordResult]
+      const a = [...titleResult,...wordResult]
+      // deleted duplicated result identified by id in array a
+      const aa = new Set(a.map((item) => item.id))
+      let y = []
+      aa.forEach(e=>{
+        y.push(a.find(item=>item.id === e))
+      })
+
+      return y
     }
     return wordResult
   }

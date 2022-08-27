@@ -15,6 +15,7 @@ import { useState } from "react"
 import {
   AppStat,
   setForbiddenURLs,
+  setMaxResults,
   setRemoteStoreKey,
   setRemoteStoreURL,
   setTempPageExpireTime,
@@ -23,8 +24,7 @@ import {
   toggleRemoteStoreEveryPage,
   toggleSearchEngineAdaption,
   toggleShowOnlyBookmarkedResults,
-  toggleStoreEveryPage,
-  setMaxResults
+  toggleStoreEveryPage
 } from "~store/stat-slice"
 
 export const SettingView = () => {
@@ -93,7 +93,7 @@ export const SettingView = () => {
       setTempPageExpireTime(temptempPageExpireTime * 1000 * 60 * 60 * 24)
     )
   }
-   // max searc result stats
+  // max searc result stats
   const [tempMaxResults, setMaxResultsChange] = useState(maxResults)
   const handleMaxResultsChange = (e) => {
     console.log(e.target.value)
@@ -118,8 +118,6 @@ export const SettingView = () => {
     }
     dispatch(setMaxResults(tempMaxResults))
   }
-
-
 
   // forbidden urls stats
   const [tempforbiddenURLs, changeforbiddenURLs] = useState(
@@ -163,25 +161,27 @@ export const SettingView = () => {
     <div className="max-w-8xl mx-auto p-4 sm:px-6 md:px-8">
       <div className="lg:block fixed z-20 inset-0   right-auto w-[19.5rem] py-10 px-6 overflow-y-auto">
         <div className=" lg:leading-6 relative  ">
-          <h1 className="lg:text-2xl font-bold pl-4">Fulltext Bookmarks</h1>
+          <h1 className="lg:text-2xl font-bold pl-4">
+            {chrome.i18n.getMessage("extensionName")}
+          </h1>
           <div className="text-lg font-normal flex flex-col gap-8 mt-10">
             <NavButton
-              title={"Settings"}
+              title={chrome.i18n.getMessage("settingPageNavSettings")}
               onClick={() => {
                 handleNavChange(0)
               }}></NavButton>
             <NavButton
-              title={"Remote API"}
+              title={chrome.i18n.getMessage("settingPageNavRemoteAPI")}
               onClick={() => {
                 handleNavChange(1)
               }}></NavButton>
             <NavButton
-              title={"About"}
+              title={chrome.i18n.getMessage("settingPageNavAbout")}
               onClick={() => {
                 handleNavChange(2)
               }}></NavButton>
             <NavButton
-              title={"Donate ❤️"}
+              title={chrome.i18n.getMessage("settingPageNavDonate")}
               onClick={() => {
                 handleNavChange(3)
               }}></NavButton>
@@ -191,10 +191,15 @@ export const SettingView = () => {
       <div className="p-4 flex flex-col gap-8 lg:pl-[19.5rem] pt-10">
         {navPage === 0 && (
           <>
-            <SettingBlock title={"Display"}>
+            <SettingBlock
+              title={chrome.i18n.getMessage("settingPageSettingDisplay")}>
               <SettingItem
-                description={"Show Result In Search Engine Page"}
-                notes={"support google/bing/baidu"}>
+                description={chrome.i18n.getMessage(
+                  "settingPageSettingSearchPageDesp"
+                )}
+                notes={chrome.i18n.getMessage(
+                  "settingPageSettingSearchPageNote"
+                )}>
                 <Toggle
                   defaultChecked={searchEngineAdaption}
                   onChange={() => dispatch(toggleSearchEngineAdaption())}
@@ -202,9 +207,12 @@ export const SettingView = () => {
               </SettingItem>
             </SettingBlock>
 
-            <SettingBlock title={"Search"}>
+            <SettingBlock
+              title={chrome.i18n.getMessage("settingPageSettingSearch")}>
               <SettingItem
-                description={"Show Only Bookmarked Pages In Search Results"}>
+                description={chrome.i18n.getMessage(
+                  "settingPageSettingSearchShowBookDesp"
+                )}>
                 <Toggle
                   defaultChecked={showOnlyBookmarkedResults}
                   onChange={() => dispatch(toggleShowOnlyBookmarkedResults())}
@@ -212,8 +220,12 @@ export const SettingView = () => {
               </SettingItem>
               <p></p>
               <SettingItemCol
-                description={"Maxium Number Of Popup Page Search Results"}
-                notes={`default 20, max 100`}>
+                description={chrome.i18n.getMessage(
+                  "settingPageSettingSearchMaxDesp"
+                )}
+                notes={chrome.i18n.getMessage(
+                  "settingPageSettingSearchMaxNote"
+                )}>
                 <input
                   type="text"
                   className="w-32 h-6"
@@ -221,42 +233,49 @@ export const SettingView = () => {
                   onChange={handleMaxResultsChange}
                   onBlur={handleMaxResultsSubmit}
                 />{" "}
-                
               </SettingItemCol>
             </SettingBlock>
 
-            <SettingBlock title={"Index"}>
+            <SettingBlock
+              title={chrome.i18n.getMessage("settingPageSettingIndex")}>
               <SettingItemCol
-                description={"Store Size"}
-                notes={"the estimated size of indexd data"}>
+                description={chrome.i18n.getMessage(
+                  "settingPageSettingIndexSizeDesp"
+                )}
+                notes={chrome.i18n.getMessage(
+                  "settingPageSettingIndexSizeNote"
+                )}>
                 <button
                   className="text-blue-500 mr-8"
                   onClick={async () => {
                     const a = await showEstimatedQuota()
                     setStoreSize(a)
                   }}>
-                  Get Size
+                  {chrome.i18n.getMessage("settingPageSettingIndexSizeButton")}
                 </button>
-                <span>
-                  {storeSize.usage}/{storeSize.quota}
-                </span>
+                <span>{storeSize.usage}</span>
+                {/* // TODO:清除所有数据 */}
               </SettingItemCol>
               <p></p>
               <SettingItem
-                description={"Index Every Page You Visited"}
-                notes={
-                  "only applies to pages after you install this extension"
-                }>
+                description={chrome.i18n.getMessage(
+                  "settingPageSettingIndexEveryDesp"
+                )}
+                notes={chrome.i18n.getMessage(
+                  "settingPageSettingIndexEveryNote"
+                )}>
                 <Toggle
                   defaultChecked={storeEveryPage}
                   onChange={() => dispatch(toggleStoreEveryPage())}
                 />
               </SettingItem>
               <SettingItem
-                description={"Index Bookmarked Page"}
-                notes={
-                  "only applies to bookmarks after you install this extension"
-                }>
+                description={chrome.i18n.getMessage(
+                  "settingPageSettingIndexBookDesp"
+                )}
+                notes={chrome.i18n.getMessage(
+                  "settingPageSettingIndexBookNote"
+                )}>
                 <Toggle
                   defaultChecked={bookmarkAdaption}
                   onChange={() => dispatch(toggleBookmarkAdaption())}
@@ -264,8 +283,12 @@ export const SettingView = () => {
               </SettingItem>
               <p></p>
               <SettingItemCol
-                description={"Store Duration of Non-Bookmarked Page "}
-                notes={`non-bookmarked page reocords will be outdated after this time, while bookmarked page will be stored forever.\ndefaults to 60 days, maxium 36500 days`}>
+                description={chrome.i18n.getMessage(
+                  "settingPageSettingIndexDurDesp"
+                )}
+                notes={chrome.i18n.getMessage(
+                  "settingPageSettingIndexDurNote"
+                )}>
                 <input
                   type="text"
                   className="w-32 h-6"
@@ -273,21 +296,23 @@ export const SettingView = () => {
                   onChange={handlePageExpireTimeChange}
                   onBlur={handlePageExpireTimeSubmit}
                 />{" "}
-                Days
+                {chrome.i18n.getMessage("days")}
               </SettingItemCol>
               <p></p>
               <SettingItemCol
-                description={"Exclude URLs"}
-                notes={
-                  "urls in this list will not be indexed ( one address per line)"
-                }>
-                <p>
+                description={chrome.i18n.getMessage(
+                  "settingPageSettingIndexExclDesp"
+                )}
+                notes={chrome.i18n.getMessage(
+                  "settingPageSettingIndexExclNote"
+                )}>
+                {/* <p>
                   <a
                     href="https://developer.chrome.com/extensions/proxy#bypass_list"
                     className="text-blue-300 mb-2">
                     {"matching pattern rules reference"}
                   </a>
-                </p>
+                </p> */}
                 <textarea
                   className="w-96"
                   onChange={(e) => {
@@ -306,24 +331,34 @@ export const SettingView = () => {
 
         {navPage === 1 && (
           <>
-            <SettingBlock title={"Remote API"}>
-              <SettingItem description={"Send To Remote API"}>
+            <SettingBlock
+              title={chrome.i18n.getMessage("settingPageRemoteTitle")}>
+              <SettingItem
+                description={chrome.i18n.getMessage(
+                  "settingPageRemoteSendDesp"
+                )}
+                notes={chrome.i18n.getMessage("settingPageRemoteSendnote")}>
                 <Toggle
                   defaultChecked={remoteStore}
                   onChange={() => dispatch(toggleRemoteStore())}
                 />
               </SettingItem>
               <SettingItem
-                description={"Send Every Stroed Page To Remote API"}
-                notes={
-                  "dafault disabled, and send only bookmarked pages to remote api"
-                }>
+                description={chrome.i18n.getMessage(
+                  "settingPageRemoteSendEveryDesp"
+                )}
+                notes={chrome.i18n.getMessage(
+                  "settingPageRemoteSendEveryNote"
+                )}>
                 <Toggle
                   defaultChecked={remoteStoreEveryPage}
                   onChange={() => dispatch(toggleRemoteStoreEveryPage())}
                 />
               </SettingItem>
-              <SettingItemCol description={"Remote API Address"}>
+              <SettingItemCol
+                description={chrome.i18n.getMessage(
+                  "settingPageRemoteAPIDesp"
+                )}>
                 <textarea
                   className="w-96 border-solid border-[1px] border-gray-300 focus:border-gray-600 focus:outline-none"
                   value={remoteStoreURL}
@@ -341,42 +376,41 @@ export const SettingView = () => {
 
         {navPage === 2 && (
           <>
-            <SettingBlock title={"Features"}>
+            <SettingBlock
+              title={chrome.i18n.getMessage("settingPageFeatureTitle")}>
               <p>
-                🔍&nbsp;&nbsp;a better bookmark/broswing history search tool.
+                🔍&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureA")}
               </p>
               <p>
-                💾&nbsp;&nbsp;store and index bookmarked page or any page you
-                visit, so you can later fulltext search them.
+                💾&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureB")}
               </p>
 
               <p>
-                🥇&nbsp;&nbsp;best matched search result will be dispalyed in
-                the search engine page as you search (google/bing/baidu).
+                🥇&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureC")}
               </p>
               <p>
-                📎&nbsp;&nbsp;search in the chrome searchbar by typing "kw"
-                first(short for 'keyword').
+                📎&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureD")}
               </p>
               <p>
-                📜&nbsp;&nbsp;or search in the extension popup page for more
-                results.
+                📜&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureE")}
               </p>
               <p>
-                😺&nbsp;&nbsp;everything stored in local storage, no accounts,
-                no cloud, no privacy issues, totally free.
+                😺&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureF")}
               </p>
               <p>
-                ✉️&nbsp;&nbsp;send your bookmark/browsing history to custom
-                remote api as you like.
+                ✉️&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureG")}
+              </p>
+              <p>
+                ⌨️&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureH")}
               </p>
             </SettingBlock>
-            <SettingBlock title={"About"}>
+            <SettingBlock
+              title={chrome.i18n.getMessage("settingPageAboutTitle")}>
               <p>
                 Developed by:{" "}
                 <a className="text-blue-300" href="https://github.com/RauX333">
                   RauX333
-                </a>
+                </a>{" "} &nbsp;with ❤️
               </p>
 
               <p>
@@ -386,16 +420,14 @@ export const SettingView = () => {
                 </a>
               </p>
 
-              <p>
-                if you have any issues or suggestions, please feel free to
-                connect me.
-              </p>
+              <p>{chrome.i18n.getMessage("settingPageAboutThanks")}</p>
             </SettingBlock>
           </>
         )}
         {navPage === 3 && (
           <>
-            <SettingBlock title={"Buy Me A Cupcake 🧁"}>
+            <SettingBlock
+              title={chrome.i18n.getMessage("settingPageDonateTitle")}>
               <p>
                 PayPal:{" "}
                 <a className="text-blue-300" href="paypal.me/dongxiajun">
@@ -404,12 +436,13 @@ export const SettingView = () => {
               </p>
             </SettingBlock>
 
-            <SettingBlock title={"About"}>
+            <SettingBlock title={chrome.i18n.getMessage("settingPageAboutTitle")}>
               <p>
                 Developed by:{" "}
                 <a className="text-blue-300" href="https://github.com/RauX333">
                   RauX333
                 </a>
+                 &nbsp;with ❤️
               </p>
 
               <p>
@@ -419,10 +452,7 @@ export const SettingView = () => {
                 </a>
               </p>
 
-              <p>
-                if you have any issues or suggestions, please feel free to
-                connect me.
-              </p>
+              <p>{chrome.i18n.getMessage("settingPageAboutThanks")}</p>
             </SettingBlock>
           </>
         )}

@@ -1,14 +1,203 @@
 {
-    "extensionName": {
-      "message": "全文书签",
-      "description": "Name of the extension."
-    },
-    "extensionDescription": {
-      "message": "可以全文搜索的书签",
-      "description": "Description of the extension."
-    },
-    "test": {
-      "message": "测试信息",
-      "description": "Popup message."
-    }
+  "extensionName": {
+    "message": "全文书签",
+    "description": "Name of the extension."
+  },
+  "extensionDescription": {
+    "message": "可以全文搜索的书签",
+    "description": "Description of the extension."
+  },
+  "test": {
+    "message": "测试信息",
+    "description": "Popup message."
+  },
+  "popupSearchTitle": {
+    "message": "全文搜索书签和浏览历史",
+    "description": "Search button."
+  },
+  "popupFilterRecent": {
+    "message": "最新",
+    "description": "Search button."
+  },
+  "popupFilterBookmarks": {
+    "message": "书签优先",
+    "description": "Search button."
+  },
+  "popupFilterOldest": {
+    "message": "最旧",
+    "description": "Search button."
+  },
+  "popupFilterRelevancy": {
+    "message": "最相关",
+    "description": "Search button."
+  },
+  "settingPageNavSettings": {
+    "message": "设置",
+    "description": "Search button."
+  },
+  "settingPageNavRemoteAPI": {
+    "message": "自定义API",
+    "description": "Search button."
+  },
+  "settingPageNavAbout": {
+    "message": "功能介绍",
+    "description": "Search button."
+  },
+  "settingPageNavDonate": {
+    "message": "捐赠 ❤️",
+    "description": "Search button."
+  },
+  "settingPageSettingDisplay": {
+    "message": "显示",
+    "description": "Search button."
+  },
+  "settingPageSettingSearchPageDesp": {
+    "message": "在搜索引擎页面中插入结果",
+    "description": "Search button."
+  },
+  "settingPageSettingSearchPageNote": {
+    "message": "支持 baidu/bing/google",
+    "description": "Search button."
+  },
+  "settingPageSettingSearch": {
+    "message": "搜索",
+    "description": "Search button."
+  },
+  "settingPageSettingSearchShowBookDesp": {
+    "message": "搜索结果只显示已加入书签的页面",
+    "description": "Search button."
+  },
+  "settingPageSettingSearchMaxDesp": {
+    "message": "搜索结果数量限制",
+    "description": "Search button."
+  },
+  "settingPageSettingSearchMaxNote": {
+    "message": "展示在popup界面的结果数量。默认20条，最大100条",
+    "description": "Search button."
+  },
+  "settingPageSettingIndex": {
+    "message": "存储",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexSizeDesp": {
+    "message": "已用空间",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexSizeNote": {
+    "message": "已使用的磁盘空间",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexSizeButton": {
+    "message": "获取已用空间",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexEveryDesp": {
+    "message": "存储所有页面",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexEveryNote": {
+    "message": "开启后开始存储所有你访问过的页面",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexBookDesp": {
+    "message": "存储书签页面",
+    "description": "Search button"
+  },
+  "settingPageSettingIndexBookNote": {
+    "message": "当页面被加入书签时自动存储",
+    "description": "Search button"
+  },
+  "settingPageSettingIndexDurDesp": {
+    "message": "存储过期时间（非书签页面）",
+    "description": "Search button"
+  },
+  "settingPageSettingIndexDurNote": {
+    "message": "非书签页面的记录将会被一直存储，而普通页面的记录将会在过期时间后被自动删除。\n默认为60天，最大为36500天",
+    "description": "Search button"
+  },
+  "days": {
+    "message": "天",
+    "description": "Search button"
+  },
+  "settingPageSettingIndexExclDesp": {
+    "message": "排除地址",
+    "description": "Search button"
+  },
+  "settingPageSettingIndexExclNote": {
+    "message": "列表中的地址将不会被存储（每行一个地址，支持通配符）",
+    "description": "Search button"
+  },
+  "settingPageRemoteTitle": {
+    "message": "自定义API",
+    "description": "Search button"
+  },
+  "settingPageRemoteSendDesp": {
+    "message": "发送至自定义API",
+    "description": "Search button"
+  },
+  "settingPageRemoteSendnote": {
+    "message": "打开此功能后将会把存储的页面（默认仅发送书签页面）发送至下方自定义的API地址，使用http post方法，以json格式发送，例如：\n{url: 'http://www.example.com/api', title: 'example page', date: 1661607379953, isBookmarked: true}",
+    "description": "Search button"
+  },
+  "settingPageRemoteSendEveryDesp": {
+    "message": "发送所有页面",
+    "description": "Search button"
+  },
+  "settingPageRemoteSendEveryNote": {
+    "message": "发送所有页面而不仅仅是书签页面，可能会加大浏览器负担。",
+    "description": "Search button"
+  },
+  "settingPageRemoteAPIDesp": {
+    "message": "自定义API地址",
+    "description": "Search button"
+  },
+  "settingPageFeatureTitle": {
+    "message": "功能介绍",
+    "description": "Search button"
+  },
+  "settingPageFeatureA": {
+    "message": "更好的 书签/浏览历史 搜索工具。",
+    "description": "Search button"
+  },
+  "settingPageFeatureB": {
+    "message": "存储并索引书签页面，或所有页面，并全文检索，再也不怕找不到看过的某个网页。",
+    "description": "Search button"
+  },
+  "settingPageFeatureC": {
+    "message": "全文检索结果展示在搜索引擎结果页面（支持 baidu/bing/google）。",
+    "description": "Search button"
+  },
+
+  "settingPageFeatureD": {
+    "message": "同时支持在浏览器地址栏搜索（输入关键字 kw 后输入你想要搜索的东西）",
+    "description": "Search button"
+  },
+  "settingPageFeatureE": {
+    "message": "你也可以点击地址栏右侧的拓展小图标在popup界面进行搜索以获得更多结果，并对结果进行排序。",
+    "description": "Search button"
+  },
+  "settingPageFeatureF": {
+    "message": "所有东西存储在本地，没有账号，没有云存储，没有隐私问题，完全免费。",
+    "description": "Search button"
+  },
+  "settingPageFeatureG": {
+    "message": "支持发送书签页面或浏览历史到自定义API",
+    "description": "Search button"
+  },
+  "settingPageFeatureH": {
+    "message": "备份功能正在开发中。",
+    "description": "Search button"
+  },
+  "settingPageAboutTitle": {
+    "message": "关于",
+    "description": "Search button"
+  },
+  "settingPageAboutThanks": {
+    "message": "如果有任何使用上的问题或者建议，请联系上述邮箱。",
+    "description": "Search button"
+  },
+  "settingPageDonateTitle": {
+    "message": "请我喝一杯奶茶吧 🧋",
+    "description": "Search button"
   }
+}

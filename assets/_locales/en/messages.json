@@ -1,14 +1,203 @@
 {
-    "extensionName": {
-      "message": "Fulltext Bookmark",
-      "description": "Name of the extension."
-    },
-    "extensionDescription": {
-      "message": "fulltext-search all the browsing history/bookmarks",
-      "description": "Description of the extension."
-    },
-    "test": {
-      "message": "test message",
-      "description": "Popup message."
-    }
+  "extensionName": {
+    "message": "Fulltext Bookmark",
+    "description": "Name of the extension."
+  },
+  "extensionDescription": {
+    "message": "fulltext-search all the browsing history/bookmarks",
+    "description": "Description of the extension."
+  },
+  "test": {
+    "message": "test message",
+    "description": "Popup message."
+  },
+  "popupSearchTitle": {
+    "message": "Fulltext Search Bookmark/History",
+    "description": "Search button."
+  },
+  "popupFilterRecent": {
+    "message": "recent",
+    "description": "Search button."
+  },
+  "popupFilterBookmarks": {
+    "message": "bookmark first",
+    "description": "Search button."
+  },
+  "popupFilterOldest": {
+    "message": "oldest",
+    "description": "Search button."
+  },
+  "popupFilterRelevancy": {
+    "message": "relevancy",
+    "description": "Search button."
+  },
+  "settingPageNavSettings": {
+    "message": "Setting",
+    "description": "Search button."
+  },
+  "settingPageNavRemoteAPI": {
+    "message": "Remote API",
+    "description": "Search button."
+  },
+  "settingPageNavAbout": {
+    "message": "Features",
+    "description": "Search button."
+  },
+  "settingPageNavDonate": {
+    "message": "Donate ❤️",
+    "description": "Search button."
+  },
+  "settingPageSettingDisplay": {
+    "message": "Display",
+    "description": "Search button."
+  },
+  "settingPageSettingSearchPageDesp": {
+    "message": "Show Result In Search Engine Page",
+    "description": "Search button."
+  },
+  "settingPageSettingSearchPageNote": {
+    "message": "support google/bing/baidu",
+    "description": "Search button."
+  },
+  "settingPageSettingSearch": {
+    "message": "Search",
+    "description": "Search button."
+  },
+  "settingPageSettingSearchShowBookDesp": {
+    "message": "Show Only Bookmarked Pages In Search Results",
+    "description": "Search button."
+  },
+  "settingPageSettingSearchMaxDesp": {
+    "message": "Maxium Number Of Popup Page Search Results",
+    "description": "Search button."
+  },
+  "settingPageSettingSearchMaxNote": {
+    "message": "default 20, max 100",
+    "description": "Search button."
+  },
+  "settingPageSettingIndex": {
+    "message": "Store",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexSizeDesp": {
+    "message": "Used Space",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexSizeNote": {
+    "message": "the estimated size of indexd data",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexSizeButton": {
+    "message": "get size",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexEveryDesp": {
+    "message": "Store Every Page You Visited",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexEveryNote": {
+    "message": "store every page you visited after this option is enabled",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexBookDesp": {
+    "message": "Store Bookmarked Page",
+    "description": "Search button"
+  },
+  "settingPageSettingIndexBookNote": {
+    "message": "Store page when it is bookmarked",
+    "description": "Search button"
+  },
+  "settingPageSettingIndexDurDesp": {
+    "message": "Expiration Duration of Store (Non-Bookmarked Page)",
+    "description": "Search button"
+  },
+  "settingPageSettingIndexDurNote": {
+    "message": "non-bookmarked page reocords will be expired after this time, while bookmarked page will be stored forever.\ndefaults to 60 days, maxium 36500 days",
+    "description": "Search button"
+  },
+  "days": {
+    "message": "days",
+    "description": "Search button"
+  },
+  "settingPageSettingIndexExclDesp": {
+    "message": "Exclude URLs",
+    "description": "Search button"
+  },
+  "settingPageSettingIndexExclNote": {
+    "message": "urls in this list will not be indexed (one address per line, support wildcard)",
+    "description": "Search button"
+  },
+  "settingPageRemoteTitle": {
+    "message": "Custom API",
+    "description": "Search button"
+  },
+  "settingPageRemoteSendDesp": {
+    "message": "Send To Custom API",
+    "description": "Search button"
+  },
+  "settingPageRemoteSendnote": {
+    "message": "send stored page (defaults only the bookmarked pages) to the custom API address by http post method. json payload example:{url: 'http://www.example.com/api', title: 'example page', date: 1661607379953, isBookmarked: true}",
+    "description": "Search button"
+  },
+  "settingPageRemoteSendEveryDesp": {
+    "message": "Send Every Stroed Page To Custom API",
+    "description": "Search button"
+  },
+  "settingPageRemoteSendEveryNote": {
+    "message": "send every page other than bookmarked page to custom API. may cause high traffic.",
+    "description": "Search button"
+  },
+  "settingPageRemoteAPIDesp": {
+    "message": "Custom API Address",
+    "description": "Search button"
+  },
+  "settingPageFeatureTitle": {
+    "message": "Features",
+    "description": "Search button"
+  },
+  "settingPageFeatureA": {
+    "message": "a better bookmark/broswing history search tool.",
+    "description": "Search button"
+  },
+  "settingPageFeatureB": {
+    "message": "store and index bookmarked page or any page you visit, so you can later fulltext search them.",
+    "description": "Search button"
+  },
+  "settingPageFeatureC": {
+    "message": "best matched search result will be dispalyed in the search engine page as you search (google/bing/baidu).",
+    "description": "Search button"
+  },
+
+  "settingPageFeatureD": {
+    "message": "search in the chrome searchbar by typing 'kw' first(short for 'keyword').",
+    "description": "Search button"
+  },
+  "settingPageFeatureE": {
+    "message": "or search in the extension popup page for more results.",
+    "description": "Search button"
+  },
+  "settingPageFeatureF": {
+    "message": "everything stored in local storage, no accounts, no cloud, no privacy issues, totally free.",
+    "description": "Search button"
+  },
+  "settingPageFeatureG": {
+    "message": "send your bookmark/browsing history to custom remote api as you like.",
+    "description": "Search button"
+  },
+  "settingPageFeatureH": {
+    "message": "backup feature is under development.",
+    "description": "Search button"
+  },
+  "settingPageAboutTitle": {
+    "message": "About",
+    "description": "Search button"
+  },
+  "settingPageAboutThanks": {
+    "message": " if you have any issues or suggestions please feel free to contact.",
+    "description": "Search button"
+  },
+  "settingPageDonateTitle": {
+    "message": "Buy Me A Cupcake 🧁",
+    "description": "Search button"
   }
+}
