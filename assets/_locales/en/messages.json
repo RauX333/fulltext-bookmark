@@ -136,7 +136,7 @@
     "description": "Search button"
   },
   "settingPageRemoteSendnote": {
-    "message": "send stored page (defaults only the bookmarked pages) to the custom API address by http post method. json payload example:{url: 'http://www.example.com/api', title: 'example page', date: 1661607379953, isBookmarked: true}",
+    "message": "send stored page (defaults only the bookmarked pages) to the custom API address by http post method. json payload example:\n{url: 'http://www.example.com/api', title: 'example page', date: 1661607379953, isBookmarked: true}",
     "description": "Search button"
   },
   "settingPageRemoteSendEveryDesp": {
