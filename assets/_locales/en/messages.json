@@ -91,6 +91,14 @@
     "message": "get size",
     "description": "Search button."
   },
+  "settingPageSettingIndexSizeClearBtn": {
+    "message": "clear data",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexSizeClearAlert": {
+    "message": "data clear finished",
+    "description": "Search button."
+  },
   "settingPageSettingIndexEveryDesp": {
     "message": "Store Every Page You Visited",
     "description": "Search button."

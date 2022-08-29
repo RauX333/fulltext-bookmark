@@ -23,42 +23,54 @@ let options = {
   forbiddenURLs: ""
 }
 
-
-window.addEventListener("load", () => {
-  if (!isExcludeURL(excludeURLs,window.location.href)) {
+if (!isExcludeURL(excludeURLs,window.location.href)) {
   chrome.storage.local.get([`persist:${storageKey}`], (items) => {
     
     if(items[`persist:${storageKey}`]) {
-      console.log("persist result",items[`persist:${storageKey}`])
+      // console.log("persist result",items[`persist:${storageKey}`])
       options = JSON.parse(items[`persist:${storageKey}`]);
     }  else {
-      console.log("no persist result")
+      
     }
     // TODO:forbid urls from useroptions
     if(isExcludeURL(JSON.parse(options.forbiddenURLs),window.location.href)) {
      
-      console.log("sdsdasdasdasdasd");
+      
       
       return
     }
 
     // listen to new bookmark event
     if(options.bookmarkAdaption.toString() === "true") {
-      console.log("aaaaa")
+      
       newBookmarkListener()
     }
     
     // parse page and send to background script
     if(options.storeEveryPage.toString() === "true") {
-      console.log("store every page")
-      parsePageAndSend()
+      
+      if(document.readyState === 'complete') {
+        parsePageAndSend()
+      } else {
+        document.onreadystatechange = function () {
+          if (document.readyState == "complete") {
+            parsePageAndSend()
+          }
+        }
+      }
+     
     }
   });
 }
-})
+
+
+// window.addEventListener("load", () => {
+ 
+// })
 
 const newBookmarkListener = (): void => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    
     if (message.command === "bookmark") {
       if(options.storeEveryPage.toString() === "true") {
         sendResponse({ pageId: pageId,stored: true })
@@ -85,11 +97,11 @@ function isExcludeURL (patterns:string[],url: string): boolean {
       continue
     }
     if (re.test(url)) {
-      console.log("exclude url:", url)
+      // console.log("exclude url:", url)
       return true
     }
   }
-  console.log("not exclude url:", url)
+  // console.log("not exclude url:", url)
   return false
 }
 
@@ -120,7 +132,7 @@ function parsePage(){
       date: Date.now()
     }
   } else {
-    console.log("not readable")
+    // console.log("not readable")
     article = {
       title: document.title || "",
       url: window.location.href || "",

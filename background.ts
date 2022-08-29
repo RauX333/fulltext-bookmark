@@ -1,7 +1,9 @@
 import Dexie from "dexie"
+import { url } from "inspector"
 import { Segment, useDefault } from "segmentit"
 
 import debounce from "~lib/debounce"
+import { getBookmarkUrl, handleUrlRemoveHash } from "~lib/util"
 import { persistor, store } from "~store/store"
 
 export {}
@@ -99,23 +101,32 @@ interface Message {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.command) {
     case "store":
-      console.log(
-        `${message.pageId} received temp store message from ${sender.tab.id}`
-      )
+      // console.log(
+      //   `${message.pageId} received temp store message from ${sender.tab.id}`
+      // )
       // isBookmarked false
-      message.data.isBookmarked = false
+
       // save to database
       ;(async () => {
+        const bookmarkSearchResult = await chrome.bookmarks.search(
+          message.data.url
+        )
+        // console.log("ppp",bookmarkSearchResult,message.data.url)
+        if (bookmarkSearchResult && bookmarkSearchResult.length > 0) {
+          // console.log("already bookmrked")
+          message.data.isBookmarked = true
+        } else {
+          message.data.isBookmarked = false
+        }
         await saveToDatabase({ ...message.data, pageId: message.pageId })
-
         sendResponse("ok")
       })()
       return true
     case "google_result":
-      console.log("google result", message.search)
+      // console.log("google result", message.search)
       ;(async () => {
-        const result = await searchString(message.search,"short")
-        console.log("search result", result)
+        const result = await searchString(message.search, "short")
+        // console.log("search result", result)
         if (result && result.length > 0) {
           const matchedFirst = result[0]
           sendResponse({
@@ -133,43 +144,66 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       })()
       return true
     case "popsearch":
-      console.log("popsearch", message.search)
+      // console.log("popsearch", message.search)
       ;(async () => {
-        const result = await searchString(message.search,"long")
-        console.log("search result", result)
+        const result = await searchString(message.search, "long")
+        // console.log("search result", result)
         sendResponse(result)
+      })()
+      return true
+    case "clearAllData":
+      ;(async () => {
+        // @ts-ignore
+        await db.pages.clear()
+        // @ts-ignore
+        await db.contents.clear()
+        sendResponse("ok")
       })()
       return true
     default:
       sendResponse("invalid command")
-      break;
+      break
   }
 })
 
 // bookmark linstener
 chrome.bookmarks.onCreated.addListener((id, bm) => {
-  console.log("bookmarks created:", id, bm)
+  // console.log("bookmarks created:", id, bm)
   const userOptions = store.getState()
-  console.log("ss oprion", userOptions)
+  // console.log("ss oprion", userOptions)
   if (!userOptions.bookmarkAdaption) {
     return
   }
-  chrome.tabs.query({ active: true }, (tabs) => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    // console.log("tabs tabs",tabs)
     chrome.tabs.sendMessage(
       tabs[0].id,
       { command: "bookmark", data: "create" },
       (resp) => {
-        console.log("book resp", resp)
+        // console.log("book resp", resp)
         // change archive status in db
-        if (resp.stored === true) {
-          bookmark(resp.pageId)
-        } else {
-          console.log("bookmark not stored")
-          resp.data.isBookmarked = true
+        if (!resp) {
           ;(async () => {
-            await saveToDatabase({ ...resp.data, pageId: resp.pageId })
+            await saveToDatabase({
+              title: tabs[0].title,
+              url: handleUrlRemoveHash(tabs[0].url),
+              date: Date.now(),
+              pageId: tabs[0].id.toString(),
+              isBookmarked: true
+            })
           })()
+        } else {
+          if (resp.stored === true) {
+            bookmark(resp.pageId)
+          } else {
+            // console.log("bookmark not stored")
+            resp.data.isBookmarked = true
+            ;(async () => {
+              await saveToDatabase({ ...resp.data, pageId: resp.pageId })
+            })()
+          }
         }
+
         return true
       }
     )
@@ -177,19 +211,7 @@ chrome.bookmarks.onCreated.addListener((id, bm) => {
 })
 
 chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
-  let removedURLs = []
-  console.log("removed", id, removeInfo)
-  // if removeInfo node has children, then get all the children's url
-  if (removeInfo.node.children) {
-    removeInfo.node.children.forEach((child) => {
-      console.log("child", child.url)
-      removedURLs.push(child.url)
-    })
-  }
-  // if delete single bookmark, then get the url of the bookmark
-  else {
-    removedURLs.push(removeInfo.node.url)
-  }
+  const removedURLs = getBookmarkUrl(removeInfo)
   unBookmarked(removedURLs)
 })
 
@@ -203,8 +225,8 @@ chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
 
 const omniboxSearch = debounce(
   async (text, suggest) => {
-    console.log("input changed", text)
-    const result = await searchString(text,"long")
+    // console.log("input changed", text)
+    const result = await searchString(text, "long")
     // slice to length 5
     const resultSlice = result.slice(0, 5)
     const sug = resultSlice.map((e) => {
@@ -225,20 +247,20 @@ chrome.omnibox.onInputChanged.addListener((text, suggest) => {
 
 chrome.omnibox.onInputEntered.addListener((text, disposition) => {
   if (disposition == "newForegroundTab") {
-    console.log("newForegroundTab")
+    // console.log("newForegroundTab")
     // create a new tab and load the url
     chrome.tabs.create({ url: text })
   }
   if (disposition == "newBackgroundTab") {
-    console.log("newBackgroundTab")
+    // console.log("newBackgroundTab")
     // create a new background tab and load the url
     chrome.tabs.create({ url: text, active: false })
   }
-  if(disposition=="currentTab"){
-    console.log("currentTab")
+  if (disposition == "currentTab") {
+    // console.log("currentTab")
     // redirect current tab to the url
-    chrome.tabs.query({active:true},(tabs)=>{
-      chrome.tabs.update(tabs[0].id,{url:text})
+    chrome.tabs.query({ active: true }, (tabs) => {
+      chrome.tabs.update(tabs[0].id, { url: text })
     })
   }
 })
@@ -249,13 +271,14 @@ chrome.omnibox.onInputEntered.addListener((text, disposition) => {
 // database functions
 function unBookmarked(urls: string[]): void {
   // delete from database matching the removedURLs
+  // console.log("+++++++++++++++",urls)
   // @ts-ignore
   db.pages
     .where("url")
     .anyOf(urls)
     .modify({ isBookmarked: false })
     .then(() => {
-      console.log("unbookmarked")
+      // console.log("unbookmarked")
     })
 }
 
@@ -269,7 +292,7 @@ function bookmark(pageId: string) {
       await db.pages.update(existed.id, { isBookmarked: true })
       const options = store.getState()
       if (options.remoteStore) {
-        console.log("bookmark remote 1")
+        // console.log("bookmark remote 1")
         sendToRemote({ ...existed, isBookmarked: true })
       }
     }
@@ -277,12 +300,12 @@ function bookmark(pageId: string) {
 }
 
 async function saveToDatabase(data: PageData) {
-   // @ts-ignore
-   const existedId = await db.pages.where("pageId").equals(data.pageId).first()
-   if (existedId && existedId.id) {
-     console.log("existed,update")
-     return
-   }
+  // @ts-ignore
+  const existedId = await db.pages.where("pageId").equals(data.pageId).first()
+  if (existedId && existedId.id) {
+    //  console.log("existed,update")
+    return
+  }
   data.contentWords = wordSplit(data.content)
   data.titleWords = wordSplit(data.title)
 
@@ -310,16 +333,18 @@ async function saveToDatabase(data: PageData) {
     const existed = await db.pages.where("url").equals(data.url).first()
     if (existed && existed.id) {
       const id = existed.id
-      await Promise.all([
-        // @ts-ignore
-        db.pages.update(id, indexData),
-        // @ts-ignore
-        db.contents.where("pid").equals(id).modify(largeData)
-      ])
+      let ps = []
       // @ts-ignore
-
-      // @ts-ignore
-      console.log("same url, update")
+      ps.push(db.pages.update(id, indexData))
+      if (
+        largeData.contentWords.length > 0 &&
+        largeData.titleWords.length > 0
+      ) {
+        // @ts-ignore
+        ps.push(db.contents.where("pid").equals(id).modify(largeData))
+      }
+      await Promise.all(ps)
+      // console.log("same url, update")
       return
     }
 
@@ -329,7 +354,7 @@ async function saveToDatabase(data: PageData) {
     // @ts-ignore
     await db.contents.add({ pid: id, ...largeData })
     // @ts-ignore
-    console.log("db saved: ", id)
+    // console.log("db saved: ", id)
   }).catch((e) => {
     alert(e.stack || e)
   })
@@ -369,7 +394,7 @@ function findAndSort(prefixes, field): Promise<any[]> {
     // if bookmarked priority option is enabled, then sort by bookmark status
     const userOptions = store.getState()
     if (userOptions.showOnlyBookmarkedResults === true) {
-      console.log("show only bookmarked results")
+      // console.log("show only bookmarked results")
 
       if (intArray.length > 300) {
         // @ts-ignore
@@ -401,38 +426,38 @@ function findAndSort(prefixes, field): Promise<any[]> {
   })
 }
 
-async function searchString(search: string,type:string) {
+async function searchString(search: string, type: string) {
   if (!search) {
     return []
   }
   const splitSearch = wordSplit(search)
   const titleResult = await findAndSort(splitSearch, "titleWords")
-  console.log("titleResult", titleResult)
+  // console.log("titleResult", titleResult)
   // @ts-ignore
   if (titleResult && titleResult.length > 0) {
-    if(type === "short"){
+    if (type === "short") {
       return titleResult
     }
   }
   const wordResult = await findAndSort(splitSearch, "contentWords")
-  console.log("wordResult", wordResult)
+  // console.log("wordResult", wordResult)
   // @ts-ignore
   if (wordResult && wordResult.length > 0) {
-    if(titleResult && titleResult.length > 0) {
-      const a = [...titleResult,...wordResult]
+    if (titleResult && titleResult.length > 0) {
+      const a = [...titleResult, ...wordResult]
       // deleted duplicated result identified by id in array a
       const aa = new Set(a.map((item) => item.id))
       let y = []
-      aa.forEach(e=>{
-        y.push(a.find(item=>item.id === e))
+      aa.forEach((e) => {
+        y.push(a.find((item) => item.id === e))
       })
 
       return y
     }
     return wordResult
   }
-  console.log("precise search no match")
-  
+  // console.log("precise search no match")
+
   return []
 }
 
@@ -450,9 +475,13 @@ function sendToRemote(data: PageData) {
     console.log("sendToRemote", postData)
 
     const userOptions = store.getState()
-    console.log("sendToRemote options", userOptions.remoteStoreURL, userOptions)
-    if (!userOptions.remoteStoreURL) {
-      console.log("no remote store url")
+    // console.log("sendToRemote options", userOptions.remoteStoreURL, userOptions)
+    if (
+      !userOptions.remoteStoreURL ||
+      userOptions.remoteStoreURL === "" ||
+      userOptions.remoteStoreURL === " "
+    ) {
+      // console.log("no remote store url")
       return
     }
     const rawRes = await fetch(userOptions.remoteStoreURL, {
@@ -464,7 +493,7 @@ function sendToRemote(data: PageData) {
       body: JSON.stringify(postData)
     })
     // const res = await rawRes.json();
-    console.log(rawRes)
+    // console.log(rawRes)
   })()
 }
 
@@ -473,9 +502,10 @@ function sendToRemote(data: PageData) {
 // ============================================================================================
 // word split functions
 function wordSplit(str: string): string[] {
-
+  if (!str || typeof str !== "string") {
+    return []
+  }
   str = str.toLowerCase()
-
 
   if (judgeChineseChar(str)) {
     console.log("chinese char")
@@ -501,7 +531,6 @@ function wordSplit(str: string): string[] {
 
     return c
   } else {
-
     const result = Array.from(
       new Intl.Segmenter("en", { granularity: "word" }).segment(str)
     )
@@ -516,7 +545,6 @@ function wordSplit(str: string): string[] {
 }
 
 function judgeChineseChar(str: string) {
-
   const reg = /[\u4E00-\u9FA5]/g
   const a = reg.test(str)
 
@@ -524,7 +552,6 @@ function judgeChineseChar(str: string) {
 }
 
 function judgeJapaneseChar(str: string) {
-
   const reg = /[\u3040-\u30FF]/g
   const a = reg.test(str)
   return a

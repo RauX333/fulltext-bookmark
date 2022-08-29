@@ -26,3 +26,29 @@ export function truncateText (text: string, maxLength: number) {
     }
     return bytes + ' ' + symbols[i];
 };
+
+
+export function getBookmarkUrl (urlResult) {
+  let removedURLs = []
+  if(urlResult.length>0) {
+    urlResult.forEach(e=>{
+      if(e.children && e.children.length>0){
+        removedURLs = removedURLs.concat(getBookmarkUrl(e.children))
+      }else {
+        removedURLs.push(handleUrlRemoveHash(e.url))
+      }
+    })
+  } else {
+    if(urlResult.node.children) {
+      removedURLs = removedURLs.concat(getBookmarkUrl(urlResult.node.children))
+    } else {
+      removedURLs.push(handleUrlRemoveHash(urlResult.node.url))
+    }
+  }
+  return removedURLs
+}
+
+export function handleUrlRemoveHash (url) {
+  const urlSplit = url.split("#")
+  return urlSplit[0]
+}

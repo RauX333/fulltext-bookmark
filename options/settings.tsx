@@ -7,6 +7,8 @@ import { NavButton } from "~components/NavButton"
 import { SettingBlock } from "~components/SettingBlock"
 import { SettingItem } from "~components/SettingItem"
 import { SettingItemCol } from "~components/SettingItemCol"
+import { Donate } from "~options/Donate"
+import { Feature } from "~options/Feature"
 
 import "~style.css"
 
@@ -157,6 +159,16 @@ export const SettingView = () => {
     }
   }
 
+
+  function handleClearAllData(){
+    console.log("clear")
+    chrome.runtime.sendMessage({command: "clearAllData"}).then(v=>{
+      console.log(v)
+      alert(chrome.i18n.getMessage("settingPageSettingIndexSizeClearAlert"))
+      showEstimatedQuota()
+    })
+  }
+
   return (
     <div className="max-w-8xl mx-auto p-4 sm:px-6 md:px-8">
       <div className="lg:block fixed z-20 inset-0   right-auto w-[19.5rem] py-10 px-6 overflow-y-auto">
@@ -254,6 +266,11 @@ export const SettingView = () => {
                   {chrome.i18n.getMessage("settingPageSettingIndexSizeButton")}
                 </button>
                 <span>{storeSize.usage}</span>
+                {storeSize.usage !=="0" && (
+                  <button className="text-blue-500 ml-8" onClick={handleClearAllData}>
+                    {chrome.i18n.getMessage("settingPageSettingIndexSizeClearBtn")}
+                  </button>
+                )}
                 {/* // TODO:清除所有数据 */}
               </SettingItemCol>
               <p></p>
@@ -374,88 +391,8 @@ export const SettingView = () => {
           </>
         )}
 
-        {navPage === 2 && (
-          <>
-            <SettingBlock
-              title={chrome.i18n.getMessage("settingPageFeatureTitle")}>
-              <p>
-                🔍&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureA")}
-              </p>
-              <p>
-                💾&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureB")}
-              </p>
-
-              <p>
-                🥇&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureC")}
-              </p>
-              <p>
-                📎&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureD")}
-              </p>
-              <p>
-                📜&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureE")}
-              </p>
-              <p>
-                😺&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureF")}
-              </p>
-              <p>
-                ✉️&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureG")}
-              </p>
-              <p>
-                ⌨️&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureH")}
-              </p>
-            </SettingBlock>
-            <SettingBlock
-              title={chrome.i18n.getMessage("settingPageAboutTitle")}>
-              <p>
-                Developed by:{" "}
-                <a className="text-blue-300" href="https://github.com/RauX333">
-                  RauX333
-                </a>{" "} &nbsp;with ❤️
-              </p>
-
-              <p>
-                Email:{" "}
-                <a href="xenoncancer@gmail.com" className="text-blue-300">
-                  xenoncancer@gmail.com
-                </a>
-              </p>
-
-              <p>{chrome.i18n.getMessage("settingPageAboutThanks")}</p>
-            </SettingBlock>
-          </>
-        )}
-        {navPage === 3 && (
-          <>
-            <SettingBlock
-              title={chrome.i18n.getMessage("settingPageDonateTitle")}>
-              <p>
-                PayPal:{" "}
-                <a className="text-blue-300" href="paypal.me/dongxiajun">
-                  paypal.me/dongxiajun
-                </a>
-              </p>
-            </SettingBlock>
-
-            <SettingBlock title={chrome.i18n.getMessage("settingPageAboutTitle")}>
-              <p>
-                Developed by:{" "}
-                <a className="text-blue-300" href="https://github.com/RauX333">
-                  RauX333
-                </a>
-                 &nbsp;with ❤️
-              </p>
-
-              <p>
-                Email:{" "}
-                <a href="xenoncancer@gmail.com" className="text-blue-300">
-                  xenoncancer@gmail.com
-                </a>
-              </p>
-
-              <p>{chrome.i18n.getMessage("settingPageAboutThanks")}</p>
-            </SettingBlock>
-          </>
-        )}
+        {navPage === 2 && <Feature></Feature>}
+        {navPage === 3 && <Donate></Donate>}
       </div>
     </div>
   )

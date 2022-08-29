@@ -91,6 +91,14 @@
     "message": "获取已用空间",
     "description": "Search button."
   },
+  "settingPageSettingIndexSizeClearBtn": {
+    "message": "清除数据",
+    "description": "Search button."
+  },
+  "settingPageSettingIndexSizeClearAlert": {
+    "message": "数据清除完毕",
+    "description": "Search button."
+  },
   "settingPageSettingIndexEveryDesp": {
     "message": "存储所有页面",
     "description": "Search button."

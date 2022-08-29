@@ -7,7 +7,7 @@ export const config: PlasmoContentScript = {
   // run_at: "document_start",
   all_frames: false
 }
-console.log("content script loaded")
+// console.log("content script loaded")
 interface SearchResult {
   title: string
   url: string
@@ -31,21 +31,28 @@ let searchFinished=0
 // get user options to decide whether to show search result
 chrome.storage.local.get([`persist:${storageKey}`], (items) => {
   if(items[`persist:${storageKey}`]) {
-    console.log("persist result",items[`persist:${storageKey}`])
+    // console.log("persist result",items[`persist:${storageKey}`])
     const rootParsed = JSON.parse(items[`persist:${storageKey}`]);
     showSearchResult = rootParsed?.searchEngineAdaption;
   }  else {
-    console.log("no persist result")
+    // console.log("no persist result")
   }
   prepare()
+  if(document.readyState === 'complete') {
+    doWork()
+  } else {
+    document.onreadystatechange = function () {
+      if (document.readyState == "complete") {
+        doWork()
+      }
+    }
+  }
 });
 
-// do work
-window.addEventListener("load", () => {
-  console.log("window loaded")
+function doWork(){
   const originContainer = document.getElementById(rootContainerID)
   if(!originContainer) {
-    console.log("originContainer not exist")
+    // console.log("originContainer not exist")
     searchFinished = -1
     return
   }
@@ -53,36 +60,52 @@ window.addEventListener("load", () => {
     searchFinished = -1
     return
   }
-  if(resultElement) { 
-    originContainer.insertBefore(resultElement, originContainer.firstChild)
-  } else {
+  originContainer.insertBefore(resultElement, originContainer.firstChild)
+}
+
+// do work
+// window.addEventListener("load", () => {
+//   // console.log("window loaded")
+//   const originContainer = document.getElementById(rootContainerID)
+//   if(!originContainer) {
+//     // console.log("originContainer not exist")
+//     searchFinished = -1
+//     return
+//   }
+//   if(showSearchResult!=="true") {
+//     searchFinished = -1
+//     return
+//   }
+//   if(resultElement) { 
+//     originContainer.insertBefore(resultElement, originContainer.firstChild)
+//   } else {
     
-    if(searchFinished === -1) {
-      return
-    } else {
-      console.log("wait for resultElement to be ready")
-      let i=0
-      const a = setInterval(()=>{
-        if(i++>=50) {
-          console.log("wait timeout")
-          clearInterval(a)
-        }
-        if(searchFinished === -1) {
-          clearInterval(a)
-        }
-        if(resultElement) {
-          originContainer.insertBefore(resultElement, originContainer.firstChild)
-          console.log(i)
-          clearInterval(a)
-        }
-      },20)
-    }
-  }
-})
+//     if(searchFinished === -1) {
+//       return
+//     } else {
+//       // console.log("wait for resultElement to be ready")
+//       let i=0
+//       const a = setInterval(()=>{
+//         if(i++>=50) {
+//           // console.log("wait timeout")
+//           clearInterval(a)
+//         }
+//         if(searchFinished === -1) {
+//           clearInterval(a)
+//         }
+//         if(resultElement) {
+//           originContainer.insertBefore(resultElement, originContainer.firstChild)
+//           console.log(i)
+//           clearInterval(a)
+//         }
+//       },20)
+//     }
+//   }
+// })
 
 
 function createResult (){
-  console.log("createResultelemnent")
+  // console.log("createResultelemnent")
   // mount-point
   const newEl = document.createElement("div")
   newEl.setAttribute("id", "fulltext-bookmark-mount-point")
@@ -171,33 +194,33 @@ function prepare(){
     return
   }
   if(isGoogle(thisURL)) {
-    console.log("google")
+    // console.log("google")
     rootContainerID="center_col"
     queryWordId = "q"
   } else if(isBing(thisURL)) {
-    console.log("bing")
+    // console.log("bing")
     rootContainerID="b_results"
     queryWordId = "q"
     // TODO:add querywordid
   } else if(isBaidu(thisURL)) {
-    console.log("baidu")
+    // console.log("baidu")
     rootContainerID="content_left"
     queryWordId = "wd"
   } else {
-    console.log("no match page")
+    // console.log("no match page")
     searchFinished = -1
   }
   
   if(queryWordId && queryWordId!=="") {
     queryWord = getUrlVars(thisURL)[queryWordId]
-    console.log("queryWord:", queryWord)
+    // console.log("queryWord:", queryWord)
   }
   
   if(queryWord && rootContainerID) {
     chrome.runtime
       .sendMessage({ command: "google_result", search: queryWord })
       .then((v) => {
-        console.log("google_result message response:", v)
+        // console.log("google_result message response:", v)
         searchResult = v
         if(searchResult && searchResult.ok!==false) {
           resultElement = createResult()
