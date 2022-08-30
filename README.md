@@ -1,5 +1,25 @@
-This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
+developed with [Plasmo extension](https://docs.plasmo.com/).
 
+## Features
+- 🔍 a better bookmark/broswing history search tool.
+- 💾 store and index bookmarked page or any page you visit, so you can later fulltext search them.
+- 🥇 best matched search result will be dispalyed in the search engine page as you search (google/bing/baidu).
+- 📎 search in the chrome searchbar by typing 'kw' first(short for 'keyword').
+- 📜 or search in the extension popup page for more results.
+- 😺 everything stored in local storage, no accounts, no cloud, no privacy issues, totally free.
+- ✉️ send your bookmark/browsing history to custom remote api as you like.
+- ⌨️ backup feature is under development.
+## Making production build
+
+Run the following:
+
+```bash
+pnpm build
+# or
+npm run build
+```
+
+This should create a production bundle for your extension.
 ## Getting Started
 
 First, run the development server:
@@ -14,20 +34,6 @@ Open your browser and load the appropriate development build. For example, if yo
 
 You can start editing the popup by modifying `popup.tsx`. It should auto-update as you make changes. To add an options page, simply add a `options.tsx` file to the root of the project, with a react component default exported. Likewise to add a content page, add a `content.ts` file to the root of the project, importing some module and do some logic, then reload the extension on your browser.
 
-For further guidance, [visit our Documentation](https://docs.plasmo.com/)
+For further guidance, [visit plasmo Documentation](https://docs.plasmo.com/)
 
-## Making production build
 
-Run the following:
-
-```bash
-pnpm build
-# or
-npm run build
-```
-
-This should create a production bundle for your extension, ready to be zipped and published to the stores.
-
-## Submit to the webstores
-
-The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/workflows#submit-your-extension) and you should be on your way for automated submission!
