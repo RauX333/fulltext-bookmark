@@ -4,7 +4,7 @@
     "description": "Name of the extension."
   },
   "extensionDescription": {
-    "message": "可以全文搜索的书签",
+    "message": "可以全文搜索的书签和历史记录",
     "description": "Description of the extension."
   },
   "test": {
@@ -157,6 +157,10 @@
   },
   "settingPageRemoteAPIDesp": {
     "message": "自定义API地址",
+    "description": "Search button"
+  },
+  "settingPageRemoteAPINote": {
+    "message": "仅支持一个地址",
     "description": "Search button"
   },
   "settingPageFeatureTitle": {

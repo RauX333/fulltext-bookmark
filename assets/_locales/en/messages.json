@@ -159,6 +159,10 @@
     "message": "Custom API Address",
     "description": "Search button"
   },
+  "settingPageRemoteAPINote": {
+    "message": "only 1 address",
+    "description": "Search button"
+  },
   "settingPageFeatureTitle": {
     "message": "Features",
     "description": "Search button"

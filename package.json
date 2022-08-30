@@ -1,9 +1,9 @@
 {
   "name": "__MSG_extensionName__",
   "displayName": "__MSG_extensionName__",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "__MSG_extensionDescription__",
-  "author": "dongxiajun",
+  "author": "RauX",
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build"

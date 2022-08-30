@@ -20,7 +20,7 @@ interface SearchResult {
 let rootContainerID = ""
 let queryWordId = ""
 let showSearchResult = "true"
-const thisURL = window.location.href
+let thisURL = window.location.href
 const storageKey = 'fulltextbookmark';
 let searchResult: SearchResult | null = null
 let queryWord = ""
@@ -38,18 +38,26 @@ chrome.storage.local.get([`persist:${storageKey}`], (items) => {
     // console.log("no persist result")
   }
   prepare()
-  if(document.readyState === 'complete') {
-    doWork()
-  } else {
-    document.onreadystatechange = function () {
-      if (document.readyState == "complete") {
-        doWork()
-      }
+  
+  if(showSearchResult === "true") {
+    if(isBaidu(thisURL)) {
+      setInterval(() => {
+        if(thisURL !== window.location.href) {
+          // console.log("bbb")
+          thisURL = window.location.href
+          window.location.reload()
+          // prepare()
+          // const originContainer = document.getElementById(rootContainerID)
+          // originContainer.insertBefore(resultElement, originContainer.firstChild)
+        }
+      },100)
     }
   }
+  
 });
 
 function doWork(){
+  // console.log("do work")
   const originContainer = document.getElementById(rootContainerID)
   if(!originContainer) {
     // console.log("originContainer not exist")
@@ -57,6 +65,7 @@ function doWork(){
     return
   }
   if(showSearchResult!=="true") {
+    // console.log("ssssss not rrrr")
     searchFinished = -1
     return
   }
@@ -65,7 +74,7 @@ function doWork(){
 
 // do work
 // window.addEventListener("load", () => {
-//   // console.log("window loaded")
+//   console.log("window loaded")
 //   const originContainer = document.getElementById(rootContainerID)
 //   if(!originContainer) {
 //     // console.log("originContainer not exist")
@@ -203,7 +212,7 @@ function prepare(){
     queryWordId = "q"
     // TODO:add querywordid
   } else if(isBaidu(thisURL)) {
-    // console.log("baidu")
+    console.log("baidu")
     rootContainerID="content_left"
     queryWordId = "wd"
   } else {
@@ -224,6 +233,15 @@ function prepare(){
         searchResult = v
         if(searchResult && searchResult.ok!==false) {
           resultElement = createResult()
+          if(document.readyState === 'complete') {
+            doWork()
+          } else {
+            document.onreadystatechange = function () {
+              if (document.readyState == "complete") {
+                doWork()
+              }
+            }
+          }
         } else {
           searchFinished = -1
         }
@@ -256,7 +274,7 @@ function isBing (url) {
 }
 
 const isBaidu = (url) => {
-  const reg = /^https:\/\/www.baidu.com\/s\/*/g
+  const reg = /^https:\/\/www.baidu.com\/*/g
   return reg.test(url)
 }
 

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { createRef, useEffect, useState } from "react"
 import Toggle from "react-toggle"
 
 import { truncateText } from "~/lib/util"
@@ -93,11 +93,17 @@ export const SearchView = () => {
     leading: false,
     trailing: true
   })
+
+  const searchinputRef = createRef<any>()
+  useEffect(() => {
+    searchinputRef.current.focus();
+  }, []);
   return (
     <div className="w-96 p-4 gap-4 h-[32rem] flex flex-col overflow-hidden">
       <h1 className="text-center">{chrome.i18n.getMessage("popupSearchTitle")}</h1>
       <div>
         <input
+          ref={searchinputRef}
           type="text"
           value={searchString}
           onChange={(e) => {

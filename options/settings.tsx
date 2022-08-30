@@ -130,7 +130,7 @@ export const SettingView = () => {
     // console.log(tempforbiddenURLs.split("\n"))
   }
   const handleBlurForbbiddenURLs = (e) => {
-    dispatch(setForbiddenURLs(tempforbiddenURLs.split("\n")))
+    dispatch(setForbiddenURLs(tempforbiddenURLs.split("\n").filter((x) => x)))
   }
 
   // remote store stats
@@ -375,10 +375,13 @@ export const SettingView = () => {
               <SettingItemCol
                 description={chrome.i18n.getMessage(
                   "settingPageRemoteAPIDesp"
+                )}
+                notes={chrome.i18n.getMessage(
+                  "settingPageRemoteAPINote"
                 )}>
                 <textarea
                   className="w-96 border-solid border-[1px] border-gray-300 focus:border-gray-600 focus:outline-none"
-                  value={remoteStoreURL}
+                  value={tempRemoteStoreURL}
                   onChange={(e) => {
                     handleRemoteStoreURLChange(e)
                   }}
