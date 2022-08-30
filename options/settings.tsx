@@ -1,4 +1,5 @@
 import rabbitImg from "data-base64:~assets/icon512.png"
+import download from "downloadjs"
 import { useDispatch, useSelector } from "react-redux"
 import Toggle from "react-toggle"
 
@@ -159,13 +160,25 @@ export const SettingView = () => {
     }
   }
 
-
-  function handleClearAllData(){
+  function handleClearAllData() {
     console.log("clear")
-    chrome.runtime.sendMessage({command: "clearAllData"}).then(v=>{
+    chrome.runtime.sendMessage({ command: "clearAllData" }).then((v) => {
       console.log(v)
       alert(chrome.i18n.getMessage("settingPageSettingIndexSizeClearAlert"))
       showEstimatedQuota()
+    })
+  }
+
+  function handleExport() {
+    console.log("export")
+    chrome.runtime.sendMessage({ command: "export" }).then((v) => {
+      console.log(v, typeof v)
+      const str = JSON.stringify(v)
+      const bytes = new TextEncoder().encode(str)
+      const blob = new Blob([bytes], {
+        type: "application/json;charset=utf-8"
+      })
+      download(blob, "dlTextBlob.json", "application/json")
     })
   }
 
@@ -266,13 +279,22 @@ export const SettingView = () => {
                   {chrome.i18n.getMessage("settingPageSettingIndexSizeButton")}
                 </button>
                 <span>{storeSize.usage}</span>
-                {storeSize.usage !=="0" && (
-                  <button className="text-blue-500 ml-8" onClick={handleClearAllData}>
-                    {chrome.i18n.getMessage("settingPageSettingIndexSizeClearBtn")}
+                {storeSize.usage !== "0" && (
+                  <>
+                   <button
+                    className="text-blue-500 ml-8 mr-4"
+                    onClick={handleClearAllData}>
+                    {chrome.i18n.getMessage(
+                      "settingPageSettingIndexSizeClearBtn"
+                    )}
                   </button>
+                  <button onClick={handleExport}>export</button>
+                  </>
+                 
                 )}
                 {/* // TODO:清除所有数据 */}
               </SettingItemCol>
+              
               <p></p>
               <SettingItem
                 description={chrome.i18n.getMessage(
@@ -373,12 +395,8 @@ export const SettingView = () => {
                 />
               </SettingItem>
               <SettingItemCol
-                description={chrome.i18n.getMessage(
-                  "settingPageRemoteAPIDesp"
-                )}
-                notes={chrome.i18n.getMessage(
-                  "settingPageRemoteAPINote"
-                )}>
+                description={chrome.i18n.getMessage("settingPageRemoteAPIDesp")}
+                notes={chrome.i18n.getMessage("settingPageRemoteAPINote")}>
                 <textarea
                   className="w-96 border-solid border-[1px] border-gray-300 focus:border-gray-600 focus:outline-none"
                   value={tempRemoteStoreURL}

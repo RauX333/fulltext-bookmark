@@ -14,6 +14,8 @@ specifiers:
   '@types/react-dom': 18.0.6
   autoprefixer: ^10.4.8
   dexie: ^3.2.2
+  dexie-export-import: ^1.0.3
+  downloadjs: ^1.4.7
   plasmo: 0.52.1
   postcss: ^8.4.16
   prettier: 2.7.1
@@ -38,6 +40,8 @@ dependencies:
   '@tailwindcss/forms': 0.5.2_tailwindcss@3.1.8
   '@tailwindcss/typography': 0.5.4_tailwindcss@3.1.8
   dexie: 3.2.2
+  dexie-export-import: 1.0.3_dexie@3.2.2
+  downloadjs: 1.4.7
   plasmo: 0.52.1_t3zwlxai2rto6jslfmw3pdgiue
   prop-types: 15.8.1
   react: 18.2.0
@@ -2542,6 +2546,14 @@ packages:
       minimist: 1.2.6
     dev: false
 
+  /dexie-export-import/1.0.3_dexie@3.2.2:
+    resolution: {integrity: sha512-oun27bUUEaeOfSZ8Cv3Nvj5s0LeANYBYQ7ROpF/3Zg1X/IALUnrX0hk5ZUMlYC3s99kFHimXX57ac5AlOdMzWw==}
+    peerDependencies:
+      dexie: ^3.0.0 || ^2.0.4
+    dependencies:
+      dexie: 3.2.2
+    dev: false
+
   /dexie/3.2.2:
     resolution: {integrity: sha512-q5dC3HPmir2DERlX+toCBbHQXW5MsyrFqPFcovkH9N2S/UW/H3H5AWAB6iEOExeraAu+j+zRDG+zg/D7YhH0qg==}
     engines: {node: '>=6.0'}
@@ -2606,6 +2618,10 @@ packages:
   /dotenv/7.0.0:
     resolution: {integrity: sha512-M3NhsLbV1i6HuGzBUH8vXrtxOk+tWmzWKDMbAVSUp3Zsjm7ywFeuwrUXhmhQyRK1q5B5GGy7hcXPbj3bnfZg2g==}
     engines: {node: '>=6'}
+    dev: false
+
+  /downloadjs/1.4.7:
+    resolution: {integrity: sha512-LN1gO7+u9xjU5oEScGFKvXhYf7Y/empUIIEAGBs1LzUq/rg5duiDrkuH5A2lQGd5jfMOb9X9usDa2oVXwJ0U/Q==}
     dev: false
 
   /eastasianwidth/0.2.0:

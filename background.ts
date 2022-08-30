@@ -1,7 +1,6 @@
 import Dexie from "dexie"
-import { url } from "inspector"
+import "dexie-export-import";
 import { Segment, useDefault } from "segmentit"
-
 import debounce from "~lib/debounce"
 import { getBookmarkUrl, handleUrlRemoveHash } from "~lib/util"
 import { persistor, store } from "~store/store"
@@ -159,6 +158,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         await db.contents.clear()
         sendResponse("ok")
       })()
+      return true
+    case "export":
+      ;(async () => {
+        const blob = await db.export();
+        console.log(blob)
+        // download(blob, "dlTextBlob.json", "application/json")
+        let reader = new FileReader();
+        reader.onload = function (e) {
+          // let readerres = reader.result;
+          let parseObj = JSON.parse(this.result);
+          console.log(parseObj)
+          sendResponse(parseObj)
+        }
+        reader.readAsText(blob, 'utf-8');
+      })();
       return true
     default:
       sendResponse("invalid command")

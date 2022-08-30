@@ -1,7 +1,7 @@
 {
   "name": "__MSG_extensionName__",
   "displayName": "__MSG_extensionName__",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "__MSG_extensionDescription__",
   "author": "RauX",
   "scripts": {
@@ -16,6 +16,8 @@
     "@tailwindcss/forms": "^0.5.2",
     "@tailwindcss/typography": "^0.5.4",
     "dexie": "^3.2.2",
+    "dexie-export-import": "^1.0.3",
+    "downloadjs": "^1.4.7",
     "plasmo": "0.52.1",
     "prop-types": "^15.8.1",
     "react": "18.2.0",
@@ -41,7 +43,9 @@
     "typescript": "4.7.4"
   },
   "manifest": {
-    "omnibox": { "keyword" : "kw" },
+    "omnibox": {
+      "keyword": "kw"
+    },
     "host_permissions": [
       "https://*/*",
       "http://*/*"
@@ -50,7 +54,8 @@
       "activeTab",
       "tabs",
       "bookmarks",
-      "storage"
+      "storage",
+      "downloads"
     ],
     "default_locale": "en"
   }
