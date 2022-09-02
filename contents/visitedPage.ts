@@ -13,8 +13,10 @@ export const config: PlasmoContentScript = {
 const excludeURLs = [
   "https://www.google.com/*",
   "https://cn.bing.com/*",
-  "https://www.baidu.com/*"
+  "https://www.baidu.com/*",
+  "https://weibo.com/*",
 ]
+console.log("visited page content script")
 const pageId = uuidv4()
 const storageKey = 'fulltextbookmark';
 let options = {
@@ -24,6 +26,7 @@ let options = {
 }
 
 if (!isExcludeURL(excludeURLs,window.location.href)) {
+  console.log("visited not exclude",window.location.href)
   chrome.storage.local.get([`persist:${storageKey}`], (items) => {
     
     if(items[`persist:${storageKey}`]) {
@@ -34,9 +37,6 @@ if (!isExcludeURL(excludeURLs,window.location.href)) {
     }
     // TODO:forbid urls from useroptions
     if(isExcludeURL(JSON.parse(options.forbiddenURLs),window.location.href)) {
-     
-      
-      
       return
     }
 
