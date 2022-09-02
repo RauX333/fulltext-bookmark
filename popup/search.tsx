@@ -174,9 +174,17 @@ export const SearchView = () => {
                 }}>
                 {truncateText(v.title, 30)}
               </a>
+              {v.isBookmarked && (
+                <i className="ml-2">
+                 ⭐ 
+                </i>
+              )}
               <p className="text-sm text-gray-300">
-                {truncateText(v.url, 50)} -{" "}
-                {new Date(v.date).toLocaleDateString()}
+                {truncateText(v.url, 40)}
+                
+              </p>
+              <p className="text-sm text-gray-300">
+              {new Date(v.date).toLocaleDateString()}
               </p>
             </div>
           )
