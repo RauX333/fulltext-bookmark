@@ -53,8 +53,7 @@
     "permissions": [
       "tabs",
       "bookmarks",
-      "storage",
-      "downloads"
+      "storage"
     ],
     "default_locale": "en"
   }

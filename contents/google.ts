@@ -1,5 +1,5 @@
 import type { PlasmoContentScript } from "plasmo"
-import {truncateText} from "~/lib/util"
+import {truncateText,getUrlVars,isGoogle,isBing,isBaidu} from "~/lib/util"
 // import "../style.css"
 
 export const config: PlasmoContentScript = {
@@ -249,55 +249,6 @@ function prepare(){
   }
 }
 
-
-
-
-// get url vars
-function getUrlVars  (url) {
-  const vars = {}
-  const parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, (m, key, value) => {
-    vars[key] = decodeURI(value)
-  }).split("?")
-  return vars
-}
-
-function isGoogle (url) {
-  const reg = /^https:\/\/www.google.com\/search\/*/g
-  // console.log("reg",reg.test(thisURL))
-  return reg.test(url)
-}
-// regexp jusge if thisURL is https://*.bing.com/*
-function isBing (url) {
-  const reg = /^https:\/\/cn.bing.com\/search\/*/g
-  return reg.test(url)
- 
-}
-
-const isBaidu = (url) => {
-  const reg = /^https:\/\/www.baidu.com\/*/g
-  return reg.test(url)
-}
-
-// HELPER
-const waitForElements = (selector) => {
-  return new Promise((resolve) => {
-    if (document.querySelector(selector)) {
-      return resolve(document.querySelector(selector))
-    }
-
-    const observer = new MutationObserver((mutations) => {
-      if (document.querySelector(selector)) {
-        resolve(document.querySelector(selector))
-        observer.disconnect()
-      }
-    })
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    })
-  })
-}
 
 
 

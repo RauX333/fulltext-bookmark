@@ -1,10 +1,13 @@
 import Dexie from "dexie"
-import "dexie-export-import";
-import { Segment, useDefault } from "segmentit"
-import debounce from "~lib/debounce"
-import { getBookmarkUrl, handleUrlRemoveHash } from "~lib/util"
-import { persistor, store } from "~store/store"
 
+import "dexie-export-import"
+
+import { Segment, useDefault } from "segmentit"
+
+import debounce from "~lib/debounce"
+import { getBookmarkUrl, handleUrlRemoveHash,isWeibo,getWeiboEncode } from "~lib/util"
+import { persistor, store } from "~store/store"
+import mid from "~lib/mid"
 export {}
 
 const segmentit = useDefault(new Segment())
@@ -107,16 +110,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       // save to database
       ;(async () => {
-        const bookmarkSearchResult = await chrome.bookmarks.search(
-          message.data.url
-        )
-        // console.log("ppp",bookmarkSearchResult,message.data.url)
-        if (bookmarkSearchResult && bookmarkSearchResult.length > 0) {
-          // console.log("already bookmrked")
-          message.data.isBookmarked = true
+        if (
+          message.data.isBookmarked === true ||
+          message.data.isBookmarked === false
+        ) {
         } else {
-          message.data.isBookmarked = false
+          const bookmarkSearchResult = await chrome.bookmarks.search(
+            message.data.url
+          )
+          // console.log("ppp",bookmarkSearchResult,message.data.url)
+          if (bookmarkSearchResult && bookmarkSearchResult.length > 0) {
+            // console.log("already bookmrked")
+            message.data.isBookmarked = true
+          } else {
+            message.data.isBookmarked = false
+          }
         }
+
         await saveToDatabase({ ...message.data, pageId: message.pageId })
         sendResponse("ok")
       })()
@@ -161,18 +171,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return true
     case "export":
       ;(async () => {
-        const blob = await db.export();
+        const blob = await db.export()
         console.log(blob)
         // download(blob, "dlTextBlob.json", "application/json")
-        let reader = new FileReader();
+        let reader = new FileReader()
         reader.onload = function (e) {
           // let readerres = reader.result;
-          let parseObj = JSON.parse(this.result);
+          // @ts-ignore
+          let parseObj = JSON.parse(this.result)
           console.log(parseObj)
           sendResponse(parseObj)
         }
-        reader.readAsText(blob, 'utf-8');
-      })();
+        reader.readAsText(blob, "utf-8")
+      })()
       return true
     default:
       sendResponse("invalid command")
@@ -485,6 +496,10 @@ function sendToRemote(data: PageData) {
       title: data.title,
       date: data.date,
       isBookmarked: data.isBookmarked
+    }
+    if(isWeibo(postData.url)){
+      const encode = getWeiboEncode(postData.url)
+      postData.url = "https://m.weibo.cn/status/"+mid.decode(encode)
     }
     console.log("sendToRemote", postData)
 

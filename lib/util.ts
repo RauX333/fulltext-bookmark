@@ -52,3 +52,40 @@ export function handleUrlRemoveHash (url) {
   const urlSplit = url.split("#")
   return urlSplit[0]
 }
+
+// get url vars
+export function getUrlVars  (url) {
+  const vars = {}
+  const parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, (m, key, value) => {
+    vars[key] = decodeURI(value)
+  }).split("?")
+  return vars
+}
+
+export function isGoogle (url) {
+  const reg = /^https:\/\/www.google.com\/search\/*/g
+  // console.log("reg",reg.test(thisURL))
+  return reg.test(url)
+}
+// regexp jusge if thisURL is https://*.bing.com/*
+export function isBing (url) {
+  const reg = /^https:\/\/cn.bing.com\/search\/*/g
+  return reg.test(url)
+ 
+}
+
+export const isBaidu = (url) => {
+  const reg = /^https:\/\/www.baidu.com\/*/g
+  return reg.test(url)
+}
+
+export const isWeibo = (url) => {
+  const reg = /^https:\/\/weibo.com\/[0-9]+\/[A-Za-z0-9]+/g
+  return reg.test(url)
+}
+
+export const getWeiboEncode = (url) => {
+
+  const urlSplit = url.split("/")
+  return urlSplit[4]
+}
