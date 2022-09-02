@@ -27,7 +27,8 @@ import {
   toggleRemoteStoreEveryPage,
   toggleSearchEngineAdaption,
   toggleShowOnlyBookmarkedResults,
-  toggleStoreEveryPage
+  toggleStoreEveryPage,
+  toggleWeiboSupport
 } from "~store/stat-slice"
 
 export const SettingView = () => {
@@ -54,6 +55,7 @@ export const SettingView = () => {
   )
   const forbiddenURLs = useSelector((state: AppStat) => state.forbiddenURLs)
   const maxResults = useSelector((state: AppStat) => state.maxResults)
+  const weiboSupport = useSelector((state: AppStat) => state.weiboSupport)
 
   // nav page states
   const [navPage, setNavPage] = useState(0)
@@ -228,6 +230,18 @@ export const SettingView = () => {
                 <Toggle
                   defaultChecked={searchEngineAdaption}
                   onChange={() => dispatch(toggleSearchEngineAdaption())}
+                />
+              </SettingItem>
+              <SettingItem
+                description={chrome.i18n.getMessage(
+                  "settingPageSettingWeiboDesp"
+                )}
+                notes={chrome.i18n.getMessage(
+                  "settingPageSettingWeiboNote"
+                )}>
+                <Toggle
+                  defaultChecked={weiboSupport}
+                  onChange={() => dispatch(toggleWeiboSupport())}
                 />
               </SettingItem>
             </SettingBlock>

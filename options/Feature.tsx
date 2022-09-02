@@ -15,6 +15,9 @@ export const Feature = () => {
               <p>
                 💾&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureB")}
               </p>
+              <p>
+                🦉&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureI")}
+              </p>
 
               <p>
                 🥇&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureC")}

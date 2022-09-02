@@ -59,6 +59,14 @@
     "message": "support google/bing/baidu",
     "description": "Search button."
   },
+  "settingPageSettingWeiboDesp": {
+    "message": "show save button in weibo",
+    "description": "Search button."
+  },
+  "settingPageSettingWeiboNote": {
+    "message": "click button to add weibo as bookmark in fulltext-bookmark and can later search them",
+    "description": "Search button."
+  },
   "settingPageSettingSearch": {
     "message": "Search",
     "description": "Search button."
@@ -198,6 +206,10 @@
   },
   "settingPageFeatureH": {
     "message": "backup feature is under development.",
+    "description": "Search button"
+  },
+  "settingPageFeatureI": {
+    "message": "bookmark twitter/weibo and search them !",
     "description": "Search button"
   },
   "settingPageAboutTitle": {

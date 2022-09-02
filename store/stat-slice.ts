@@ -12,6 +12,7 @@ export interface AppStat {
   tempPageExpireTime: number
   maxResults: number
   forbiddenURLs: string[]
+  weiboSupport: boolean
 }
 
 const statSlice = createSlice({
@@ -27,7 +28,8 @@ const statSlice = createSlice({
     remoteStoreKey: "123",
     maxResults: 20,
     forbiddenURLs: ["https://www.google.com/*","https://cn.bing.com/*","https://www.baidu.com/*","https://.*.something.com/*"], // TODO:change the last example
-    tempPageExpireTime: 60 * 60 * 24 * 60 * 1000 // 60 days
+    tempPageExpireTime: 60 * 60 * 24 * 60 * 1000, // 60 days
+    weiboSupport: true,
   },
   reducers: {
     toggleSearchEngineAdaption: (state) => {
@@ -62,6 +64,9 @@ const statSlice = createSlice({
     },
     setMaxResults: (state, action) => {
       state.maxResults = action.payload
+    },
+    toggleWeiboSupport: (state) => {
+      state.weiboSupport = !state.weiboSupport
     }
   }
 })
@@ -77,7 +82,8 @@ export const {
   setRemoteStoreKey,
   setTempPageExpireTime,
   setForbiddenURLs,
-  setMaxResults
+  setMaxResults,
+  toggleWeiboSupport,
 } = statSlice.actions
 
 export default statSlice.reducer

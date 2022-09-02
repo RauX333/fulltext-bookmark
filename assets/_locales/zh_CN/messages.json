@@ -59,6 +59,14 @@
     "message": "支持 baidu/bing/google",
     "description": "Search button."
   },
+  "settingPageSettingWeiboDesp": {
+    "message": "在微博页面显示保存按钮",
+    "description": "Search button."
+  },
+  "settingPageSettingWeiboNote": {
+    "message": "点击按钮可以保存感兴趣的微博至本拓展中并可被搜索；配合自定义api功能可以把微博保存至远程api",
+    "description": "Search button."
+  },
   "settingPageSettingSearch": {
     "message": "搜索",
     "description": "Search button."
@@ -198,6 +206,10 @@
   },
   "settingPageFeatureH": {
     "message": "备份功能正在开发中。",
+    "description": "Search button"
+  },
+  "settingPageFeatureI": {
+    "message": "给 微博/twitter 加书签并且可以被搜索！",
     "description": "Search button"
   },
   "settingPageAboutTitle": {
