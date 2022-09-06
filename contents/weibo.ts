@@ -2,6 +2,7 @@
 // import "../style.css"
 import icon512 from "data-base64:~assets/icon512.png"
 import loading from "data-base64:~assets/loading.gif"
+import tickPNG from "data-base64:~assets/tick.png"
 import type { PlasmoContentScript } from "plasmo"
 import { v4 as uuidv4 } from "uuid"
 
@@ -17,12 +18,14 @@ console.log("weibo content script")
 
 const storageKey = "fulltextbookmark"
 let weiboSupport = "true"
+
+let tickedList = []
 // get user options to decide whether to show search result
 chrome.storage.local.get([`persist:${storageKey}`], (items) => {
   if (items[`persist:${storageKey}`]) {
     // console.log("persist result",items[`persist:${storageKey}`])
     const rootParsed = JSON.parse(items[`persist:${storageKey}`])
-    console.log(rootParsed)
+    // console.log(rootParsed)
     weiboSupport = rootParsed.weiboSupport
   } else {
     // console.log("no persist result")
@@ -116,8 +119,13 @@ async function findFeedCard() {
 function makeBtn(url: string, content: string, title: string) {
   const btn = document.createElement("btn")
   // btn.innerText = 'bookmark';
-  const ic = document.createElement("span")
-  btn.style.backgroundImage = `url(${icon512})`
+  // const ic = document.createElement("span")
+  if(tickedList.includes(url)) {
+    btn.style.backgroundImage = `url(${tickPNG})`
+  } else {
+    btn.style.backgroundImage = `url(${icon512})`
+  }
+  
   // btn.style.width = '10px';
   // btn.style.height = '10px';
   btn.style.backgroundSize = "contain"
@@ -142,11 +150,14 @@ function makeBtn(url: string, content: string, title: string) {
   btn.onmouseout = function () {
     btn.style.backgroundColor = "#fff"
   }
-  btn.onclick = async function () {
-    btn.style.backgroundImage = `url(${loading})`
-    await archive(url, content, title)
-    btn.style.backgroundImage = `url(${icon512})`
+  if(!tickedList.includes(url)) {
+    btn.onclick = async function () {
+      btn.style.backgroundImage = `url(${loading})`
+      await archive(url, content, title)
+      btn.style.backgroundImage = `url(${tickPNG})`
+    }
   }
+  
 
   return btn
 }
@@ -179,7 +190,7 @@ const waitForElements = (selector) => {
 }
 
 async function archive(url: string, content: string, title: string) {
-  console.log("archive", url, content, title)
+  // console.log("archive", url, content, title)
   const data = {
     url: url,
     content: content,
@@ -187,6 +198,10 @@ async function archive(url: string, content: string, title: string) {
     date: Date.now(),
     isBookmarked: true
   }
+  if(tickedList.length>100) {
+    tickedList.splice(0,50)
+  }
+  tickedList.push(data.url)
   return chrome.runtime.sendMessage({
     command: "store",
     data: data,

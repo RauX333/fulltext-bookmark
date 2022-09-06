@@ -27,7 +27,7 @@ const statSlice = createSlice({
     remoteStoreURL: "",// TODO:delete
     remoteStoreKey: "123",
     maxResults: 20,
-    forbiddenURLs: ["https://www.google.com/*","https://cn.bing.com/*","https://www.baidu.com/*","https://.*.something.com/*"], // TODO:change the last example
+    forbiddenURLs: ["https://www.google.com/*","https://www.bing.com/*","https://cn.bing.com/*","https://www.baidu.com/*","https://.*.something.com/*"], // TODO:change the last example
     tempPageExpireTime: 60 * 60 * 24 * 60 * 1000, // 60 days
     weiboSupport: true,
   },

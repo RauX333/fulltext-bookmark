@@ -64,7 +64,7 @@
     "description": "Search button."
   },
   "settingPageSettingWeiboNote": {
-    "message": "点击按钮可以保存感兴趣的微博至本拓展中并可被搜索；配合自定义api功能可以把微博保存至远程api",
+    "message": "点击微博页面中集成的按钮可以保存感兴趣的微博至本拓展中并可被搜索；配合自定义api功能可以把微博保存至远程api",
     "description": "Search button."
   },
   "settingPageSettingSearch": {
@@ -104,7 +104,7 @@
     "description": "Search button."
   },
   "settingPageSettingIndexSizeClearAlert": {
-    "message": "数据清除完毕",
+    "message": "数据清除完毕 （剩余数据为拓展运行必需的数据）",
     "description": "Search button."
   },
   "settingPageSettingIndexEveryDesp": {
@@ -209,7 +209,7 @@
     "description": "Search button"
   },
   "settingPageFeatureI": {
-    "message": "给 微博/twitter 加书签并且可以被搜索！",
+    "message": "给微博加书签并且可以被搜索！",
     "description": "Search button"
   },
   "settingPageAboutTitle": {
@@ -222,6 +222,10 @@
   },
   "settingPageDonateTitle": {
     "message": "请我喝一杯奶茶吧 🧋",
+    "description": "Search button"
+  },
+  "settingPageNotice": {
+    "message": "修改的配置在页面刷新后生效。",
     "description": "Search button"
   }
 }

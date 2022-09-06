@@ -12,7 +12,7 @@
     "description": "Popup message."
   },
   "popupSearchTitle": {
-    "message": "Fulltext Search Bookmark/History",
+    "message": "Type To Fulltext Search Bookmark/History",
     "description": "Search button."
   },
   "popupFilterRecent": {
@@ -104,7 +104,7 @@
     "description": "Search button."
   },
   "settingPageSettingIndexSizeClearAlert": {
-    "message": "data clear finished",
+    "message": "data clear finished (the rest is the neccessary data for extension)",
     "description": "Search button."
   },
   "settingPageSettingIndexEveryDesp": {
@@ -209,7 +209,7 @@
     "description": "Search button"
   },
   "settingPageFeatureI": {
-    "message": "bookmark twitter/weibo and search them !",
+    "message": "bookmark interesting weibo and search them !",
     "description": "Search button"
   },
   "settingPageAboutTitle": {
@@ -222,6 +222,10 @@
   },
   "settingPageDonateTitle": {
     "message": "Buy Me A Cupcake 🧁",
+    "description": "Search button"
+  },
+  "settingPageNotice": {
+    "message": "settings taking effect after browsing pages refresh.",
     "description": "Search button"
   }
 }

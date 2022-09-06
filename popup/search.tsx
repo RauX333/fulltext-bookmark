@@ -94,13 +94,25 @@ export const SearchView = () => {
     trailing: true
   })
 
+  const onHandleJumpToOptionsPage = () => {
+    chrome.runtime.openOptionsPage(()=>{
+      console.log("open options page")
+    })
+  }
+
   const searchinputRef = createRef<any>()
   useEffect(() => {
     searchinputRef.current.focus();
   }, []);
   return (
     <div className="w-96 p-4 gap-4 h-[32rem] flex flex-col overflow-hidden">
-      <h1 className="text-center">{chrome.i18n.getMessage("popupSearchTitle")}</h1>
+      <div className="flex flex-row justify-between">
+      <span className="text-left">{chrome.i18n.getMessage("popupSearchTitle")}</span>
+      
+        <a className="text-right text-blue-500" href="" onClick={onHandleJumpToOptionsPage}>{chrome.i18n.getMessage("settingPageNavSettings")}</a>
+      
+      </div>
+      
       <div>
         <input
           ref={searchinputRef}

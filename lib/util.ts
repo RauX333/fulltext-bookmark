@@ -70,8 +70,8 @@ export function isGoogle (url) {
 // regexp jusge if thisURL is https://*.bing.com/*
 export function isBing (url) {
   const reg = /^https:\/\/cn.bing.com\/search\/*/g
-  return reg.test(url)
- 
+  const reg2 = /^https:\/\/www.bing.com\/search\/*/g
+  return reg.test(url) || reg2.test(url)
 }
 
 export const isBaidu = (url) => {

@@ -3,7 +3,7 @@ import {truncateText,getUrlVars,isGoogle,isBing,isBaidu} from "~/lib/util"
 // import "../style.css"
 
 export const config: PlasmoContentScript = {
-  matches: ["https://www.google.com/*","https://cn.bing.com/*","https://www.baidu.com/*"],
+  matches: ["https://www.google.com/*","https://cn.bing.com/*","https://www.baidu.com/*","https://www.bing.com/*"],
   // run_at: "document_start",
   all_frames: false
 }

@@ -171,18 +171,18 @@ export const SettingView = () => {
     })
   }
 
-  function handleExport() {
-    console.log("export")
-    chrome.runtime.sendMessage({ command: "export" }).then((v) => {
-      console.log(v, typeof v)
-      const str = JSON.stringify(v)
-      const bytes = new TextEncoder().encode(str)
-      const blob = new Blob([bytes], {
-        type: "application/json;charset=utf-8"
-      })
-      download(blob, "dlTextBlob.json", "application/json")
-    })
-  }
+  // function handleExport() {
+  //   console.log("export")
+  //   chrome.runtime.sendMessage({ command: "export" }).then((v) => {
+  //     console.log(v, typeof v)
+  //     const str = JSON.stringify(v)
+  //     const bytes = new TextEncoder().encode(str)
+  //     const blob = new Blob([bytes], {
+  //       type: "application/json;charset=utf-8"
+  //     })
+  //     download(blob, "dlTextBlob.json", "application/json")
+  //   })
+  // }
 
   return (
     <div className="max-w-8xl mx-auto p-4 sm:px-6 md:px-8">
@@ -212,12 +212,17 @@ export const SettingView = () => {
               onClick={() => {
                 handleNavChange(3)
               }}></NavButton>
+
           </div>
         </div>
+        
       </div>
       <div className="p-4 flex flex-col gap-8 lg:pl-[19.5rem] pt-10">
         {navPage === 0 && (
           <>
+            {chrome.i18n.getMessage(
+                  "settingPageNotice"
+                )}
             <SettingBlock
               title={chrome.i18n.getMessage("settingPageSettingDisplay")}>
               <SettingItem
@@ -302,7 +307,8 @@ export const SettingView = () => {
                       "settingPageSettingIndexSizeClearBtn"
                     )}
                   </button>
-                  <button onClick={handleExport}>export</button>
+                  {/* // TODO: export */}
+                  {/* <button onClick={handleExport}>export</button> */}
                   </>
                  
                 )}
