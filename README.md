@@ -3,7 +3,7 @@ A Chrome Extension developed with [Plasmo extension](https://docs.plasmo.com/).
 ## Features
 - 🔍 a better bookmark/broswing history search tool.
 - 💾 store and index bookmarked page or any page you visit, so you can later fulltext search them.
-- 🦉 bookmark interesting weibo and search them !
+- 🦉 bookmark interesting weibo and search them!
 - 🥇 best matched search result will be dispalyed in the search engine page as you search (google/bing/baidu).
 - 📎 search in the chrome searchbar by typing 'kw' first(short for 'keyword').
 - 📜 or search in the extension popup page for more results.

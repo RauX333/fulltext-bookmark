@@ -128,7 +128,7 @@
     "description": "Search button"
   },
   "settingPageSettingIndexDurNote": {
-    "message": "非书签页面的记录将会被一直存储，而普通页面的记录将会在过期时间后被自动删除。\n默认为60天，最大为36500天",
+    "message": "书签页面的记录将会被一直存储，而普通页面的记录将会在过期时间后被自动删除。\n默认为60天，最大为36500天",
     "description": "Search button"
   },
   "days": {
