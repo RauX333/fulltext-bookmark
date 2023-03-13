@@ -11,7 +11,7 @@ export const Donate = () => {
               title={chrome.i18n.getMessage("settingPageDonateTitle")}>
               <p>
                 PayPal:{" "}
-                <a className="text-blue-300" href="paypal.me/dongxiajun">
+                <a className="text-blue-300" href="https://paypal.me/dongxiajun">
                   paypal.me/dongxiajun
                 </a>
               </p>
