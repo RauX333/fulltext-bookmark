@@ -16,6 +16,7 @@ specifiers:
   dexie: ^3.2.2
   dexie-export-import: ^1.0.3
   downloadjs: ^1.4.7
+  jieba-wasm: ^0.0.2
   plasmo: 0.52.1
   postcss: ^8.4.16
   prettier: 2.7.1
@@ -42,6 +43,7 @@ dependencies:
   dexie: 3.2.2
   dexie-export-import: 1.0.3_dexie@3.2.2
   downloadjs: 1.4.7
+  jieba-wasm: 0.0.2
   plasmo: 0.52.1_t3zwlxai2rto6jslfmw3pdgiue
   prop-types: 15.8.1
   react: 18.2.0
@@ -3114,6 +3116,10 @@ packages:
   /javascript-natural-sort/0.7.1:
     resolution: {integrity: sha512-nO6jcEfZWQXDhOiBtG2KvKyEptz7RVbpGP4vTD2hLBdmNQSsCiicO2Ioinv6UI4y9ukqnBpy+XZ9H6uLNgJTlw==}
     dev: true
+
+  /jieba-wasm/0.0.2:
+    resolution: {integrity: sha512-CPmS+U/klii3LWKrccDqm/BvWmgBB3x4HV/WBxC/l7GsitVfzCzsZ8cWz+vh2riv6M5P8rvHJzCz4xsoFA79cw==}
+    dev: false
 
   /js-tokens/4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}

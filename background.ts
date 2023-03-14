@@ -2,15 +2,19 @@ import Dexie from "dexie"
 
 import "dexie-export-import"
 
-import { Segment, useDefault } from "segmentit"
-
+// import { Segment, useDefault } from "segmentit"
 import debounce from "~lib/debounce"
 import { getBookmarkUrl, handleUrlRemoveHash,isWeibo,getWeiboEncode } from "~lib/util"
 import { persistor, store } from "~store/store"
 import mid from "~lib/mid"
 export {}
 
-const segmentit = useDefault(new Segment())
+import init,{cut_for_search} from "~lib/jieba_rs_wasm.js"
+(async function() {
+  await init()
+})()
+
+// const segmentit = useDefault(new Segment())
 // let userOptions = null;
 // // // console.log("init useroptions",userOptions);
 // persistor.subscribe(() => {
@@ -535,42 +539,52 @@ function wordSplit(str: string): string[] {
     return []
   }
   str = str.toLowerCase()
-
-  if (judgeChineseChar(str)) {
-    console.log("chinese char")
-    // console.time("seg")
-
-    // console.timeEnd("seg")
-    const result = segmentit.doSegment(str)
+  const result = cut_for_search(str, true);
+    console.log(result)
     const a = result
       .map((e) => {
-        return palindrome(e.w)
+        return palindrome(e)
       })
       .filter((e) => e !== "" && e !== null && e !== undefined)
     return a
-  } else if (judgeJapaneseChar(str)) {
-    const result = Array.from(
-      new Intl.Segmenter("js-JP", { granularity: "word" }).segment(str)
-    )
-    const a = result.filter((e) => e.isWordLike)
-    const b = a.map((e) => {
-      return palindrome(e.segment)
-    })
-    const c = b.filter((e) => e !== "" && e !== null && e !== undefined)
 
-    return c
-  } else {
-    const result = Array.from(
-      new Intl.Segmenter("en", { granularity: "word" }).segment(str)
-    )
-    const a = result.filter((e) => e.isWordLike)
-    const b = a.map((e) => {
-      return palindrome(e.segment)
-    })
-    const c = b.filter((e) => e !== "" && e !== null && e !== undefined)
+  // if (judgeChineseChar(str)) {
+  //   console.log("chinese char")
+  //   // console.time("seg")
 
-    return c
-  }
+  //   // console.timeEnd("seg")
+  //   // const result = segmentit.doSegment(str)
+  //   const result = cut_for_search(str, true);
+  //   console.log(result)
+  //   const a = result
+  //     .map((e) => {
+  //       return palindrome(e)
+  //     })
+  //     .filter((e) => e !== "" && e !== null && e !== undefined)
+  //   return a
+  // } else if (judgeJapaneseChar(str)) {
+  //   const result = Array.from(
+  //     new Intl.Segmenter("js-JP", { granularity: "word" }).segment(str)
+  //   )
+  //   const a = result.filter((e) => e.isWordLike)
+  //   const b = a.map((e) => {
+  //     return palindrome(e.segment)
+  //   })
+  //   const c = b.filter((e) => e !== "" && e !== null && e !== undefined)
+
+  //   return c
+  // } else {
+  //   const result = Array.from(
+  //     new Intl.Segmenter("en", { granularity: "word" }).segment(str)
+  //   )
+  //   const a = result.filter((e) => e.isWordLike)
+  //   const b = a.map((e) => {
+  //     return palindrome(e.segment)
+  //   })
+  //   const c = b.filter((e) => e !== "" && e !== null && e !== undefined)
+
+  //   return c
+  // }
 }
 
 function judgeChineseChar(str: string) {
