@@ -1,17 +1,46 @@
-import { createRef, useEffect, useState } from "react"
+import { createRef, useCallback, useEffect, useMemo, useState } from "react"
 import Toggle from "react-toggle"
 
 import { truncateText } from "~/lib/util"
 import debounce from "~lib/debounce"
+import useDebounce from "~lib/useDebounce"
 
+// import debounce from "~lib/simpleDebounce"
 import "~style.css"
 
 export const SearchView = () => {
   const [searchString, setSearchString] = useState("")
   const [searchResults, setSearchResults] = useState([])
   const [pinyinStatus, setPinyinStatus] = useState(0)
-  const [filter, setFilter] = useState(0) // 0:relevancy 1:recent 2:old 3:bookmark
+  const [filter, setFilter] = useState(1) // 0:relevancy 1:recent 2:old 3:bookmark
 
+  const debouncedSearchTerm = useDebounce(searchString, 500);
+  const sendSearch = () => {
+    console.log("====================================")
+    console.log("send search", searchString)
+    console.log("====================================")
+    if (searchString === "" || searchString == " ") {
+      return
+    }
+    chrome.runtime
+      .sendMessage({ command: "popsearch", search: searchString })
+      .then((v) => {
+        setSearchResults(
+          v.map((e, index) => {
+            e.relevancy = index
+            return e
+          })
+        )
+      })
+  }
+  useEffect(() => {
+    if (pinyinStatus === 0 ) {
+      console.log("====================================")
+      console.log("debounce send search", debouncedSearchTerm)
+      console.log("====================================")
+      sendSearch()
+    }
+  }, [debouncedSearchTerm])
   const handleChangeFilter = (value) => {
     console.log("---", value)
     if (value === filter) {
@@ -61,11 +90,17 @@ export const SearchView = () => {
 
   const handleSearchInputChange = (e) => {
     setSearchString(e.target.value)
-    if (pinyinStatus === 0) {
-      debounceSendSearch()
-    }
+    // if (pinyinStatus === 0) {
+    //   console.log('====================================');
+    //   console.log("debounce send search");
+    //   console.log('====================================');
+    //   debounceSendSearch()
+    // }
   }
-  const handleSearchInputBlur = () => {
+  const handleSearchInputBlur = (e) => {
+    // console.log("====================================")
+    // console.log("blur send search")
+    // console.log("====================================")
     sendSearch()
   }
   const handleKeyPress = (event) => {
@@ -74,45 +109,33 @@ export const SearchView = () => {
     }
   }
 
-  const sendSearch = () => {
-    if (searchString === "" || searchString == " ") {
-      return
-    }
-    chrome.runtime
-      .sendMessage({ command: "popsearch", search: searchString })
-      .then((v) => {
-        setSearchResults(
-          v.map((e, index) => {
-            e.relevancy = index
-            return e
-          })
-        )
-      })
-  }
-  const debounceSendSearch = debounce(sendSearch, 1200, {
-    leading: false,
-    trailing: true
-  })
+  // const debounceSendSearch = debounce(sendSearch, 500, false)
 
   const onHandleJumpToOptionsPage = () => {
-    chrome.runtime.openOptionsPage(()=>{
+    chrome.runtime.openOptionsPage(() => {
       console.log("open options page")
     })
   }
 
   const searchinputRef = createRef<any>()
   useEffect(() => {
-    searchinputRef.current.focus();
-  }, []);
+    searchinputRef.current.focus()
+  }, [])
   return (
     <div className="w-96 p-4 gap-4 h-[32rem] flex flex-col overflow-hidden">
       <div className="flex flex-row justify-between">
-      <span className="text-left">{chrome.i18n.getMessage("popupSearchTitle")}</span>
-      
-        <a className="text-right text-blue-500" href="" onClick={onHandleJumpToOptionsPage}>{chrome.i18n.getMessage("settingPageNavSettings")}</a>
-      
+        <span className="text-left">
+          {chrome.i18n.getMessage("popupSearchTitle")}
+        </span>
+
+        <a
+          className="text-right text-blue-500"
+          href=""
+          onClick={onHandleJumpToOptionsPage}>
+          {chrome.i18n.getMessage("settingPageNavSettings")}
+        </a>
       </div>
-      
+
       <div>
         <input
           ref={searchinputRef}
@@ -121,16 +144,19 @@ export const SearchView = () => {
           onChange={(e) => {
             handleSearchInputChange(e)
           }}
-          onBlur={() => {
-            handleSearchInputBlur()
+          onBlur={(e) => {
+            handleSearchInputBlur(e)
           }}
           onKeyPress={handleKeyPress}
           onCompositionStart={() => {
             setPinyinStatus(1)
           }}
           onCompositionEnd={() => {
+            // console.log("====================================")
+            // console.log("composition end")
+            // console.log("====================================")
             setPinyinStatus(0)
-            sendSearch()
+            // sendSearch()
           }}
           className="outline-none w-full h-10 px-4 rounded-lg"
         />
@@ -186,17 +212,10 @@ export const SearchView = () => {
                 }}>
                 {truncateText(v.title, 30)}
               </a>
-              {v.isBookmarked && (
-                <i className="ml-2">
-                 ⭐ 
-                </i>
-              )}
+              {v.isBookmarked && <i className="ml-2">⭐</i>}
+              <p className="text-sm text-gray-300">{truncateText(v.url, 40)}</p>
               <p className="text-sm text-gray-300">
-                {truncateText(v.url, 40)}
-                
-              </p>
-              <p className="text-sm text-gray-300">
-              {new Date(v.date).toLocaleDateString()}
+                {new Date(v.date).toLocaleDateString()}
               </p>
             </div>
           )
