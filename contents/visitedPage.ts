@@ -16,7 +16,7 @@ const excludeURLs = [
   "https://www.baidu.com/*",
   "https://weibo.com/*",
 ]
-console.log("visited page content script")
+// console.log("visited page content script")
 const pageId = uuidv4()
 const storageKey = 'fulltextbookmark';
 let options = {
@@ -26,7 +26,7 @@ let options = {
 }
 
 if (!isExcludeURL(excludeURLs,window.location.href)) {
-  console.log("visited not exclude",window.location.href)
+  // console.log("visited not exclude",window.location.href)
   chrome.storage.local.get([`persist:${storageKey}`], (items) => {
     
     if(items[`persist:${storageKey}`]) {
@@ -111,7 +111,7 @@ function parsePageAndSend (){
   chrome.runtime
     .sendMessage({ command: "store", data: article, pageId: pageId })
     .then((v) => {
-      console.log(`${pageId} store message response: ${v}`)
+      // console.log(`${pageId} store message response: ${v}`)
     })
 }
 
@@ -124,7 +124,7 @@ function parsePage(){
   if (isProbablyReaderable(documentClone)) {
     // @ts-ignore
     article = new Readability(documentClone).parse()
-    console.log(article)
+    // console.log(article)
     article = {
       title: article.title || "",
       content: article.textContent || "",

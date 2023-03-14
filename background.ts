@@ -4,13 +4,19 @@ import "dexie-export-import"
 
 // import { Segment, useDefault } from "segmentit"
 import debounce from "~lib/debounce"
-import { getBookmarkUrl, handleUrlRemoveHash,isWeibo,getWeiboEncode } from "~lib/util"
-import { persistor, store } from "~store/store"
+import init, { cut_for_search } from "~lib/jieba_rs_wasm.js"
 import mid from "~lib/mid"
+import {
+  getBookmarkUrl,
+  getWeiboEncode,
+  handleUrlRemoveHash,
+  isWeibo
+} from "~lib/util"
+import { persistor, store } from "~store/store"
+
 export {}
 
-import init,{cut_for_search} from "~lib/jieba_rs_wasm.js"
-(async function() {
+;(async function () {
   await init()
 })()
 
@@ -139,7 +145,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // console.log("google result", message.search)
       ;(async () => {
         const result = await searchString(message.search, "short")
-        console.log("search result", result)
+        // console.log("search result", result)
         if (result && result.length > 0) {
           const matchedFirst = result[0]
           sendResponse({
@@ -160,7 +166,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // console.log("popsearch", message.search)
       ;(async () => {
         const result = await searchString(message.search, "long")
-        console.log("search result", result)
+        // console.log("search result", result)
         sendResponse(result)
       })()
       return true
@@ -176,14 +182,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "export":
       ;(async () => {
         const blob = await db.export()
-        console.log(blob)
+        // console.log(blob)
         // download(blob, "dlTextBlob.json", "application/json")
         let reader = new FileReader()
         reader.onload = function (e) {
           // let readerres = reader.result;
           // @ts-ignore
           let parseObj = JSON.parse(this.result)
-          console.log(parseObj)
+          // console.log(parseObj)
           sendResponse(parseObj)
         }
         reader.readAsText(blob, "utf-8")
@@ -391,9 +397,6 @@ async function saveToDatabase(data: PageData) {
 
 // a search method that give the most possible result
 function findAndSort(prefixes, field): Promise<any[]> {
-  console.log('====================================');
-  console.log("prefix",prefixes);
-  console.log('====================================');
   // @ts-ignore
   return db.transaction("r", db.contents, db.pages, function* () {
     // Parallell search for all prefixes - just select resulting primary keys
@@ -404,9 +407,6 @@ function findAndSort(prefixes, field): Promise<any[]> {
         db.contents.where(field).startsWith(prefix).primaryKeys()
       )
     )
-    console.log('====================================');
-    console.log("raw results",results);
-    console.log('====================================');
 
     // faltten the array => sort => count
 
@@ -467,7 +467,7 @@ async function searchString(search: string, type: string) {
   }
   const splitSearch = wordSplit(search)
   const titleResult = await findAndSort(splitSearch, "titleWords")
-  console.log("titleResult", titleResult)
+  // console.log("titleResult", titleResult)
   // @ts-ignore
   if (titleResult && titleResult.length > 0) {
     if (type === "short") {
@@ -475,7 +475,7 @@ async function searchString(search: string, type: string) {
     }
   }
   const wordResult = await findAndSort(splitSearch, "contentWords")
-  console.log("wordResult", wordResult)
+  // console.log("wordResult", wordResult)
   // @ts-ignore
   if (titleResult && titleResult.length > 0) {
     if (wordResult && wordResult.length > 0) {
@@ -508,11 +508,11 @@ function sendToRemote(data: PageData) {
       date: data.date,
       isBookmarked: data.isBookmarked
     }
-    if(isWeibo(postData.url)){
+    if (isWeibo(postData.url)) {
       const encode = getWeiboEncode(postData.url)
-      postData.url = "https://m.weibo.cn/status/"+mid.decode(encode)
+      postData.url = "https://m.weibo.cn/status/" + mid.decode(encode)
     }
-    console.log("sendToRemote", postData)
+    // console.log("sendToRemote", postData)
 
     const userOptions = store.getState()
     // console.log("sendToRemote options", userOptions.remoteStoreURL, userOptions)
@@ -546,14 +546,14 @@ function wordSplit(str: string): string[] {
     return []
   }
   str = str.toLowerCase()
-  const result = cut_for_search(str, true);
-    console.log(result)
-    const a = result
-      .map((e) => {
-        return palindrome(e)
-      })
-      .filter((e) => e !== "" && e !== null && e !== undefined)
-    return a
+  const result = cut_for_search(str, true)
+  // console.log(result)
+  const a = result
+    .map((e) => {
+      return palindrome(e)
+    })
+    .filter((e) => e !== "" && e !== null && e !== undefined)
+  return a
 
   // if (judgeChineseChar(str)) {
   //   console.log("chinese char")
