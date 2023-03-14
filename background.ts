@@ -139,7 +139,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // console.log("google result", message.search)
       ;(async () => {
         const result = await searchString(message.search, "short")
-        // console.log("search result", result)
+        console.log("search result", result)
         if (result && result.length > 0) {
           const matchedFirst = result[0]
           sendResponse({
@@ -160,7 +160,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // console.log("popsearch", message.search)
       ;(async () => {
         const result = await searchString(message.search, "long")
-        // console.log("search result", result)
+        console.log("search result", result)
         sendResponse(result)
       })()
       return true
@@ -391,6 +391,9 @@ async function saveToDatabase(data: PageData) {
 
 // a search method that give the most possible result
 function findAndSort(prefixes, field): Promise<any[]> {
+  console.log('====================================');
+  console.log("prefix",prefixes);
+  console.log('====================================');
   // @ts-ignore
   return db.transaction("r", db.contents, db.pages, function* () {
     // Parallell search for all prefixes - just select resulting primary keys
@@ -401,6 +404,9 @@ function findAndSort(prefixes, field): Promise<any[]> {
         db.contents.where(field).startsWith(prefix).primaryKeys()
       )
     )
+    console.log('====================================');
+    console.log("raw results",results);
+    console.log('====================================');
 
     // faltten the array => sort => count
 
@@ -461,7 +467,7 @@ async function searchString(search: string, type: string) {
   }
   const splitSearch = wordSplit(search)
   const titleResult = await findAndSort(splitSearch, "titleWords")
-  // console.log("titleResult", titleResult)
+  console.log("titleResult", titleResult)
   // @ts-ignore
   if (titleResult && titleResult.length > 0) {
     if (type === "short") {
@@ -469,10 +475,10 @@ async function searchString(search: string, type: string) {
     }
   }
   const wordResult = await findAndSort(splitSearch, "contentWords")
-  // console.log("wordResult", wordResult)
+  console.log("wordResult", wordResult)
   // @ts-ignore
-  if (wordResult && wordResult.length > 0) {
-    if (titleResult && titleResult.length > 0) {
+  if (titleResult && titleResult.length > 0) {
+    if (wordResult && wordResult.length > 0) {
       const a = [...titleResult, ...wordResult]
       // deleted duplicated result identified by id in array a
       const aa = new Set(a.map((item) => item.id))
@@ -480,9 +486,10 @@ async function searchString(search: string, type: string) {
       aa.forEach((e) => {
         y.push(a.find((item) => item.id === e))
       })
-
       return y
     }
+    return titleResult
+  } else if (wordResult && wordResult.length > 0) {
     return wordResult
   }
   // console.log("precise search no match")
