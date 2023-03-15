@@ -13,12 +13,15 @@ import {
   isWeibo
 } from "~lib/util"
 import { persistor, store } from "~store/store"
-
+import { v4 as uuidv4 } from "uuid"
 export {}
 
 ;(async function () {
   await init()
 })()
+
+
+
 
 // const segmentit = useDefault(new Segment())
 // let userOptions = null;
@@ -249,6 +252,48 @@ chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
   const removedURLs = getBookmarkUrl(removeInfo)
   unBookmarked(removedURLs)
 })
+
+// ===================================================================
+// get existed bookmarks
+chrome.runtime.onInstalled.addListener(
+  ()=>{
+    chrome.bookmarks.getTree(function(bookmarkTreeNodes) {
+      const bookmarks = [];
+    
+      function traverseBookmarkNode(node) {
+        if (node.children) {
+          for (const childNode of node.children) {
+            traverseBookmarkNode(childNode);
+          }
+        } else {
+          console.log(node)
+          bookmarks.push({
+            title: node.title,
+            url: node.url,
+            date:node.dateAdded
+          });
+        }
+      }
+    
+      for (const rootNode of bookmarkTreeNodes) {
+        traverseBookmarkNode(rootNode);
+      }
+      console.log(bookmarks);
+      bookmarks.forEach(e=>{
+        ;(async () => {
+          await saveToDatabase({
+            title: e.title,
+            url: handleUrlRemoveHash(e.url),
+            date: e.date,
+            pageId: uuidv4(),
+            isBookmarked: true
+          })
+        })()
+      })
+      
+    })
+  }
+)
 
 // chrome.omnibox.setDefaultSuggestion(
 //   {description:"search fulltext bookmark/history "},

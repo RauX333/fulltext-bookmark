@@ -16,9 +16,9 @@ export const SearchView = () => {
 
   const debouncedSearchTerm = useDebounce(searchString, 500);
   const sendSearch = () => {
-    console.log("====================================")
-    console.log("send search", searchString)
-    console.log("====================================")
+    // console.log("====================================")
+    // console.log("send search", searchString)
+    // console.log("====================================")
     if (searchString === "" || searchString == " ") {
       return
     }
@@ -29,15 +29,17 @@ export const SearchView = () => {
           v.map((e, index) => {
             e.relevancy = index
             return e
+          }).sort((a, b) => {
+            return b.date - a.date
           })
         )
       })
   }
   useEffect(() => {
     if (pinyinStatus === 0 ) {
-      console.log("====================================")
-      console.log("debounce send search", debouncedSearchTerm)
-      console.log("====================================")
+      // console.log("====================================")
+      // console.log("debounce send search", debouncedSearchTerm)
+      // console.log("====================================")
       sendSearch()
     }
   }, [debouncedSearchTerm])
@@ -113,7 +115,7 @@ export const SearchView = () => {
 
   const onHandleJumpToOptionsPage = () => {
     chrome.runtime.openOptionsPage(() => {
-      console.log("open options page")
+      // console.log("open options page")
     })
   }
 
