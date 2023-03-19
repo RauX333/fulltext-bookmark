@@ -11,6 +11,18 @@
     "message": "测试信息",
     "description": "Popup message."
   },
+  "popupLinkTitle": {
+    "message": "在新标签页打开",
+    "description": "Search button."
+  },
+  "popupSearchTab": {
+    "message": "🔍 搜索",
+    "description": "Search button."
+  },
+  "popupGPTTab": {
+    "message": "🤖 Ask GPT",
+    "description": "Search button."
+  },
   "popupSearchTitle": {
     "message": "全文搜索书签和浏览历史",
     "description": "Search button."

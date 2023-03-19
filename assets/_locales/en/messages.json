@@ -11,8 +11,20 @@
     "message": "test message",
     "description": "Popup message."
   },
+  "popupLinkTitle": {
+    "message": "open link in a new tab",
+    "description": "Search button."
+  },
+  "popupSearchTab": {
+    "message": "🔍 Search",
+    "description": "Search button."
+  },
+  "popupGPTTab": {
+    "message": "🤖 Ask GPT",
+    "description": "Search button."
+  },
   "popupSearchTitle": {
-    "message": "Type To Fulltext Search Bookmark/History",
+    "message": "Fulltext Search Bookmark/History",
     "description": "Search button."
   },
   "popupFilterRecent": {
@@ -32,7 +44,7 @@
     "description": "Search button."
   },
   "settingPageNavSettings": {
-    "message": "Setting",
+    "message": "Settings",
     "description": "Search button."
   },
   "settingPageNavRemoteAPI": {

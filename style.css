@@ -4,6 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
+*::-webkit-scrollbar {
+  width: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: white;
+  border-radius: 5px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #e5e8eb;
+  border-radius: 5px;
+  border: 3px solid #e5e8eb;
+}
+
 .react-toggle {
     touch-action: pan-x;
   
