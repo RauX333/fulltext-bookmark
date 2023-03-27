@@ -2,75 +2,38 @@ import Dexie from "dexie"
 
 import "dexie-export-import"
 
+import { v4 as uuidv4 } from "uuid"
+import { genEmbedding } from "~lib/chat"
 // import { Segment, useDefault } from "segmentit"
 import debounce from "~lib/debounce"
+import type { GPTAnswer } from "~lib/interface"
 import init, { cut_for_search } from "~lib/jieba_rs_wasm.js"
 import mid from "~lib/mid"
 import {
+  blobToVector,
   getBookmarkUrl,
   getWeiboEncode,
   handleUrlRemoveHash,
-  isWeibo
+  isWeibo,
+  textSplitter,
+  vectorToBlob
 } from "~lib/util"
 import { persistor, store } from "~store/store"
-import { v4 as uuidv4 } from "uuid"
-export {}
 
+export {}
 ;(async function () {
   await init()
 })()
 
-
-
-
-// const segmentit = useDefault(new Segment())
-// let userOptions = null;
-// // // console.log("init useroptions",userOptions);
-// persistor.subscribe(() => {
-//   console.log("State changed with: ", store?.getState())
-//   userOptions = store.getState()
-//   console.log("changed useroptions ",userOptions);
-// });
 // ====================================================================================================
 // Database setup
 // Dexie.delete("PageDatabase")
 const db = new Dexie("PageDatabase")
 db.version(1).stores({
   pages: "++id,url,title,date,pageId,isBookmarked",
-  contents: "&pid,*contentWords,*titleWords"
+  contents: "&pid,*contentWords,*titleWords,content",// pid is id of pages table
+  vectors:"pid,serial"
 })
-// // @ts-ignore
-// db.pages.hook("creating", function (primKey, obj, trans) {
-//   if (typeof obj.content == "string") {
-//     obj.contentWords = wordSplit(obj.content)
-//   }
-//   if (typeof obj.title == "string") {
-//     obj.titleWords = wordSplit(obj.title)
-//   }
-// })
-// // @ts-ignore
-// db.pages.hook("updating", function (mods, primKey, obj, trans) {
-//   if (mods.hasOwnProperty("content")) {
-//     // "message" property is being updated
-//     if (typeof mods.content === "string") {
-//       // "message" property was updated to another valid value. Re-index messageWords:
-//       return { contentWords: wordSplit(mods.content) }
-//     } else {
-//       // "message" property was deleted (typeof mods.message === 'undefined') or changed to an unknown type. Remove indexes:
-//       return { contentWords: [] }
-//     }
-//   }
-//   if (mods.hasOwnProperty("title")) {
-//     // "message" property is being updated
-//     if (typeof mods.title === "string") {
-//       // "message" property was updated to another valid value. Re-index messageWords:
-//       return { titleWords: wordSplit(mods.title) }
-//     } else {
-//       // "message" property was deleted (typeof mods.message === 'undefined') or changed to an unknown type. Remove indexes:
-//       return { titleWords: [] }
-//     }
-//   }
-// })
 db.open()
 
 // delete outdated records
@@ -91,6 +54,9 @@ db.transaction("rw", db.pages, db.contents, async () => {
     await db.contents.where("pid").anyOf(delIDs).delete()
   }
 })
+
+
+
 
 // ====================================================================================================
 
@@ -116,11 +82,9 @@ interface Message {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.command) {
     case "store":
-      // console.log(
-      //   `${message.pageId} received temp store message from ${sender.tab.id}`
-      // )
-      // isBookmarked false
-
+      console.log("====================================")
+      console.log(message, sender)
+      console.log("====================================")
       // save to database
       ;(async () => {
         if (
@@ -141,6 +105,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
 
         await saveToDatabase({ ...message.data, pageId: message.pageId })
+        changeBadge(sender.tab.id)
         sendResponse("ok")
       })()
       return true
@@ -169,6 +134,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // console.log("popsearch", message.search)
       ;(async () => {
         const result = await searchString(message.search, "long")
+        // console.log("search result", result)
+        sendResponse(result)
+      })()
+      return true
+    case "gptsearch":
+      ;(async () => {
+        const result = await searchStringGPT(message.search)
         // console.log("search result", result)
         sendResponse(result)
       })()
@@ -255,45 +227,42 @@ chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
 
 // ===================================================================
 // get existed bookmarks
-chrome.runtime.onInstalled.addListener(
-  ()=>{
-    chrome.bookmarks.getTree(function(bookmarkTreeNodes) {
-      const bookmarks = [];
-    
-      function traverseBookmarkNode(node) {
-        if (node.children) {
-          for (const childNode of node.children) {
-            traverseBookmarkNode(childNode);
-          }
-        } else {
-          console.log(node)
-          bookmarks.push({
-            title: node.title,
-            url: node.url,
-            date:node.dateAdded
-          });
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.bookmarks.getTree(function (bookmarkTreeNodes) {
+    const bookmarks = []
+
+    function traverseBookmarkNode(node) {
+      if (node.children) {
+        for (const childNode of node.children) {
+          traverseBookmarkNode(childNode)
         }
+      } else {
+        // console.log(node)
+        bookmarks.push({
+          title: node.title,
+          url: node.url,
+          date: node.dateAdded
+        })
       }
-    
-      for (const rootNode of bookmarkTreeNodes) {
-        traverseBookmarkNode(rootNode);
-      }
-      console.log(bookmarks);
-      bookmarks.forEach(e=>{
-        ;(async () => {
-          await saveToDatabase({
-            title: e.title,
-            url: handleUrlRemoveHash(e.url),
-            date: e.date,
-            pageId: uuidv4(),
-            isBookmarked: true
-          })
-        })()
-      })
-      
+    }
+
+    for (const rootNode of bookmarkTreeNodes) {
+      traverseBookmarkNode(rootNode)
+    }
+    // console.log(bookmarks)
+    bookmarks.forEach((e) => {
+      ;(async () => {
+        await saveToDatabase({
+          title: e.title,
+          url: handleUrlRemoveHash(e.url),
+          date: e.date,
+          pageId: uuidv4(),
+          isBookmarked: true
+        })
+      })()
     })
-  }
-)
+  })
+})
 
 // chrome.omnibox.setDefaultSuggestion(
 //   {description:"search fulltext bookmark/history "},
@@ -346,6 +315,28 @@ chrome.omnibox.onInputEntered.addListener((text, disposition) => {
 })
 
 // ====================================================================================================
+function changeBadge(tabId) {
+  chrome.action.setBadgeText(
+    {
+      text: "√",
+      tabId: tabId
+    },
+    () => {}
+  )
+  // @ts-ignore
+  chrome.action.setBadgeTextColor({
+    color: "white",
+    tabId: tabId
+  })
+  chrome.action.setBadgeBackgroundColor({
+    color: "#2ab24c",
+    tabId: tabId
+  })
+  chrome.action.setTitle({
+    title: "page archieved",
+    tabId: tabId
+  })
+}
 
 // ====================================================================================================
 // database functions
@@ -389,7 +380,6 @@ async function saveToDatabase(data: PageData) {
   data.contentWords = wordSplit(data.content)
   data.titleWords = wordSplit(data.title)
 
-  delete data.content
   const indexData = {
     url: data.url,
     title: data.title,
@@ -399,7 +389,8 @@ async function saveToDatabase(data: PageData) {
   }
   const largeData = {
     contentWords: data.contentWords,
-    titleWords: data.titleWords
+    titleWords: data.titleWords,
+    content:data.content
   }
   const options = store.getState()
   if (options.remoteStore) {
@@ -506,6 +497,67 @@ function findAndSort(prefixes, field): Promise<any[]> {
   })
 }
 
+async function getPageData(a){
+  // @ts-ignore
+  const contentA = await db.contents.where('pid').equals(a.id).toArray()
+  return {content:contentA[0].content,...a}
+}
+
+async function getEmbedding(a) {
+  const docs = await textSplitter(a)
+  const existed = await db.vectors.where("pid").equals(a.id).first()
+  if(existed && existed.id) {
+    //TODO:get embeddings from database
+    const emds = await db.vectors.where('pid').equals(a.id).sortBy('serial')
+    console.log("emds",emds);
+    const vecs = emds.map(e=>{
+      return blobToVector(e.vectorBlob)
+    })
+    if(docs.length === vecs.length) {
+      return {docs:docs,vectors:vecs}
+    }
+  } 
+  const newVecs = await Promise.all(docs.map(d=>{
+    genEmbedding(d.pageContent)
+  }))
+
+  // TODO:save newvecs in database
+  await db.vectors.where("pid").equals(a.id).delete()
+  await Promise.all(newVecs.map((e,i)=>{
+    return db.vectors.add({pid:a.id,serial:i,vectorBlob:vectorToBlob(e)})
+  }))
+  return {docs:docs,vectors:newVecs}
+}
+
+async function searchStringGPT(search: string): Promise<GPTAnswer> {
+  console.log("ggggg");
+  
+  if (!search) {
+    console.log("aaaaa");
+    
+    return { answer: "you ask for nothing", sources: null }
+  }
+  const splitSearch = wordSplit(search)
+  const wordResult = await findAndSort(splitSearch, "contentWords")
+  if (wordResult && wordResult.length > 0) {
+    const pageArray = await Promise.all(wordResult.map(a=>{
+      return getPageData(a)
+    }))
+    const temp = await Promise.all(pageArray.map(a=>{
+      return getEmbedding(a)}))
+    const docs = temp.map(t=>{
+      return t.docs
+    })
+    const vectors = temp.map(t=>{
+      return t.vectors
+    })
+
+  } else {
+    console.log("bbbbb");
+    
+    return {answer:'no refrences found in your archieved webpages',sources:null}
+  }
+}
 async function searchString(search: string, type: string) {
   if (!search) {
     return []
@@ -538,7 +590,6 @@ async function searchString(search: string, type: string) {
     return wordResult
   }
   // console.log("precise search no match")
-
   return []
 }
 

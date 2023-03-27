@@ -1,8 +1,9 @@
 import React, { createRef, useEffect, useState } from "react"
+import type { GPTAnswer } from "~lib/interface"
 
 const GPTSearch = () => {
   const [searchTerm, setSearchTerm] = useState("")
-  const [searchResult, setSearchResult] = useState<{answer:string,sources:Array<{url:string,title:string}>}>()
+  const [searchResult, setSearchResult] = useState<GPTAnswer>()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSearch = async () => {

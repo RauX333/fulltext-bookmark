@@ -13,6 +13,8 @@ export interface AppStat {
   maxResults: number
   forbiddenURLs: string[]
   weiboSupport: boolean
+  GPTURL:string
+  GPTKey:string
 }
 
 const statSlice = createSlice({
@@ -30,8 +32,16 @@ const statSlice = createSlice({
     forbiddenURLs: ["https://www.google.com/*","https://www.bing.com/*","https://cn.bing.com/*","https://www.baidu.com/*","https://.*.something.com/*"], // TODO:change the last example
     tempPageExpireTime: 60 * 60 * 24 * 60 * 1000, // 60 days
     weiboSupport: true,
+    GPTURL:'https://openai.api2d.net',
+    GPTKey:'fk186518-NG01S8zCkQdv8RKGu7wApzehJyY8HyoT'
   },
   reducers: {
+    setGPTURL: (state,action) => {
+      state.GPTURL = action.payload
+    },
+    setGPTKey: (state,action) => {
+      state.GPTKey = action.payload
+    },
     toggleSearchEngineAdaption: (state) => {
       state.searchEngineAdaption = !state.searchEngineAdaption
     },
@@ -84,6 +94,8 @@ export const {
   setForbiddenURLs,
   setMaxResults,
   toggleWeiboSupport,
+  setGPTKey,
+  setGPTURL
 } = statSlice.actions
 
 export default statSlice.reducer
