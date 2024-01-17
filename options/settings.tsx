@@ -1,23 +1,28 @@
-import rabbitImg from "data-base64:~assets/icon512.png"
-import download from "downloadjs"
+// import rabbitImg from "data-base64:~assets/icon512.png"
+// import download from "downloadjs"
 import { useDispatch, useSelector } from "react-redux"
 import Toggle from "react-toggle"
 
-import { byteConvert } from "~/lib/util"
-import { NavButton } from "~components/NavButton"
-import { SettingBlock } from "~components/SettingBlock"
-import { SettingItem } from "~components/SettingItem"
-import { SettingItemCol } from "~components/SettingItemCol"
-import { Donate } from "~options/Donate"
-import { Feature } from "~options/Feature"
+import { byteConvert } from "~/lib/utils"
 
-import "~style.css"
+import { Donate } from "./Donate"
+import { Feature } from "./Feature"
+import { NavButton } from "./NavButton"
+import { SettingBlock } from "./SettingBlock"
+import { SettingItem } from "./SettingItem"
+import { SettingItemCol } from "./SettingItemCol"
+
+import "~/style.css"
 
 import { useState } from "react"
 
+// import "~style.css"
+import { chat, initApi } from "~/lib/chat"
 import {
   AppStat,
   setForbiddenURLs,
+  setGPTKey,
+  setGPTURL,
   setMaxResults,
   setRemoteStoreKey,
   setRemoteStoreURL,
@@ -26,6 +31,7 @@ import {
   toggleRemoteStore,
   toggleRemoteStoreEveryPage,
   toggleSearchEngineAdaption,
+  toggleShowAskGPT,
   toggleShowOnlyBookmarkedResults,
   toggleStoreEveryPage,
   toggleWeiboSupport
@@ -56,12 +62,46 @@ export const SettingView = () => {
   const forbiddenURLs = useSelector((state: AppStat) => state.forbiddenURLs)
   const maxResults = useSelector((state: AppStat) => state.maxResults)
   const weiboSupport = useSelector((state: AppStat) => state.weiboSupport)
+  const GPTKey = useSelector((state: AppStat) => state.GPTKey)
+  const GPTURL = useSelector((state: AppStat) => state.GPTURL)
+  const showAskGPT = useSelector((state: AppStat) => state.showAskGPT)
+  // GPT settings states
+  const [isTestLoading, changeisTestLoading] = useState(false)
+  const [tempGPTURL, changeGPTURL] = useState(GPTURL)
+  const handleGPTURLChange = (e) => {
+    changeGPTURL(e.target.value)
+  }
+  const handleBlurGPTURL = (e) => {
+    dispatch(setGPTURL(tempGPTURL))
+  }
+
+  const [tempGPTKey, changeGPTKey] = useState(GPTKey)
+  const handleGPTKeyChange = (e) => {
+    changeGPTKey(e.target.value)
+  }
+  const handleBlurGPTKey = (e) => {
+    dispatch(setGPTKey(tempGPTKey))
+  }
+  const [GPTTestResult, changeGPTTestResult] = useState("")
+  const handleGPTSettingTest = async () => {
+    changeisTestLoading(true)
+    // test by send hello
+    //  let resp;
+    try {
+      initApi(GPTKey, GPTURL)
+      await chat("hello")
+      // console.log(resp);
+      changeisTestLoading(false)
+      changeGPTTestResult("success")
+    } catch (error) {
+      changeisTestLoading(false)
+      changeGPTTestResult("fail")
+    }
+  }
 
   // nav page states
   const [navPage, setNavPage] = useState(0)
   const handleNavChange = (pageNum: number) => {
-    console.log(pageNum)
-
     setNavPage(pageNum)
   }
 
@@ -70,7 +110,7 @@ export const SettingView = () => {
     tempPageExpireTime / 1000 / 60 / 60 / 24
   )
   const handlePageExpireTimeChange = (e) => {
-    console.log(e.target.value)
+    // console.log(e.target.value)
     if (e.target.value === "") {
       // @ts-ignore
       setPageExpireTime("")
@@ -101,7 +141,7 @@ export const SettingView = () => {
   // max searc result stats
   const [tempMaxResults, setMaxResultsChange] = useState(maxResults)
   const handleMaxResultsChange = (e) => {
-    console.log(e.target.value)
+    // console.log(e.target.value)
     if (e.target.value === "") {
       // @ts-ignore
       setMaxResultsChange("")
@@ -163,13 +203,17 @@ export const SettingView = () => {
   }
 
   function handleClearAllData() {
-    console.log("clear")
+    // console.log("clear")
     chrome.runtime.sendMessage({ command: "clearAllData" }).then((v) => {
-      console.log(v)
+      // console.log(v)
       alert(chrome.i18n.getMessage("settingPageSettingIndexSizeClearAlert"))
       showEstimatedQuota()
     })
   }
+
+  // function reloadEx(){
+  //   chrome.runtime.reload()
+  // }
 
   // function handleExport() {
   //   console.log("export")
@@ -203,26 +247,28 @@ export const SettingView = () => {
                 handleNavChange(1)
               }}></NavButton>
             <NavButton
-              title={chrome.i18n.getMessage("settingPageNavAbout")}
+              title={chrome.i18n.getMessage("settingPageNavGPT")}
               onClick={() => {
                 handleNavChange(2)
               }}></NavButton>
             <NavButton
-              title={chrome.i18n.getMessage("settingPageNavDonate")}
+              title={chrome.i18n.getMessage("settingPageNavAbout")}
               onClick={() => {
                 handleNavChange(3)
               }}></NavButton>
-
+            <NavButton
+              title={chrome.i18n.getMessage("settingPageNavDonate")}
+              onClick={() => {
+                handleNavChange(4)
+              }}></NavButton>
           </div>
         </div>
-        
       </div>
       <div className="p-4 flex flex-col gap-8 lg:pl-[19.5rem] pt-10">
         {navPage === 0 && (
           <>
-            {chrome.i18n.getMessage(
-                  "settingPageNotice"
-                )}
+            {chrome.i18n.getMessage("settingPageNotice")}
+            {/* <button onClick={()=>{reloadEx()}}>reload</button> */}
             <SettingBlock
               title={chrome.i18n.getMessage("settingPageSettingDisplay")}>
               <SettingItem
@@ -241,9 +287,7 @@ export const SettingView = () => {
                 description={chrome.i18n.getMessage(
                   "settingPageSettingWeiboDesp"
                 )}
-                notes={chrome.i18n.getMessage(
-                  "settingPageSettingWeiboNote"
-                )}>
+                notes={chrome.i18n.getMessage("settingPageSettingWeiboNote")}>
                 <Toggle
                   defaultChecked={weiboSupport}
                   onChange={() => dispatch(toggleWeiboSupport())}
@@ -290,31 +334,30 @@ export const SettingView = () => {
                   "settingPageSettingIndexSizeNote"
                 )}>
                 <button
-                  className="text-blue-500 mr-8"
+                  className="text-blue-500 mr-8 text-lg"
                   onClick={async () => {
                     const a = await showEstimatedQuota()
                     setStoreSize(a)
                   }}>
                   {chrome.i18n.getMessage("settingPageSettingIndexSizeButton")}
                 </button>
-                <span>{storeSize.usage}</span>
+                <span className="text-lg">{storeSize.usage}</span>
                 {storeSize.usage !== "0" && (
                   <>
-                   <button
-                    className="text-blue-500 ml-8 mr-4"
-                    onClick={handleClearAllData}>
-                    {chrome.i18n.getMessage(
-                      "settingPageSettingIndexSizeClearBtn"
-                    )}
-                  </button>
-                  {/* // TODO: export */}
-                  {/* <button onClick={handleExport}>export</button> */}
+                    <button
+                      className="text-blue-500 ml-8 mr-4 text-lg"
+                      onClick={handleClearAllData}>
+                      {chrome.i18n.getMessage(
+                        "settingPageSettingIndexSizeClearBtn"
+                      )}
+                    </button>
+                    {/* // TODO: export */}
+                    {/* <button onClick={handleExport}>export</button> */}
                   </>
-                 
                 )}
                 {/* // TODO:清除所有数据 */}
               </SettingItemCol>
-              
+
               <p></p>
               <SettingItem
                 description={chrome.i18n.getMessage(
@@ -431,9 +474,103 @@ export const SettingView = () => {
             </SettingBlock>
           </>
         )}
-
-        {navPage === 2 && <Feature></Feature>}
-        {navPage === 3 && <Donate></Donate>}
+        {navPage === 2 && (
+          <>
+            <SettingBlock title={chrome.i18n.getMessage("settingPageGPTTitle")}>
+              <SettingItem
+                description={chrome.i18n.getMessage("settingPageGPTTitleDesp")}
+                notes={""}>
+                <Toggle
+                  defaultChecked={showAskGPT}
+                  onChange={() => dispatch(toggleShowAskGPT())}
+                />
+              </SettingItem>
+              <SettingItemCol
+                description={chrome.i18n.getMessage("settingPageGPTURLDesp")}
+                notes={chrome.i18n.getMessage("settingPageGPTURLDespnotes")}>
+                <div className="form">
+                  <form>
+                    <div className="row mb-4">
+                      <div className="col">
+                        <label htmlFor="openai-api">OpenAI API</label>
+                      </div>
+                      <div className="col">
+                        <input
+                          className="w-96"
+                          type="text"
+                          id="openai-api"
+                          name="openai-api"
+                          placeholder="https://api.openai.com"
+                          value={tempGPTURL}
+                          onChange={(e) => {
+                            handleGPTURLChange(e)
+                          }}
+                          onBlur={(e) => {
+                            handleBlurGPTURL(e)
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="row mb-4">
+                      <div className="col">
+                        <label htmlFor="openai-key">API Key</label>
+                      </div>
+                      <div className="col">
+                        <input
+                          className="w-96"
+                          type="text"
+                          id="openai-key"
+                          name="openai-key"
+                          value={tempGPTKey}
+                          placeholder="API Key"
+                          onChange={(e) => {
+                            handleGPTKeyChange(e)
+                          }}
+                          onBlur={(e) => {
+                            handleBlurGPTKey(e)
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="row mb-4">
+                      <div className="col">
+                        <button
+                          type="button"
+                          className="bg-blue-500 hover:bg-blue-700 w-16 h-8 rounded text-white text-lg relative"
+                          onClick={async () => {
+                            await handleGPTSettingTest()
+                          }}>
+                          {chrome.i18n.getMessage("settingPageGPTTest")}
+                          {isTestLoading && (
+                            <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                            </div>
+                          )}
+                        </button>
+                        {GPTTestResult === "success" && (
+                          <span
+                            style={{ color: "#19AB27" }}
+                            className="text-lg ml-4">
+                            {chrome.i18n.getMessage("settingPageGPTTestSuc")}
+                          </span>
+                        )}
+                        {GPTTestResult === "fail" && (
+                          <span
+                            style={{ color: "red" }}
+                            className="text-lg ml-4">
+                            {chrome.i18n.getMessage("settingPageGPTTestFail")}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </SettingItemCol>
+            </SettingBlock>
+          </>
+        )}
+        {navPage === 3 && <Feature></Feature>}
+        {navPage === 4 && <Donate></Donate>}
       </div>
     </div>
   )

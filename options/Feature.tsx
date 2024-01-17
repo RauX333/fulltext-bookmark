@@ -1,7 +1,7 @@
-import { SettingBlock } from "~components/SettingBlock"
-import { SettingItem } from "~components/SettingItem"
-import { SettingItemCol } from "~components/SettingItemCol"
-
+import { SettingBlock } from "./SettingBlock"
+import { SettingItem } from "./SettingItem"
+import { SettingItemCol } from "./SettingItemCol"
+// import '@assets/style/tailwind.css';
 import "~style.css"
 
 export const Feature = () => {
@@ -9,6 +9,10 @@ export const Feature = () => {
         <>
             <SettingBlock
               title={chrome.i18n.getMessage("settingPageFeatureTitle")}>
+              
+              <p>
+                🤖&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureGPT")}
+              </p>
               <p>
                 🔍&nbsp;&nbsp;{chrome.i18n.getMessage("settingPageFeatureA")}
               </p>

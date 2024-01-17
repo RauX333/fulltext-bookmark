@@ -11,6 +11,62 @@
     "message": "测试信息",
     "description": "Popup message."
   },
+  "settingPageGPTTitle": {
+    "message": "Ask GPT设置",
+    "description": "Search button."
+  },
+  "settingPageGPTTitleDesp": {
+    "message": "在Popup界面显示'Ask GPT'功能",
+    "description": "Search button."
+  },
+  "gptFirst": {
+    "message": "请在「设置」中提供你自己的openai api key以使用Ask GPT功能",
+    "description": "Search button."
+  },
+  "settingPageGPTURLDesp": {
+    "message": "openai API地址和API Key",
+    "description": "Search button."
+  },
+  "settingPageGPTURLDespnotes": {
+    "message": "你需要提供你自己的api key以使用Ask GPT功能",
+    "description": "Search button."
+  },
+  "settingPageGPTTest": {
+    "message": "测试",
+    "description": "Search button."
+  },
+  "popupAskPlaceholder": {
+    "message": "对已保存的页面数据提问 ↵",
+    "description": "Search button."
+  },
+  "settingPageGPTTestSuc": {
+    "message": "测试成功",
+    "description": "Search button."
+  },
+  "popupAskAnswerFrom": {
+    "message": "GPT的回答：",
+    "description": "Search button."
+  },
+  "popupAskAnswerSource": {
+    "message": "参考页面：",
+    "description": "Search button."
+  },
+  "popupAskAnswerCopy": {
+    "message": "复制",
+    "description": "Search button."
+  },
+  "settingPageGPTTestFail": {
+    "message": "测试失败,请检查你的设置",
+    "description": "Search button."
+  },
+  "settingPageFeatureGPT": {
+    "message": "使用openai GPT3.5 api, 对已保存的页面数据提问, 获得的回答将会带上参考网页。比如，你可以提问:如何做奶茶？拓展将会搜索你的数据库，找到最匹配的页面并回答你奶茶的制作方法。(如果你不喜欢这个功能，可以在设置中关闭它。)",
+    "description": "Search button."
+  },
+  "settingPageNavGPT": {
+    "message": "GPT设置",
+    "description": "Search button."
+  },
   "popupLinkTitle": {
     "message": "在新标签页打开",
     "description": "Search button."
@@ -209,7 +265,7 @@
     "description": "Search button"
   },
   "settingPageFeatureF": {
-    "message": "所有东西存储在本地，没有账号，没有云存储，没有隐私问题，完全免费。",
+    "message": "所有东西存储在本地，没有账号，没有云存储，没有隐私问题，完全免费。（当你使用Ask GPT功能时，拓展会发送数据到OpenAI API。 如果你不喜欢这个功能，你可以关闭它。）",
     "description": "Search button"
   },
   "settingPageFeatureG": {

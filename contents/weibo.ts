@@ -14,7 +14,7 @@ export const config: PlasmoContentScript = {
   all_frames: false
 }
 
-console.log("weibo content script")
+// console.log("weibo content script")
 
 const storageKey = "fulltextbookmark"
 let weiboSupport = "true"

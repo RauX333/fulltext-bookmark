@@ -1,6 +1,6 @@
 import type { PlasmoContentScript } from "plasmo"
 
-import { getUrlVars, isBaidu, isBing, isGoogle, truncateText } from "~/lib/util"
+import { getUrlVars, isBaidu, isBing, isGoogle, truncateText } from "~/lib/utils"
 
 // import "../style.css"
 

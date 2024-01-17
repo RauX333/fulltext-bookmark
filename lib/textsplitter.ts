@@ -1,7 +1,7 @@
-import type * as tiktoken from "@dqbd/tiktoken";
-import {
-  get_encoding,
-} from "@dqbd/tiktoken";
+// import type * as tiktoken from "@dqbd/tiktoken";
+// import {
+//   get_encoding,
+// } from "@dqbd/tiktoken";
 export interface DocumentParams {
   pageContent: string;
 
@@ -206,83 +206,83 @@ export class RecursiveCharacterTextSplitter
   }
 }
 
-export interface TokenTextSplitterParams extends TextSplitterParams {
-  encodingName: tiktoken.TiktokenEncoding;
-  allowedSpecial: "all" | Array<string>;
-  disallowedSpecial: "all" | Array<string>;
-}
+// export interface TokenTextSplitterParams extends TextSplitterParams {
+//   encodingName: tiktoken.TiktokenEncoding;
+//   allowedSpecial: "all" | Array<string>;
+//   disallowedSpecial: "all" | Array<string>;
+// }
 
 /**
  * Implementation of splitter which looks at tokens.
  */
-export class TokenTextSplitter
-  extends TextSplitter
-  implements TokenTextSplitterParams
-{
-  encodingName: tiktoken.TiktokenEncoding;
+// export class TokenTextSplitter
+//   extends TextSplitter
+//   implements TokenTextSplitterParams
+// {
+//   encodingName: tiktoken.TiktokenEncoding;
 
-  allowedSpecial: "all" | Array<string>;
+//   allowedSpecial: "all" | Array<string>;
 
-  disallowedSpecial: "all" | Array<string>;
+//   disallowedSpecial: "all" | Array<string>;
 
-  private tokenizer: tiktoken.Tiktoken;
+//   private tokenizer: tiktoken.Tiktoken;
 
-  private registry: FinalizationRegistry<tiktoken.Tiktoken>;
+//   private registry: FinalizationRegistry<tiktoken.Tiktoken>;
 
-  constructor(fields?: Partial<TokenTextSplitterParams>) {
-    super(fields);
+//   constructor(fields?: Partial<TokenTextSplitterParams>) {
+//     super(fields);
 
-    this.encodingName = fields?.encodingName ?? "gpt2";
-    this.allowedSpecial = fields?.allowedSpecial ?? [];
-    this.disallowedSpecial = fields?.disallowedSpecial ?? "all";
-  }
+//     this.encodingName = fields?.encodingName ?? "gpt2";
+//     this.allowedSpecial = fields?.allowedSpecial ?? [];
+//     this.disallowedSpecial = fields?.disallowedSpecial ?? "all";
+//   }
 
-  async splitText(text: string): Promise<string[]> {
-    if (!this.tokenizer) {
-      // const tiktoken = await TokenTextSplitter.imports();
-      this.tokenizer = get_encoding(this.encodingName);
-      // We need to register a finalizer to free the tokenizer when the
-      // splitter is garbage collected.
-      this.registry = new FinalizationRegistry((t) => t.free());
-      this.registry.register(this, this.tokenizer);
-    }
+//   async splitText(text: string): Promise<string[]> {
+//     if (!this.tokenizer) {
+//       // const tiktoken = await TokenTextSplitter.imports();
+//       this.tokenizer = get_encoding(this.encodingName);
+//       // We need to register a finalizer to free the tokenizer when the
+//       // splitter is garbage collected.
+//       this.registry = new FinalizationRegistry((t) => t.free());
+//       this.registry.register(this, this.tokenizer);
+//     }
 
-    const splits: string[] = [];
+//     const splits: string[] = [];
 
-    const input_ids = this.tokenizer.encode(
-      text,
-      this.allowedSpecial,
-      this.disallowedSpecial
-    );
+//     const input_ids = this.tokenizer.encode(
+//       text,
+//       this.allowedSpecial,
+//       this.disallowedSpecial
+//     );
 
-    let start_idx = 0;
-    let cur_idx = Math.min(start_idx + this.chunkSize, input_ids.length);
-    let chunk_ids = input_ids.slice(start_idx, cur_idx);
+//     let start_idx = 0;
+//     let cur_idx = Math.min(start_idx + this.chunkSize, input_ids.length);
+//     let chunk_ids = input_ids.slice(start_idx, cur_idx);
 
-    const decoder = new TextDecoder();
+//     const decoder = new TextDecoder();
 
-    while (start_idx < input_ids.length) {
-      splits.push(decoder.decode(this.tokenizer.decode(chunk_ids)));
+//     while (start_idx < input_ids.length) {
+//       splits.push(decoder.decode(this.tokenizer.decode(chunk_ids)));
 
-      start_idx += this.chunkSize - this.chunkOverlap;
-      cur_idx = Math.min(start_idx + this.chunkSize, input_ids.length);
-      chunk_ids = input_ids.slice(start_idx, cur_idx);
-    }
+//       start_idx += this.chunkSize - this.chunkOverlap;
+//       cur_idx = Math.min(start_idx + this.chunkSize, input_ids.length);
+//       chunk_ids = input_ids.slice(start_idx, cur_idx);
+//     }
 
-    return splits;
-  }
+//     return splits;
+//   }
 
-  // static async imports(): Promise<typeof tiktoken> {
-  //   try {
-  //     return await import("@dqbd/tiktoken");
-  //   } catch (err) {
-  //     console.error(err);
-  //     throw new Error(
-  //       "Please install @dqbd/tiktoken as a dependency with, e.g. `npm install -S @dqbd/tiktoken`"
-  //     );
-  //   }
-  // }
-}
+//   // static async imports(): Promise<typeof tiktoken> {
+//   //   try {
+//   //     return await import("@dqbd/tiktoken");
+//   //   } catch (err) {
+//   //     console.error(err);
+//   //     throw new Error(
+//   //       "Please install @dqbd/tiktoken as a dependency with, e.g. `npm install -S @dqbd/tiktoken`"
+//   //     );
+//   //   }
+//   // }
+// }
 
 export type MarkdownTextSplitterParams = TextSplitterParams;
 

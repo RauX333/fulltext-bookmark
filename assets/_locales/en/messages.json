@@ -4,15 +4,67 @@
     "description": "Name of the extension."
   },
   "extensionDescription": {
-    "message": "fulltext-search all the browsing history/bookmarks",
+    "message": "Fulltext-search all the browsing history/bookmarks.",
     "description": "Description of the extension."
   },
   "test": {
-    "message": "test message",
+    "message": "Test message",
     "description": "Popup message."
   },
+  "settingPageFeatureGPT": {
+    "message": "Ask OpenAI GPT-3.5 about your archived pages, and it will answer with references. For example, if you ask 'how to make milk tea', this extension will search in your archived pages, find the most relevant page, and answer your question with references. (If you don't like the feature, you can always choose to close it in Settings.)",
+    "description": "Search button."
+  },
+  "settingPageGPTTitle": {
+    "message": "Ask GPT Settings",
+    "description": "Search button."
+  },
+  "settingPageGPTTitleDesp": {
+    "message": "Show 'Ask GPT' in popup",
+    "description": "Search button."
+  },
+  "gptFirst": {
+    "message": "To use this function, please set OpenAI API URL and your own API key in Settings.",
+    "description": "Search button."
+  },
+  "settingPageGPTURLDesp": {
+    "message": "OpenAI API URL and API Key",
+    "description": "Search button."
+  },
+  "settingPageGPTTest": {
+    "message": "Test",
+    "description": "Search button."
+  },
+  "popupAskPlaceholder": {
+    "message": "Ask about your archived pages ↵",
+    "description": "Search button."
+  },
+  "popupAskAnswerFrom": {
+    "message": "Answer from GPT:",
+    "description": "Search button."
+  },
+  "popupAskAnswerCopy": {
+    "message": "Copy",
+    "description": "Search button."
+  },
+  "popupAskAnswerSource": {
+    "message": "Sources from archive:",
+    "description": "Search button."
+  },
+  "settingPageGPTTestSuc": {
+    "message": "Test success",
+    "description": "Search button."
+  },
+  "settingPageGPTTestFail": {
+    "message": "Test fail, please check your settings",
+    "description": "Search button."
+  },
+  "settingPageGPTURLDespnotes": {
+    "message": "Please provide your own OpenAI API key to make it work.",
+    "description": "Search button."
+  },
   "popupLinkTitle": {
-    "message": "open link in a new tab",
+    "message": "Open link in a new tab",
     "description": "Search button."
   },
   "popupSearchTab": {
@@ -28,23 +80,27 @@
     "description": "Search button."
   },
   "popupFilterRecent": {
-    "message": "recent",
+    "message": "Recent",
     "description": "Search button."
   },
   "popupFilterBookmarks": {
-    "message": "bookmark first",
+    "message": "Bookmark first",
     "description": "Search button."
   },
   "popupFilterOldest": {
-    "message": "oldest",
+    "message": "Oldest",
     "description": "Search button."
   },
   "popupFilterRelevancy": {
-    "message": "relevancy",
+    "message": "Relevancy",
     "description": "Search button."
   },
   "settingPageNavSettings": {
     "message": "Settings",
+    "description": "Search button."
+  },
+  "settingPageNavGPT": {
+    "message": "GPT Settings",
     "description": "Search button."
   },
   "settingPageNavRemoteAPI": {
@@ -68,15 +124,15 @@
     "description": "Search button."
   },
   "settingPageSettingSearchPageNote": {
-    "message": "support google/bing/baidu",
+    "message": "Support Google/Bing/Baidu.",
     "description": "Search button."
   },
   "settingPageSettingWeiboDesp": {
-    "message": "show save button in weibo",
+    "message": "Show save button in Weibo",
     "description": "Search button."
   },
   "settingPageSettingWeiboNote": {
-    "message": "click button to add weibo as bookmark in fulltext-bookmark and can later search them",
+    "message": "Click button to add Weibo as bookmark in Fulltext-Bookmark and can later search them.",
     "description": "Search button."
   },
   "settingPageSettingSearch": {
@@ -88,11 +144,11 @@
     "description": "Search button."
   },
   "settingPageSettingSearchMaxDesp": {
-    "message": "Maxium Number Of Popup Page Search Results",
+    "message": "Maximum Number Of Popup Page Search Results",
     "description": "Search button."
   },
   "settingPageSettingSearchMaxNote": {
-    "message": "default 20, max 100",
+    "message": "Default 20, maximum 100.",
     "description": "Search button."
   },
   "settingPageSettingIndex": {
@@ -104,19 +160,19 @@
     "description": "Search button."
   },
   "settingPageSettingIndexSizeNote": {
-    "message": "the estimated size of indexd data",
+    "message": "The estimated size of indexed data.",
     "description": "Search button."
   },
   "settingPageSettingIndexSizeButton": {
-    "message": "get size",
+    "message": "Get size",
     "description": "Search button."
   },
   "settingPageSettingIndexSizeClearBtn": {
-    "message": "clear data",
+    "message": "Clear data",
     "description": "Search button."
   },
   "settingPageSettingIndexSizeClearAlert": {
-    "message": "data clear finished (the rest is the neccessary data for extension)",
+    "message": "Data clear finished (the rest is the necessary data for extension).",
     "description": "Search button."
   },
   "settingPageSettingIndexEveryDesp": {
@@ -124,120 +180,119 @@
     "description": "Search button."
   },
   "settingPageSettingIndexEveryNote": {
-    "message": "store every page you visited after this option is enabled",
+    "message": "Store every page you visited after this option is enabled.",
     "description": "Search button."
   },
   "settingPageSettingIndexBookDesp": {
     "message": "Store Bookmarked Page",
-    "description": "Search button"
+    "description": "Search button."
   },
   "settingPageSettingIndexBookNote": {
-    "message": "Store page when it is bookmarked",
-    "description": "Search button"
+    "message": "Store page when it is bookmarked.",
+    "description": "Search button."
   },
   "settingPageSettingIndexDurDesp": {
     "message": "Expiration Duration of Store (Non-Bookmarked Page)",
-    "description": "Search button"
+    "description": "Search button."
   },
   "settingPageSettingIndexDurNote": {
-    "message": "non-bookmarked page reocords will be expired after this time, while bookmarked page will be stored forever.\ndefaults to 60 days, maxium 36500 days",
-    "description": "Search button"
+    "message": "Non-bookmarked page records will be expired after this time, while bookmarked page will be stored forever. Defaults to 60 days, maximum 36500 days.",
+    "description": "Search button."
   },
   "days": {
     "message": "days",
-    "description": "Search button"
+    "description": "Search button."
   },
   "settingPageSettingIndexExclDesp": {
     "message": "Exclude URLs",
-    "description": "Search button"
+    "description": "Search button."
   },
   "settingPageSettingIndexExclNote": {
-    "message": "urls in this list will not be indexed (one address per line, support wildcard)",
-    "description": "Search button"
+    "message": "URLs in this list will not be indexed (one address per line, support wildcard).",
+    "description": "Search button."
   },
   "settingPageRemoteTitle": {
     "message": "Custom API",
-    "description": "Search button"
+    "description": "Search button."
   },
   "settingPageRemoteSendDesp": {
     "message": "Send To Custom API",
-    "description": "Search button"
+    "description": "Search button."
   },
   "settingPageRemoteSendnote": {
-    "message": "send stored page (defaults only the bookmarked pages) to the custom API address by http post method. json payload example:\n{url: 'http://www.example.com/api', title: 'example page', date: 1661607379953, isBookmarked: true}",
-    "description": "Search button"
+    "message": "Send stored page (defaults only the bookmarked pages) to the custom API address by HTTP POST method. JSON payload example:\n{url: 'http://www.example.com/api', title: 'example page', date: 1661607379953, isBookmarked: true}",
+    "description": "Search button."
   },
   "settingPageRemoteSendEveryDesp": {
-    "message": "Send Every Stroed Page To Custom API",
-    "description": "Search button"
+    "message": "Send Every Stored Page To Custom API",
+    "description": "Search button."
   },
   "settingPageRemoteSendEveryNote": {
-    "message": "send every page other than bookmarked page to custom API. may cause high traffic.",
-    "description": "Search button"
+    "message": "Send every page other than bookmarked page to custom API. May cause high traffic.",
+    "description": "Search button."
   },
   "settingPageRemoteAPIDesp": {
     "message": "Custom API Address",
-    "description": "Search button"
+    "description": "Search button."
   },
   "settingPageRemoteAPINote": {
-    "message": "only 1 address",
-    "description": "Search button"
+    "message": "Only 1 address.",
+    "description": "Search button."
   },
   "settingPageFeatureTitle": {
     "message": "Features",
-    "description": "Search button"
+    "description": "Search button."
   },
   "settingPageFeatureA": {
-    "message": "a better bookmark/broswing history search tool.",
-    "description": "Search button"
+    "message": "A better bookmark/browsing history search tool.",
+    "description": "Search button."
   },
   "settingPageFeatureB": {
-    "message": "store and index bookmarked page or any page you visit, so you can later fulltext search them.",
-    "description": "Search button"
+    "message": "Store and index bookmarked page or any page you visit, so you can later fulltext search them.",
+    "description": "Search button."
   },
   "settingPageFeatureC": {
-    "message": "best matched search result will be dispalyed in the search engine page as you search (google/bing/baidu).",
-    "description": "Search button"
+    "message": "Best matched search result will be displayed in the search engine page as you search (Google/Bing/Baidu).",
+    "description": "Search button."
   },
-
   "settingPageFeatureD": {
-    "message": "search in the chrome searchbar by typing 'kw' first(short for 'keyword').",
-    "description": "Search button"
+    "message": "Search in the Chrome search bar by typing 'kw' first (short for 'keyword').",
+    "description": "Search button."
   },
   "settingPageFeatureE": {
-    "message": "or search in the extension popup page for more results.",
-    "description": "Search button"
+    "message": "Or search in the extension popup page for more results.",
+    "description": "Search button."
   },
   "settingPageFeatureF": {
-    "message": "everything stored in local storage, no accounts, no cloud, no privacy issues, totally free.",
-    "description": "Search button"
+    "message": "Everything stored in local storage, no accounts, no cloud, no privacy issues, totally free.(Except when you use Ask GPT feature, it will send data to OpenAI API. If you don't like it, just close this feature.)",
+    "description": "Search button."
   },
   "settingPageFeatureG": {
-    "message": "send your bookmark/browsing history to custom remote api as you like.",
-    "description": "Search button"
+    "message": "Send your bookmark/browsing history to custom remote API as you like.",
+    "description": "Search button."
   },
   "settingPageFeatureH": {
-    "message": "backup feature is under development.",
-    "description": "Search button"
+    "message": "Backup feature is under development.",
+    "description": "Search button."
   },
   "settingPageFeatureI": {
-    "message": "bookmark interesting weibo and search them!",
-    "description": "Search button"
+    "message": "Bookmark interesting Weibo and search them!",
+    "description": "Search button."
   },
   "settingPageAboutTitle": {
     "message": "About",
-    "description": "Search button"
+    "description": "Search button."
   },
   "settingPageAboutThanks": {
-    "message": " if you have any issues or suggestions please feel free to contact.",
-    "description": "Search button"
+    "message": "If you have any issues or suggestions, please feel free to contact.",
+    "description": "Search button."
   },
   "settingPageDonateTitle": {
     "message": "Buy Me A Cupcake 🧁",
-    "description": "Search button"
+    "description": "Search button."
   },
   "settingPageNotice": {
-    "message": "settings taking effect after browsing pages refresh.",
-    "description": "Search button"
+    "message": "Settings take effect after browsing pages refresh.",
+    "description": "Search button."
   }
 }
