@@ -171,6 +171,26 @@
     "message": "清除数据",
     "description": "Search button."
   },
+  "settingPageSettingIndexSizeExportBtn": {
+    "message": "导出Excel",
+    "description": "Export to Excel button."
+  },
+  "settingPageSettingIndexSizeImportBtn": {
+    "message": "导入CSV",
+    "description": "Import CSV button."
+  },
+  "settingPageDataManagementTitle": {
+    "message": "数据管理",
+    "description": "Data management section title."
+  },
+  "settingPageDataManagementDesc": {
+    "message": "导入和导出数据",
+    "description": "Import and export data description."
+  },
+  "settingPageDataManagementNote": {
+    "message": "备份和恢复你的数据",
+    "description": "Import and export data notes."
+  },
   "settingPageSettingIndexSizeClearAlert": {
     "message": "数据清除完毕 （剩余数据为拓展运行必需的数据）",
     "description": "Search button."
@@ -295,5 +315,53 @@
   "settingPageNotice": {
     "message": "修改的配置在页面刷新后生效。",
     "description": "Search button"
+  },
+  "settingPageSettingGPT": {
+    "message": "GPT设置",
+    "description": "GPT设置标题"
+  },
+  "settingPageSettingGPTShowDesp": {
+    "message": "显示Ask GPT功能",
+    "description": "GPT设置描述"
+  },
+  "settingPageSettingGPTShowNote": {
+    "message": "在弹出窗口中启用或禁用Ask GPT功能。",
+    "description": "GPT设置注释"
+  },
+  "settingPageSettingGPTUrlDesp": {
+    "message": "OpenAI API地址",
+    "description": "GPT URL设置描述"
+  },
+  "settingPageSettingGPTUrlNote": {
+    "message": "OpenAI API请求的URL地址。",
+    "description": "GPT URL设置注释"
+  },
+  "settingPageSettingGPTKeyDesp": {
+    "message": "OpenAI API密钥",
+    "description": "GPT密钥设置描述"
+  },
+  "settingPageSettingGPTKeyNote": {
+    "message": "用于身份验证的个人OpenAI API密钥。",
+    "description": "GPT密钥设置注释"
+  },
+  "settingPageSettingGPTTestDesp": {
+    "message": "测试API连接",
+    "description": "GPT测试设置描述"
+  },
+  "settingPageSettingGPTTestNote": {
+    "message": "使用提供的URL和密钥测试OpenAI API连接。",
+    "description": "GPT测试设置注释"
+  },
+  "settingPageSettingGPTTestBtn": {
+    "message": "测试",
+    "description": "GPT测试按钮文本"
+  },
+  "settingPageSettingGPTTestLoading": {
+    "message": "测试中...",
+    "description": "GPT测试加载文本"
+  },
+  "settingPageSettingRemoteAPI": {
+    "message": "远程API设置",
+    "description": "远程API设置标题"
   }
 }

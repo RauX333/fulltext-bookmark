@@ -286,6 +286,29 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         reader.readAsText(blob, "utf-8");
       })();
       return true;
+    case "import":
+      (async () => {
+        try {
+          if (!message.data || !message.data.url) {
+            console.error("Invalid import data: missing URL");
+            sendResponse("error: invalid data");
+            return;
+          }
+
+          // Generate pageId if not provided
+          if (!message.data.pageId) {
+            message.data.pageId = uuidv4();
+          }
+
+          // Save to database
+          await saveToDatabase(message.data);
+          sendResponse("ok");
+        } catch (error) {
+          console.error("Error importing data:", error);
+          sendResponse("error: " + (error.message || "unknown error"));
+        }
+      })();
+      return true;
     default:
       sendResponse("invalid command");
       break;

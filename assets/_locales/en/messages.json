@@ -168,8 +168,28 @@
     "description": "Search button."
   },
   "settingPageSettingIndexSizeClearBtn": {
-    "message": "Clear data",
+    "message": "Clear All Data",
     "description": "Search button."
+  },
+  "settingPageSettingIndexSizeExportBtn": {
+    "message": "Export Excel",
+    "description": "Export to Excel button."
+  },
+  "settingPageSettingIndexSizeImportBtn": {
+    "message": "Import CSV",
+    "description": "Import CSV button."
+  },
+  "settingPageDataManagementTitle": {
+    "message": "Data Management",
+    "description": "Data management section title."
+  },
+  "settingPageDataManagementDesc": {
+    "message": "Import and Export Data",
+    "description": "Import and export data description."
+  },
+  "settingPageDataManagementNote": {
+    "message": "Backup and restore your data",
+    "description": "Import and export data notes."
   },
   "settingPageSettingIndexSizeClearAlert": {
     "message": "Data clear finished (the rest is the necessary data for extension).",
@@ -294,5 +314,53 @@
   "settingPageNotice": {
     "message": "Settings take effect after browsing pages refresh.",
     "description": "Search button."
+  },
+  "settingPageSettingGPT": {
+    "message": "GPT Settings",
+    "description": "GPT settings section title."
+  },
+  "settingPageSettingGPTShowDesp": {
+    "message": "Show Ask GPT Feature",
+    "description": "GPT settings description."
+  },
+  "settingPageSettingGPTShowNote": {
+    "message": "Enable or disable the Ask GPT feature in the popup.",
+    "description": "GPT settings note."
+  },
+  "settingPageSettingGPTUrlDesp": {
+    "message": "OpenAI API URL",
+    "description": "GPT URL settings description."
+  },
+  "settingPageSettingGPTUrlNote": {
+    "message": "The URL for OpenAI API requests.",
+    "description": "GPT URL settings note."
+  },
+  "settingPageSettingGPTKeyDesp": {
+    "message": "OpenAI API Key",
+    "description": "GPT key settings description."
+  },
+  "settingPageSettingGPTKeyNote": {
+    "message": "Your personal OpenAI API key for authentication.",
+    "description": "GPT key settings note."
+  },
+  "settingPageSettingGPTTestDesp": {
+    "message": "Test API Connection",
+    "description": "GPT test settings description."
+  },
+  "settingPageSettingGPTTestNote": {
+    "message": "Test your OpenAI API connection with the provided URL and key.",
+    "description": "GPT test settings note."
+  },
+  "settingPageSettingGPTTestBtn": {
+    "message": "Test",
+    "description": "GPT test button text."
+  },
+  "settingPageSettingGPTTestLoading": {
+    "message": "Testing...",
+    "description": "GPT test loading text."
+  },
+  "settingPageSettingRemoteAPI": {
+    "message": "Remote API Settings",
+    "description": "Remote API settings section title."
   }
 }
