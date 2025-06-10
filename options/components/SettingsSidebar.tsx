@@ -51,9 +51,9 @@ export const SettingsSidebar = ({ navPage, onNavChange, onCollapse }: SettingsSi
 
   return (
     <>
-      {/* Toggle button - always visible */}
+      {/* Toggle button - visible only when collapsed */}
       <button 
-        className={`fixed top-4 left-4 z-30 p-2 rounded-md bg-white shadow-md ${isCollapsed ? 'block' : 'block'}`}
+        className={`fixed top-4 left-4 z-30 p-2 rounded-md bg-white shadow-md ${isCollapsed ? 'block' : 'hidden'}`}
         onClick={toggleCollapse}
         aria-label="Toggle sidebar"
       >
@@ -72,13 +72,24 @@ export const SettingsSidebar = ({ navPage, onNavChange, onCollapse }: SettingsSi
           )}
         </svg>
       </button>
-
       {/* Sidebar */}
       <div 
         className={`fixed z-20 inset-0 right-auto w-[16rem] py-10 px-6 overflow-y-auto bg-white transition-transform duration-300 ease-in-out ${isCollapsed ? '-translate-x-full' : 'translate-x-0'} ${isMobile ? 'shadow-lg' : ''}`}
       >
         <div className="lg:leading-6 relative">
-          {/* Remove desktop close button since we now have the always-visible toggle */}
+          {/* Close button positioned at top right of sidebar */}
+          {!isCollapsed && (
+            <button 
+              className="absolute top-0 right-0 p-2 rounded-md hover:bg-gray-100"
+              onClick={toggleCollapse}
+              aria-label="Close sidebar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          )}
           <h1 className="lg:text-2xl font-bold pl-4">
             {chrome.i18n.getMessage("extensionName")}
           </h1>
