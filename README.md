@@ -1,4 +1,7 @@
 A Chrome Extension developed with [Plasmo extension](https://docs.plasmo.com/).
+## Update
+⌨️ Add backup feature for exporting your data into a csv file. And you can also import it back to the extension to restore.
+
 
 ## Features
 - 🔍 a better bookmark/broswing history search tool.
@@ -9,7 +12,7 @@ A Chrome Extension developed with [Plasmo extension](https://docs.plasmo.com/).
 - 📜 or search in the extension popup page for more results.
 - 😺 everything stored in local storage, no accounts, no cloud, no privacy issues, totally free.
 - ✉️ send your bookmark/browsing history to custom remote api as you like.
-- ⌨️ backup feature is under development.
+
 ## Making production build
 
 Run the following:
