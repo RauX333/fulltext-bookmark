@@ -281,7 +281,12 @@ export const generateUUID = () => {
  * @param onComplete Callback function to run after import is complete
  */
 export const handleFileUpload = async (file, onComplete) => {
-  if (!file) return;
+  if (!file) {
+    if (onComplete && typeof onComplete === 'function') {
+      onComplete();
+    }
+    return;
+  }
 
   try {
     const reader = new FileReader();
@@ -292,11 +297,17 @@ export const handleFileUpload = async (file, onComplete) => {
         
         if (jsonData.length === 0) {
           alert('No valid data found in the CSV file.');
+          if (onComplete && typeof onComplete === 'function') {
+            onComplete();
+          }
           return;
         }
 
         // Show confirmation with count of records
         if (!confirm(`Import ${jsonData.length} records to the database?`)) {
+          if (onComplete && typeof onComplete === 'function') {
+            onComplete();
+          }
           return;
         }
 
@@ -305,47 +316,67 @@ export const handleFileUpload = async (file, onComplete) => {
         let successCount = 0;
         let errorCount = 0;
         
-        for (let i = 0; i < jsonData.length; i += batchSize) {
-          const batch = jsonData.slice(i, i + batchSize);
-          
-          // Process each item in the batch
-          for (const item of batch) {
-            try {
-              await new Promise((resolve) => {
-                chrome.runtime.sendMessage({
-                  command: "import",
-                  data: item
-                }, (response) => {
-                  if (response === "ok") {
-                    successCount++;
-                  } else {
-                    errorCount++;
-                  }
-                  resolve();
+        try {
+          for (let i = 0; i < jsonData.length; i += batchSize) {
+            const batch = jsonData.slice(i, i + batchSize);
+            
+            // Process each item in the batch
+            for (const item of batch) {
+              try {
+                await new Promise((resolve) => {
+                  chrome.runtime.sendMessage({
+                    command: "import",
+                    data: item
+                  }, (response) => {
+                    if (response === "ok") {
+                      successCount++;
+                    } else {
+                      errorCount++;
+                    }
+                    resolve();
+                  });
                 });
-              });
-            } catch (error) {
-              console.error('Error importing item:', error, item);
-              errorCount++;
+              } catch (error) {
+                console.error('Error importing item:', error, item);
+                errorCount++;
+              }
             }
           }
-        }
-        
-        // Show results
-        alert(`Import completed: ${successCount} records imported successfully, ${errorCount} errors.`);
-        
-        // Call the completion callback if provided
-        if (onComplete && typeof onComplete === 'function') {
-          onComplete();
+          
+          // Show results
+          alert(`Import completed: ${successCount} records imported successfully, ${errorCount} errors.`);
+        } catch (error) {
+          console.error('Error during batch processing:', error);
+          alert(`Import interrupted: ${successCount} records imported, ${errorCount} errors. Error: ${error.message}`);
+        } finally {
+          // Call the completion callback if provided
+          if (onComplete && typeof onComplete === 'function') {
+            onComplete();
+          }
         }
       } catch (error) {
         console.error('Error processing CSV file:', error);
         alert('Error processing CSV file: ' + error.message);
+        if (onComplete && typeof onComplete === 'function') {
+          onComplete();
+        }
       }
     };
+    
+    reader.onerror = () => {
+      console.error('FileReader error');
+      alert('Error reading file. Please try again.');
+      if (onComplete && typeof onComplete === 'function') {
+        onComplete();
+      }
+    };
+    
     reader.readAsText(file, 'UTF-8');
   } catch (error) {
     console.error('Error reading file:', error);
     alert('Error reading file: ' + error.message);
+    if (onComplete && typeof onComplete === 'function') {
+      onComplete();
+    }
   }
 };

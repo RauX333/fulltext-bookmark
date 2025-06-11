@@ -95,7 +95,7 @@ export const SettingView = () => {
         onCollapse={handleSidebarCollapse}
       />
 
-      <div className={`transition-all duration-300 ease-in-out max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-10 ${sidebarCollapsed ? 'lg:pl-8' : 'lg:pl-[16rem]'}`}>
+      <div className={`transition-all duration-300 ease-in-out max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-10 ${sidebarCollapsed ? 'lg:pl-8' : 'lg:pl-10'}`}>
         {navPage === 0 && (
           <>
             <GeneralSettings
