@@ -1,10 +1,10 @@
 # Privacy Policy for Fulltext Bookmark
 
-This Privacy Policy describes how Fulltext Bookmark ("the Extension") collects, uses, and handles your information when you use our Chrome Extension. (visit https://chromewebstore.google.com/ and search for Fulltext Bookmark for more detail about the extension )
+This Privacy Policy describes how Fulltext Bookmark ("the Extension") collects, uses, and handles your information when you use our Chrome Extension. (You can visit https://chromewebstore.google.com/ and search for "Fulltext Bookmark" for more details about the extension.)
 
 ## 1. Data Collection and Storage
 
-Fulltext Bookmark is designed with privacy in mind. All data processed by the Extension is stored locally on your device using IndexedDB (which is in your Chrome application). Actually we don't have a server to store your data.
+Fulltext Bookmark is designed with privacy in mind. All data processed by the Extension is stored locally on your device using IndexedDB (within your Chrome application). We do not operate any servers to store your data.
 
 ### Information We Store Locally:
 
