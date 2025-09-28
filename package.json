@@ -19,6 +19,7 @@
     "dexie": "^3.2.2",
     "dexie-export-import": "^1.0.3",
     "downloadjs": "^1.4.7",
+    "flexsearch": "^0.8.212",
     "jieba-wasm": "^0.0.2",
     "plasmo": "0.52.1",
     "prop-types": "^15.8.1",
@@ -68,7 +69,9 @@
           "offscreen.html",
           "offscreen.js"
         ],
-        "matches": ["*://*/*"]
+        "matches": [
+          "*://*/*"
+        ]
       }
     ]
   }
