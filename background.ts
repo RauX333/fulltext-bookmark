@@ -599,6 +599,8 @@ function findAndSort(prefixes, field,GPT): Promise<any[]> {
       intArray = intArray.slice(0, userOps.GPTSearchMaxNumber);
     }
 
+    // TODO:maybe we should add a lib to re-rank the results?
+
     // @ts-ignore
     return yield db.pages.bulkGet(intArray);
   });
