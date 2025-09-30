@@ -3,12 +3,34 @@
 
 
 import init, { cut_for_search } from "~lib/jieba_rs_wasm.js";
+import stemmer from "node-snowball";
 
 (async function () {
     await init();
   })();
 
-  
+// Load stopwords from the text file
+const stopwordsData = await fetch("~lib/stopwords_CN_EN.txt")
+  .then(response => response.text())
+  .catch(() => "");
+
+const stopwordsSet = new Set(stopwordsData.split('\n').filter(word => word.trim() !== ""));
+
+export function removeStopWords(words: string[]): string[] {
+  return words.filter(word => !stopwordsSet.has(word));
+}
+
+export function wordStemming(words: string[]): string[] {
+  return words.map(word => {
+    // Only stem English words (letters only), skip Chinese characters
+    if (/^[a-zA-Z]+$/.test(word)) {
+      return stemmer.stemword(word, 'english');
+    }
+    return word;
+  });
+}
+
+
 export function wordSplit(str: string): string[] {
     if (!str || typeof str !== "string") {
       return [];
@@ -21,7 +43,14 @@ export function wordSplit(str: string): string[] {
         return palindrome(e);
       })
       .filter((e) => e !== "" && e !== null && e !== undefined);
-    return a;
+
+    // Remove stopwords
+    const filteredWords = removeStopWords(a);
+
+    // Apply word stemming
+    const stemmedWords = wordStemming(filteredWords);
+
+    return stemmedWords;
   
     // if (judgeChineseChar(str)) {
     //   console.log("chinese char")

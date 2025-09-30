@@ -1,8 +1,9 @@
 # enhance search experience
 - fulltext search 
   - text pre-processing
+    - Removing HTML Tags and URLs
     - remove stop words
-    - stemming (optional)
+    - stemming
   -  use current method to query from indexedDB
   -  result ranking 
     - import a new lib to re-FulltextSearch the results in memory.
