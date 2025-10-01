@@ -21,7 +21,7 @@
     "downloadjs": "^1.4.7",
     "flexsearch": "^0.8.212",
     "jieba-wasm": "^0.0.2",
-    "node-snowball": "^0.8.0",
+    "lancaster-stemmer": "^2.1.0",
     "plasmo": "0.52.1",
     "prop-types": "^15.8.1",
     "react": "18.2.0",
