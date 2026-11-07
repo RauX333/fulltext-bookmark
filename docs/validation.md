@@ -7,12 +7,18 @@ Environment: Windows, Node.js 24.15.0, installed Google Chrome 156.0.8078.80, Pl
 - 18 Node test cases: legacy Redux settings, zero retention, URL normalization/security, same-page updates, atomic concurrent upserts, bilingual search, ranking, fuzzy matching, phrase filters, v1 data migration, expiry cleanup, multiline CSV, legacy backup merge, authenticated encrypted backups, malformed URL encoding and synthetic API connection tests.
 - A separate 13-query relevance corpus checks first-result expectations for Chinese/English stop words, traditional/simplified Chinese, aliases, dotted initialisms, contractions, phrase proximity and bounded partial matching. It also rejects ambiguous acronym guesses and preserves negation. This is a regression corpus, not a general benchmark of all real-world queries.
 - The common-posting regression has 5,005 records and places a rare correct match after the former 5,000-posting cutoff.
-- 10 browser cases exercise dynamic comments, responsive hidden copies, forms/editable fields, open shadow DOM, same-origin frames, virtualized text retention, SPA identity, IME completion, empty results, snippets, tab switching, worker suspension, Weibo expanded/forwarded/recycled cards, bilingual settings and viewport widths 360/390/768/1280.
+- 11 browser cases exercise dynamic comments, responsive hidden copies, forms/editable fields, open shadow DOM, same-origin frames, virtualized text retention, SPA identity, IME completion, empty results, snippets, tab switching, worker suspension, Weibo expanded/forwarded/recycled cards, bilingual settings, backup downloads/restoration and viewport widths 360/390/768/1280.
 - Real headed Chrome toolbar popup: measured `innerWidth=400`, `innerHeight=600`; arrow pagination is present. Side panel, popup and tab preference changes take effect immediately. Explicit mode changes carry the query while preserving the default preference.
 - Actual same-ID Chrome upgrade: seeded the original native IDB v10 (Dexie v1), installed the new build at the same unpacked path, then searched original records without an import. IDs 42/43, timestamps, text, saved flags and original Redux preferences survived. An expired legacy non-bookmark remained after upgrade under the migration grace period.
 - Original Weibo icon pixels are compared against `assets/icon512.png`, allowing lossless PNG re-encoding by the build tool.
 
 Commands: `npm run check`, `npm run format:check`, `npm run test:e2e`, `npm run package`, `npm audit --omit=dev`. Generated evidence remains under `test-results/` and `playwright-report/`, not in the repository. The production zip contains third-party license notices.
+
+## Actual backup export/import check
+
+A separate visible Chrome window uses an isolated profile and synthetic records. The test operates the settings UI: import two initial records, click each export button, verify the actual file on disk, clear only this test database, select the exported file for import, and search for both restored records in the search UI. JSON, CSV and password-encrypted JSON all preserve titles, complete multiline text, Chinese, emoji, commas/quotes, formula-like text, timestamps and bookmark flags. Wrong-password and tampered encrypted-file imports report an error and leave the existing records unchanged.
+
+Export filenames use local date/time, for example `Fulltext-Bookmark-2026-11-08_00-34-33.encrypted.json`. The browser test explicitly uses ordinary download naming instead of Playwright's internal GUID artifact naming and verifies the actual on-disk filename. The authorized daily Chrome debugging session has also had its normal download behavior restored. This test never clears the daily browser database. Evidence: `test-results/evidence/backup-downloads/results.json` and `backup-restored-*.png`.
 
 ## Authorized live Weibo check
 

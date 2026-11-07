@@ -11,6 +11,10 @@ import {
   importPages
 } from '../backup'
 function download(text: string, extension: string) {
+  const now = new Date()
+  const pad = (value: number) => String(value).padStart(2, '0')
+  const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+  const time = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`
   const url = URL.createObjectURL(
     new Blob([text], {
       type: extension === 'csv' ? 'text/csv;charset=utf-8' : 'application/json'
@@ -18,8 +22,11 @@ function download(text: string, extension: string) {
   )
   const anchor = document.createElement('a')
   anchor.href = url
-  anchor.download = `fulltext-bookmark-${new Date().toISOString().slice(0, 10)}.${extension}`
+  anchor.download = `Fulltext-Bookmark-${date}_${time}.${extension}`
+  anchor.hidden = true
+  document.body.append(anchor)
   anchor.click()
+  anchor.remove()
   setTimeout(() => URL.revokeObjectURL(url), 10000)
 }
 export function DataSettings({
