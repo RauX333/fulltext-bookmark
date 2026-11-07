@@ -40,7 +40,7 @@
 | 按用户新稿修正 README，英文版同步 | 已完成 | 保留简洁介绍和 2.0 改进清单，修正标点、空格、标题、链接及代码块；中英文结构一致 |
 | 导出文件应有合适的名称 | 已完成并实测 | Fulltext-Bookmark-本地日期_时间，加 .json / .csv / .encrypted.json；验证磁盘实际文件名，并恢复日常 Chrome 被调试连接改变的下载命名行为 |
 | 实际操作验证导入导出，包括加密 | 已完成 | 有界面 Chrome 逐项导出、清空隔离测试库、从界面选文件导入及搜索；完整内容/日期/书签状态一致；密码错误或密文篡改不改变原数据 |
-| SSH 推送 Gitea，并推送自己的 GitHub | 交付核对项 | 目标分别为 localhost:2222/dongxiajun/fulltext-bookmark 与 RauX333/fulltext-bookmark 的 main；最终交付消息核对远端 SHA |
+| SSH 推送 Gitea，并推送自己的 GitHub | 已完成 | 已推送两个仓库的 main，并通过 ls-remote 分别核对提交；Gitea 使用 localhost:2222 SSH，GitHub 为 RauX333/fulltext-bookmark |
 | 按表格列出全部要求及客户评论 | 已完成 | 本清单与最终交付表格 |
 
 ## 截图中的客户评论
