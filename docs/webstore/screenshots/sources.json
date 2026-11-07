@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "width": 1280,
+  "height": 800,
+  "format": "JPEG",
+  "isolatedProfile": true,
+  "accountsUsed": false,
+  "sources": [
+    "https://en.wikipedia.org/wiki/Solar_System",
+    "https://en.wikipedia.org/wiki/Planet",
+    "https://en.wikipedia.org/wiki/Mars",
+    "https://zh.wikipedia.org/wiki/太阳系",
+    "https://zh.wikipedia.org/wiki/行星",
+    "https://zh.wikipedia.org/wiki/火星"
+  ],
+  "searchEngines": [
+    "https://www.baidu.com/",
+    "https://www.bing.com/"
+  ]
+}

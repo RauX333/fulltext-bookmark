@@ -1,0 +1,47 @@
+Fulltext Bookmark
+
+Save the text of pages you visit and find your bookmarks and browsing history by the words you remember.
+
+🎇 What's new in 2.0
+More reliable page capture, improved Chinese and English full-text search, side panel search, and encrypted backups.
+
+🔍 Search beyond page titles
+Search saved pages by title, text, or URL, with snippets and highlighted matches. Find exact phrases, match simplified and traditional Chinese, and use English word forms, common abbreviations, and fuzzy spelling matches. Improved handling of common function words helps keep results relevant.
+
+💾 Save the text you browse
+Automatically save loaded webpage text and follow changes such as expanded articles, scrolling content, and dynamically loaded comments. Choose retention periods and excluded URLs to control what gets saved.
+
+📜 Three ways to search
+Search in the side panel by default, or use the extension popup or a dedicated tab. Choose what opens when you click the extension icon in Settings.
+
+📎 Search from the address bar
+Type kw in Chrome's address bar, press Tab, and enter your keywords to search saved content.
+
+🥇 Find saved pages while searching the web
+See a matching saved page alongside Google, Bing, or Baidu search results and rediscover content you have read before.
+
+🦉 Save interesting Weibo posts
+Updated for the current Weibo interface, including expanded long posts and reposted text. Search their saved content later.
+
+🗂️ Find and switch to open tabs
+Search your open tabs and switch directly to the one you need.
+
+⌨️ Back up and restore
+Export and import JSON or CSV files, including backups from earlier versions. Add a password to export an encrypted backup and restore it when needed. Encryption applies to backup files, not the extension's active database.
+
+🌏 Chinese and English interfaces
+Full support for Simplified Chinese and English, with improved layouts for smaller screens.
+
+😺 Local use, no account required
+Free to use. Saved page text and searches are processed on your device by default, without an account or cloud service.
+
+✉️ Optional custom API
+If you choose, configure a custom API to receive page metadata such as titles and URLs. This feature is off by default and includes a connection test.
+
+Upgrading from an earlier version
+Update through the original Chrome Web Store listing to keep using your existing data. No export or import is required.
+
+What gets saved
+The extension saves webpage text that your browser has loaded. Importing existing browser history provides titles, URLs, and other available metadata; revisit pages to capture text that was never saved.
+
+Version 2.0: Rebuilt page capture and search, updated Weibo support, added side panel and tab search, introduced encrypted backups, improved bilingual interfaces and smaller-screen layouts, and fixed numerous bugs. The former AskGPT feature has been removed.
