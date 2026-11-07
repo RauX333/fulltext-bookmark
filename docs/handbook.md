@@ -1,124 +1,23 @@
-# Fulltext Bookmark Handbook
+# User handbook
 
-## Project Overview
+Fulltext Bookmark saves the text loaded in pages you browse and makes it searchable later. The toolbar icon opens the side panel by default. In **Settings → Search → Clicking the extension icon opens**, choose side panel, popup or search tab. Switching views from the search header carries your query and does not change this default. The toolbar popup is 400 × 600 CSS pixels on a sufficiently large screen.
 
-Fulltext Bookmark is a Chrome extension developed with the Plasmo framework that enhances bookmark and browsing history management. It provides powerful search capabilities by storing and indexing bookmarked pages and browsing history for full-text search.
+## Search
 
-## Key Features
+Type keywords in the search box, or enter `kw` and press Tab in Chrome's address bar. Use the title/text/URL field selector, bookmark filter and date/relevance sort. Double quotes require a complete phrase. English typo matching is optional; stemming, Chinese segmentation, simplified/traditional forms and supported abbreviation aliases work automatically. Negation is preserved. When only a majority of query terms match, the results explicitly say so.
 
-- 🔍 Enhanced bookmark/browsing history search
-- 💾 Storage and indexing of bookmarked pages and visited pages for full-text search
-- 🦉 Bookmark and search Weibo posts
-- 🥇 Display best-matched search results in search engine pages (Google/Bing/Baidu)
-- 📎 Search from Chrome's search bar using the 'kw' prefix
-- 📜 Search from the extension's popup page for more comprehensive results
-- 😺 Local storage for privacy (no accounts, no cloud)
-- ✉️ Optional remote API integration for sending bookmark/browsing history
-- 📊 Data export functionality (JSON and Excel formats)
+Results show matching snippets. **Read saved text** opens the archived text. **Open tabs** searches titles/URLs of tabs you currently have open and can switch directly to them. Existing browser-history imports do not contain page bodies; visit those pages to add text.
 
-## Project Structure
+## Capture and Weibo
 
-### Core Components
+Capture includes loaded comments, expanded text, responsive content and virtualized lists you scroll through. Hidden content and form inputs are excluded. For long Weibo posts, expand the post first and click the original iceberg save button. Saved posts can be updated by clicking again. Forwarded post text is included when loaded. The button does not like, post, or otherwise change your Weibo account.
 
-1. **Background Script** (`background.ts`)
-   - Manages the database operations using Dexie
-   - Handles message passing between different parts of the extension
-   - Processes bookmarks and page content
-   - Implements search functionality
+## Settings and backups
 
-2. **Content Scripts**
-   - `visitedPage.ts`: Processes and extracts content from visited pages
-   - `google.ts`: Integrates with search engine results
-   - `weibo.ts`: Provides Weibo-specific functionality
+Capture settings control automatic saving, bookmark synchronization, Weibo buttons, retention days (0 = forever) and URL exclusions. Search settings include language, default view, page size, bookmarks-only default, fuzzy matching, search-engine integration and omnibox search.
 
-3. **Popup UI** (`popup/`)
-   - `index.tsx`: Entry point for the popup
-   - `search.tsx`: Implements search functionality in the popup
-   - `GPTSearch.tsx`: Provides GPT-assisted search capabilities
+JSON and CSV exports include saved text. Imports merge records while retaining newer existing text. Optional encrypted backups require a password of at least eight characters; the password is not saved, and this encrypts the backup file only. The optional custom API sends page metadata to the address you configure. **Test connection** sends one synthetic record without history or page text.
 
-4. **Options Page** (`options/`)
-   - `settings.tsx`: Main settings interface with various configuration options
-   - `Feature.tsx`: Displays feature information
-   - `Donate.tsx`: Provides donation information
+Existing users of the original store listing upgrade directly with their saved records and settings. The background index may need time to update; an in-progress message appears. See [compatibility details](architecture.md#upgrade-contract). The developer unpacked build has a different extension ID and separate data.
 
-5. **Libraries** (`lib/`)
-   - `interface.ts`: Defines TypeScript interfaces
-   - `textsplitter.ts`: Text processing utilities
-   - `wordSplit.ts`: Word splitting functionality for search indexing
-   - `utils.ts`: General utility functions
-
-### Database Structure
-
-The extension uses Dexie.js (IndexedDB wrapper) with three main stores:
-
-1. **pages**: Stores metadata about pages
-   - URL, title, date, bookmark status, page ID
-
-2. **contents**: Stores the actual content of pages
-   - Content text, content words (tokenized), title words (tokenized)
-
-3. **vectors**: Stores embedding vectors for semantic search
-
-## User Interface
-
-### Popup
-
-The popup interface provides a search box and displays search results with relevant information such as title, URL, and content snippets.
-
-### Options Page
-
-The options page is divided into several sections:
-
-1. **Display Settings**
-   - Search engine adaptation
-   - Bookmark adaptation
-   - Show only bookmarked results
-
-2. **Search Settings**
-   - Maximum results
-   - Page expiration time
-
-3. **Indexing Settings**
-   - Exclusion rules for URLs
-   - Weibo support
-
-4. **Remote Storage**
-   - Enable/disable remote storage
-   - Configure remote storage URL
-   - Option to store every page or only bookmarks
-
-5. **GPT Settings**
-   - Enable/disable GPT integration
-   - Configure GPT URL and API key
-   - Test GPT connection
-
-6. **Data Management**
-   - Clear all data
-   - Export data (JSON and Excel formats)
-
-## Data Flow
-
-1. When a user visits a page, the content script extracts the page content
-2. The content is sent to the background script for processing and storage
-3. When a user searches, the query is processed by the background script
-4. Search results are retrieved from the database and displayed to the user
-5. For GPT-assisted searches, the query is sent to the configured GPT API
-
-## Export Functionality
-
-The extension provides ways to export all stored data in both JSON and CSV (Excel) formats. This is useful for backup purposes or for analyzing the data outside of the extension.
-
-- **JSON Export**: Exports the complete database structure including all tables and metadata.
-- **Excel Export**: Exports the pages data in CSV format, which can be opened directly in Excel or other spreadsheet applications. The CSV includes columns for URL, title, description, bookmark status, creation date, and last updated date.
-
-## Development
-
-To build the extension:
-
-```bash
-pnpm build
-# or
-npm run build
-```
-
-This creates a production bundle for the extension that can be loaded into Chrome.
+[中文使用说明](../README.md) · [Build and development](../README.en.md)

@@ -1,0 +1,30 @@
+name: Validate extension
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run check
+      - run: npx playwright install --with-deps chrome
+      - run: xvfb-run -a npm run test:e2e
+      - run: npm run package
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: extension-and-test-results
+          path: |
+            build/chrome-mv3-prod.zip
+            playwright-report/
+            test-results/

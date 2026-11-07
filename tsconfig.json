@@ -1,11 +1,21 @@
 {
-  "extends": "plasmo/templates/tsconfig.base",
-  "exclude": ["node_modules"],
-  "include": [".plasmo/**/*", "./**/*.ts", "./**/*.tsx"],
   "compilerOptions": {
-    "paths": {
-      "~*": ["./*"]
-    },
-    "baseUrl": "."
-  }
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "ES2022.Intl"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": ["chrome", "node"]
+  },
+  "include": [
+    ".plasmo/index.d.ts",
+    "src",
+    "tests",
+    "scripts",
+    "playwright.config.ts"
+  ]
 }
