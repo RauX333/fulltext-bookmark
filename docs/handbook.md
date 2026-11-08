@@ -20,4 +20,4 @@ JSON and CSV exports include saved text. Imports merge records while retaining n
 
 Existing users of the original store listing upgrade directly with their saved records and settings. The background index may need time to update; an in-progress message appears. See [compatibility details](architecture.md#upgrade-contract). The developer unpacked build has a different extension ID and separate data.
 
-[中文使用说明](../README.md) · [Build and development](../README.en.md)
+[中文使用说明](../README.zh-CN.md) · [Build and development](../README.md)
