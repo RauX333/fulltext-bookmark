@@ -8,19 +8,15 @@ Hey, it's been a while! This update brings a whole batch of improvements.
 
 ## What's new in 2.0
 
-- Improved webpage text capture.
-- A second live audit covers 50 new Chinese and 50 new international sites, with dedicated article adapters and fixes for repeated table values and missing content cards.
-- Further audits cover 100 non-IT sites and 100 traffic-ranked blog candidates, with source-backed ranking methodology. Adapters now have a reusable [domain and shared-component structure](src/adapters/README.md).
-- The initial exclusion list now includes common webmail sites (Gmail, Outlook, QQ/Tencent business mail, NetEase, iCloud Mail and more) to avoid automatically saving email. Rules are editable; upgrades preserve existing lists, so existing users can add these exclusions themselves.
-- ChatGPT, Gemini and DeepSeek message and conversation saving, enabled by default. Save icons follow each native message action row; the conversation icon sits outside the composer, and saved text has a green check. Automatic saving waits for responses to finish; saved messages are grouped into a conversation with chat bubbles in search previews. Both features can be switched off in Settings.
-- Updated Weibo saving support for the latest Weibo interface.
-- X (Twitter) post saving. Weibo and X default to saving text only when you click **Save post**; each site has separate automatic capture and enable settings.
-- Settings save automatically, with validation alerts that preserve your last valid settings.
-- More accurate search to help you find what you need.
-- Side panel and new-tab search.
-- Encrypted backup exports.
-- Better support for smaller screens.
-- Many interface and feature improvements, plus bug fixes.
+- Improved webpage text capture, with broader site support and less page clutter.
+- Save ChatGPT, Gemini and DeepSeek messages and conversations.
+- Save Weibo and X (Twitter) posts, with optional automatic capture.
+- Search more accurately with phrases, wildcards, site filters and built-in search help.
+- Preview saved text as Markdown and export individual items to Markdown or PDF.
+- Search in the side panel or a new tab.
+- Settings save automatically with input validation; new installations exclude common webmail sites from automatic capture.
+- Export encrypted backups and keep existing data when upgrading.
+- Reduced extension permissions, better support for small screens, and various fixes.
 
 ## Upgrading from an earlier version
 
