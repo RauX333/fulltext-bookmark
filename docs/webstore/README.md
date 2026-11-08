@@ -1,4 +1,28 @@
-# Chrome Web Store materials · 2.0.0
+# Chrome Web Store materials · 2.0.1
+
+2.0.1 移除多余的 `tabs` 权限，保留 HTTP/HTTPS 站点权限以支持网页全文保存和已打开标签页搜索。重新提交时使用 `build/Fulltext-Bookmark-2.0.1-chrome.zip`；下列说明和截图继续适用。
+
+构建后还会清理 Plasmo 为内嵌微博图标生成的多余 PNG 资源声明，避免 manifest 引用不存在的文件；实际图标继续内嵌在内容脚本中。
+
+## 2.0.1 权限核查
+
+| 权限 | 当前用途及结论 |
+| --- | --- |
+| `tabs` | 已移除。标签页搜索只处理 HTTP/HTTPS 页面，已有站点权限覆盖其标题、URL 读取；创建、切换标签页不需要此权限。 |
+| `storage` | 保留。`src/settings.ts` 保存设置，`src/SearchView.tsx` 使用 session storage 传递侧边栏查询词。 |
+| `bookmarks` | 保留。`src/background.ts` 查询书签状态、同步现有书签，并监听新增、修改和删除。当前每次抓取也会查询书签状态，不能只删除声明。 |
+| `alarms` | 保留。`src/background.ts` 定时清理过期内容，并分批恢复索引重建。 |
+| `webNavigation` | 保留。`src/background.ts` 校验抓取消息对应的当前文档，并监听单页应用路由和 hash 变化。 |
+| `unlimitedStorage` | 建议保留。正文及全文索引存储在 IndexedDB；此声明直接提供存储配额和自动驱逐豁免，不需要对应的 API 调用。取消后小数据量仍可工作，但要设计容量限制、配额错误处理及持久存储策略。 |
+| `sidePanel` | 保留。侧边栏是默认搜索入口，`src/presentation.ts` 和 `src/SearchView.tsx` 调用侧边栏 API。 |
+| `history`（可选） | 保留可选声明。只在用户点击“导入浏览历史”时申请，后台确认授权后读取历史。 |
+| `http://*/*`、`https://*/*` | 保留当前站点范围。自动全文保存覆盖任意网页，标签页标题/URL 查询及用户配置的远程 API 请求也使用此范围。缩小为按站点授权需要同步调整功能与授权流程。 |
+
+若将书签集成改为用户主动开启，可将 `bookmarks` 改为可选权限，同时为所有相关 API 调用与监听器补充未授权处理。当前默认启用书签集成，因此 2.0.1 保持现有功能，只移除确定冗余的 `tabs`。
+
+依据：[Chrome 权限列表](https://developer.chrome.com/docs/extensions/reference/permissions-list)、[存储配额与持久性](https://developer.chrome.com/docs/extensions/develop/concepts/storage-and-cookies)、[可选权限](https://developer.chrome.com/docs/extensions/reference/api/permissions)、[多余权限审核说明](https://developer.chrome.com/docs/webstore/troubleshooting#excessive-permissions)。
+
+## 商店素材
 
 - 中文说明：`description.zh-CN.txt`
 - English description: `description.en.txt`

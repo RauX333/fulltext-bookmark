@@ -1,5 +1,14 @@
 # Validation record — 2026-11-08
 
+## 2.0.1 permission fix and package verification
+
+- Removed the redundant `tabs` permission and bumped the package and lockfile versions to 2.0.1. Remaining permissions and their call sites are documented in `docs/webstore/README.md`.
+- Type checking, formatting, all 18 Node tests and all 11 browser tests passed. The browser suite includes open-tab search/switching, capture, backup restoration and same-ID upgrades.
+- A clean build reproduced Plasmo's dangling `web_accessible_resources` declaration for the inline Weibo PNG. The postbuild finalizer removes only the missing generated capture PNG when the content script embeds a PNG data URL and does not reference that filename. Four isolated checks verified removal of the inline declaration, retention of existing files, and failure for referenced or unrelated missing resources. The real Chrome Weibo test, including original icon pixel comparison, passed again after finalization.
+- Final `build/Fulltext-Bookmark-2.0.1-chrome.zip`: version 2.0.1, no required or optional `tabs`, HTTP/HTTPS host permissions retained, all declared resources present, all 30 archive entries match the final build. Size: 1,213,440 bytes; SHA-256: `c9541e5abd6df8c641fd64ff11a3bc0c38f5dee3bc88e1c8a1514beb6f097baa`.
+
+## Original 2.0.0 validation
+
 Environment: Windows, Node.js 24.15.0, installed Google Chrome 156.0.8078.80, Plasmo 0.90.5, Manifest V3. Chrome tests use temporary isolated profiles except the explicitly authorized logged-in Weibo check.
 
 ## Automated coverage

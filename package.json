@@ -1,7 +1,7 @@
 {
   "name": "fulltext-bookmark",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.0.1",
   "displayName": "__MSG_extensionName__",
   "description": "__MSG_extensionDescription__",
   "author": "RauX",
@@ -21,14 +21,13 @@
     "check": "npm run typecheck && npm test && npm run build",
     "benchmark:chrome": "node scripts/browser-benchmark.mjs",
     "format:check": "prettier --check src tests scripts",
-    "postbuild": "node scripts/license-notices.mjs"
+    "postbuild": "node scripts/license-notices.mjs && node scripts/finalize-manifest.mjs"
   },
   "manifest": {
     "minimum_chrome_version": "127",
     "default_locale": "en",
     "permissions": [
       "storage",
-      "tabs",
       "bookmarks",
       "alarms",
       "webNavigation",
