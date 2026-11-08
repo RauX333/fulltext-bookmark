@@ -6,6 +6,8 @@ export function ConnectionSettings({
   settings,
   patch,
   toggle,
+  inputProps,
+  errors,
   task,
   setStatus
 }: EditorProps & TaskProps) {
@@ -26,15 +28,25 @@ export function ConnectionSettings({
       >
         {toggle('remoteStore')}
       </Field>
-      <Field title={t('API 地址', 'API URL')}>
+      <Field
+        title={t('API 地址', 'API URL')}
+        error={errors?.remoteStoreURL}
+        errorId="remoteStoreURL-error"
+      >
         <input
+          {...inputProps?.('remoteStoreURL')}
           type="url"
           value={settings.remoteStoreURL}
           onChange={(e) => patch('remoteStoreURL', e.target.value)}
         />
       </Field>
-      <Field title={t('API 密钥（可选）', 'API key (optional)')}>
+      <Field
+        title={t('API 密钥（可选）', 'API key (optional)')}
+        error={errors?.remoteStoreKey}
+        errorId="remoteStoreKey-error"
+      >
         <input
+          {...inputProps?.('remoteStoreKey')}
           type="password"
           value={settings.remoteStoreKey}
           onChange={(e) => patch('remoteStoreKey', e.target.value)}

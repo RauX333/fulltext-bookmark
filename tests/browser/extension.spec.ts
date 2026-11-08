@@ -145,9 +145,8 @@ test('popup and settings fit 360px, 390px, 768px and desktop widths; settings pe
   await expect(settings.locator('#capture')).toBeVisible()
   const retention = settings.locator('input[type=number]').first()
   await retention.fill('0')
-  await settings.getByRole('button', { name: /保存设置|Save settings/ }).click()
-  await expect(settings.getByRole('status')).toContainText(
-    /设置已保存|Settings saved/
+  await expect(settings.getByTestId('settings-save-status')).toContainText(
+    /设置已自动保存|Settings saved automatically/
   )
   await settings.reload()
   await expect(retention).toHaveValue('0')
@@ -207,12 +206,13 @@ test('Weibo card adapter re-reads expanded and recycled posts; local save only',
   await page.route('https://weibo.com/fixture', (route) =>
     route.fulfill({
       contentType: 'text/html; charset=utf-8',
-      body: '<article><a class="_time_abc_33" href="https://weibo.com/1234567890/AbCdE1234">Today</a><a class="_name_abc_120">测试作者</a><div class="wbpro-feed-content"><div class="detail_wbtext">WeiboInitial 桃花</div></div><div class="retweet"><div class="wbpro-feed-reText">RetweetedBirch 原微博转发正文</div></div><footer></footer></article>'
+      body: '<article><a class="_time_abc_33" href="https://weibo.com/1234567890/AbCdE1234">Today</a><a class="_name_abc_120">测试作者</a><div class="wbpro-feed-content"><div class="detail_wbtext">WeiboInitial 桃花</div></div><div class="retweet"><div class="wbpro-feed-reText">RetweetedBirch 原微博转发正文</div><footer></footer></div><footer></footer></article>'
     })
   )
   await page.goto('https://weibo.com/fixture')
   const button = page.locator('[data-ftb-weibo]')
   await expect(button).toHaveCount(1)
+  await expect(page.locator('.retweet [data-ftb-weibo]')).toHaveCount(0)
   await expect(button.locator('img')).toHaveAttribute(
     'alt',
     'Fulltext Bookmark'
@@ -281,14 +281,8 @@ test('all screens switch between English and Chinese and retain omnibox settings
   const language = settings.locator('#search select').last()
   for (const locale of ['en', 'zh-CN']) {
     await language.selectOption(locale)
-    await settings
-      .getByRole('button', {
-        name: locale === 'en' ? 'Save settings' : '保存设置',
-        exact: true
-      })
-      .click()
-    await expect(settings.getByRole('status')).toContainText(
-      locale === 'en' ? 'Settings saved' : '设置已保存'
+    await expect(settings.getByTestId('settings-save-status')).toContainText(
+      locale === 'en' ? 'Settings saved automatically' : '设置已自动保存'
     )
     await extension.reload()
     await expect(extension.locator('.search-box input')).toHaveAttribute(
@@ -310,7 +304,7 @@ test('all screens switch between English and Chinese and retain omnibox settings
       )
     ).toBeChecked()
     expect(await settings.locator('body').innerText()).not.toMatch(
-      /GPT|OpenAI|内容保存在本机/
+      /\bGPT\b|OpenAI|内容保存在本机/
     )
   }
   await settings.close()

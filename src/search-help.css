@@ -1,0 +1,80 @@
+.search-shell .app-header {
+  position: relative;
+}
+.search-shell .header-actions {
+  align-items: center;
+}
+.header-actions .search-help-button {
+  width: 32px;
+  min-width: 32px;
+  padding: 6px;
+  border-radius: 50%;
+  color: #64748b;
+}
+.header-actions .search-help-button:hover,
+.header-actions .search-help-button[aria-expanded='true'] {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.search-help-panel {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% - 2px);
+  right: 0;
+  width: min(460px, calc(100vw - 32px));
+  max-height: min(72vh, 580px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px;
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 36px #0f172a26;
+  color: #334155;
+  font-size: 13px;
+  text-align: left;
+}
+.search-help-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.search-help-heading h2 {
+  margin: 0;
+  font-size: 16px;
+}
+.header-actions .search-help .search-help-heading button {
+  font-size: 22px;
+  min-width: 32px;
+}
+.search-help-panel p {
+  margin: 6px 0 12px;
+}
+.search-help-panel dl {
+  margin: 0;
+}
+.search-help-panel dl > div {
+  padding: 10px 0;
+  border-top: 1px solid #edf1f6;
+}
+.search-help-panel code {
+  color: #1d4ed8;
+  overflow-wrap: anywhere;
+  font-family: Consolas, 'Cascadia Mono', monospace;
+  font-size: 13px;
+}
+.search-help-example-label {
+  color: #64748b;
+  font-size: 12px;
+  margin-inline-end: 4px;
+}
+.search-help-panel dd {
+  margin: 5px 0 0;
+  line-height: 1.6;
+}
+.search-help-panel .search-help-note {
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 12px;
+}

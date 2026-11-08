@@ -1,10 +1,12 @@
 import { t } from './i18n'
+import { contentContextActive, onContentInvalidated } from './content-context'
 export function installSearchCompanion(enabled: () => boolean) {
   if (!/(^|\.)(google\.[a-z.]+|bing\.com|baidu\.com)$/.test(location.hostname))
     return
   let last = '',
     timeout = 0
   const run = async () => {
+    if (!contentContextActive()) return
     if (!enabled()) {
       document.querySelector('[data-ftb-companion]')?.remove()
       return
@@ -18,7 +20,13 @@ export function installSearchCompanion(enabled: () => boolean) {
         command: 'search-companion',
         query
       })
-      if (!response?.ok || !response.result || last !== query) return
+      if (
+        !contentContextActive() ||
+        !response?.ok ||
+        !response.result ||
+        last !== query
+      )
+        return
       document.querySelector('[data-ftb-companion]')?.remove()
       const container = document.querySelector(
         '#search, #b_results, #content_left'
@@ -50,6 +58,7 @@ export function installSearchCompanion(enabled: () => boolean) {
     }
   }
   const observer = new MutationObserver((mutations) => {
+    if (!contentContextActive()) return
     if (
       mutations.every((m) =>
         (m.target instanceof Element
@@ -63,5 +72,10 @@ export function installSearchCompanion(enabled: () => boolean) {
     timeout = window.setTimeout(() => void run(), 900)
   })
   observer.observe(document.body, { childList: true, subtree: true })
+  onContentInvalidated(() => {
+    observer.disconnect()
+    clearTimeout(timeout)
+    document.querySelector('[data-ftb-companion]')?.remove()
+  })
   void run()
 }

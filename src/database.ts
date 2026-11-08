@@ -1,6 +1,12 @@
 import Dexie, { type Table } from 'dexie'
 import type { PageRecord, ContentRecord, PageInput } from './types'
+import {
+  chatConversationUrl,
+  mergeConversation,
+  readConversation
+} from './chatgpt-data'
 import { indexWords, deletions, hashText, normalizeUrl } from './text'
+import { mergeArticleSnapshot } from './captured-snapshot'
 export const INDEX_VERSION = 3
 export const MAX_CONTENT_LENGTH = 1_000_000
 interface TermRecord {
@@ -75,6 +81,12 @@ export async function savePage(
   database = db
 ): Promise<{ id: number; changed: boolean }> {
   const url = normalizeUrl(input.url)
+  const conversation = readConversation(input.conversation)
+  if (
+    input.conversation &&
+    (!conversation || !chatConversationUrl(url, conversation.site))
+  )
+    throw new Error('Invalid chat conversation')
   const title = (typeof input.title === 'string' ? input.title : '').slice(
     0,
     4000
@@ -95,10 +107,23 @@ export async function savePage(
         ? await database.contents.get(existing.id)
         : undefined
       const merged =
-        input.mergeContent && content && old?.content
-          ? mergeCapturedText(old.content, content)
+        input.mergeContent &&
+        content &&
+        old?.content &&
+        existing?.captureProfile === input.captureProfile
+          ? input.captureProfile
+            ? mergeArticleSnapshot(
+                old.content,
+                content,
+                Math.max(MAX_CONTENT_LENGTH, old.content.length)
+              )
+            : mergeCapturedText(old.content, content)
           : undefined
-      const nextText = merged?.text || content || old?.content || ''
+      const chat = conversation
+        ? mergeConversation(old?.conversation, conversation)
+        : undefined
+      const nextText =
+        chat?.content || merged?.text || content || old?.content || ''
       const nextTitle = title || existing?.title || url
       const contentHash = hashText(nextText),
         titleHash = hashText(nextTitle)
@@ -106,6 +131,9 @@ export async function savePage(
         !existing ||
         existing.contentHash !== contentHash ||
         existing.titleHash !== titleHash ||
+        (!!chat &&
+          JSON.stringify(chat.conversation) !==
+            JSON.stringify(old?.conversation)) ||
         existing.indexVersion !== INDEX_VERSION
       const page: PageRecord = {
         ...existing,
@@ -121,14 +149,24 @@ export async function savePage(
         contentHash,
         titleHash,
         source: content ? 'page' : existing?.source || input.source || 'page',
+        captureProfile: content
+          ? input.captureProfile
+          : existing?.captureProfile,
         truncated:
-          merged?.truncated || (input.truncated ?? existing?.truncated ?? false)
+          chat?.truncated ||
+          merged?.truncated ||
+          (input.truncated ?? existing?.truncated ?? false)
       }
       const id = await database.pages.put(page)
       if (changed) {
         const next: ContentRecord = {
           pid: id,
           content: nextText,
+          conversation:
+            chat?.conversation ||
+            (content && content !== old?.content
+              ? undefined
+              : old?.conversation),
           contentWords:
             old && existing?.contentHash === contentHash
               ? old.contentWords
@@ -169,6 +207,7 @@ export async function reindexBatch(database = db, batchSize = 25) {
         const next: ContentRecord = {
           pid: current.id!,
           content: content?.content || '',
+          conversation: content?.conversation,
           contentWords: indexWords(content?.content || ''),
           titleWords: indexWords(current.title || ''),
           urlWords: indexWords(safeDecode(current.url || ''))

@@ -1,4 +1,6 @@
-import { preferredRoots } from './adapters'
+import { preferredRoots, selectAdapter, articleNoise } from './adapters'
+import { isCaptureInterstitial } from './capture-policy'
+import { mergeArticleSnapshot } from './captured-snapshot'
 export const MAX_CAPTURE_LENGTH = 1_000_000
 const skipTags = new Set([
   'SCRIPT',
@@ -52,6 +54,7 @@ export interface Capture {
   truncated: boolean
   roots: (Document | ShadowRoot)[]
   nodes: number
+  profile?: string
 }
 export function idle(): Promise<void> {
   return new Promise((resolve) => {
@@ -64,19 +67,61 @@ export function idle(): Promise<void> {
 // text are first-class content. Yield frequently to preserve scrolling and typing.
 export async function extractVisibleText(
   root: Document | Element,
-  cancelled = () => false
+  cancelled = () => false,
+  ignoreSelector?: string
 ): Promise<Capture> {
   const document =
     root.nodeType === 9 ? (root as Document) : root.ownerDocument!
+  if (root.nodeType === 9 && isCaptureInterstitial(document))
+    return { text: '', truncated: false, roots: [document], nodes: 0 }
+  if (root.nodeType === 1 && hiddenAncestor(root as Element))
+    return { text: '', truncated: false, roots: [document], nodes: 0 }
   const preferred =
     root.nodeType === 9
       ? preferredRoots(document, document.location?.hostname || '')
       : []
+  const adapter =
+    root.nodeType === 9
+      ? selectAdapter(
+          document.location?.hostname || '',
+          document.location?.pathname
+        )
+      : undefined
+  const isolated = !!adapter?.isolate
+  const stops = (isolated ? adapter?.stopBefore || [] : []).map((rule) => ({
+    selector: rule.selector,
+    text: new RegExp(rule.text.source, rule.text.flags.replace(/[gy]/g, ''))
+  }))
+  const excludedBlocks = (isolated ? adapter?.excludeBlocks || [] : []).map(
+    (rule) => ({
+      selector: rule.selector,
+      text: new RegExp(rule.text.source, rule.text.flags.replace(/[gy]/g, ''))
+    })
+  )
+  const visibleAriaHidden = adapter?.visibleAriaHidden?.join(',')
+  const profile = isolated
+    ? `${adapter!.id}:${adapter!.revision ?? 2}`
+    : undefined
+  const ignored = [
+    ignoreSelector,
+    ...(isolated ? [articleNoise, ...(adapter?.ignore || [])] : [])
+  ]
+    .filter(Boolean)
+    .join(',')
   const visited = new WeakSet<Node>()
   const stack: (Node | string)[] =
-    root.nodeType === 9 ? [document.body, ...preferred.reverse()] : [root]
+    root.nodeType === 9
+      ? [...(isolated ? [] : [document.body]), ...preferred.reverse()]
+      : [root]
   const parts: string[] = [],
-    roots: (Document | ShadowRoot)[] = [document]
+    roots: (Document | ShadowRoot)[] = [
+      document,
+      ...new Set(
+        preferred
+          .map((element) => element.getRootNode())
+          .filter((node): node is ShadowRoot => node instanceof ShadowRoot)
+      )
+    ]
   let size = 0,
     nodes = 0,
     sliceStart = performance.now(),
@@ -110,13 +155,19 @@ export async function extractVisibleText(
     if (node.nodeType === 1) {
       const element = node as HTMLElement
       // A preferred article can still be inside a collapsed/responsive container.
-      if (preferred.includes(element) && hiddenAncestor(element)) continue
+      if (
+        preferred.includes(element) &&
+        (hiddenAncestor(element) || (ignored && element.closest(ignored)))
+      )
+        continue
       if (
         skipTags.has(element.tagName) ||
+        (ignored && element.matches(ignored)) ||
         element.hidden ||
         element.closest('[data-ftb-owned]') ||
         element.isContentEditable ||
-        element.getAttribute('aria-hidden') === 'true'
+        (element.getAttribute('aria-hidden') === 'true' &&
+          !(visibleAriaHidden && element.matches(visibleAriaHidden)))
       )
         continue
       if (element.tagName === 'DETAILS' && !element.hasAttribute('open')) {
@@ -132,6 +183,11 @@ export async function extractVisibleText(
         style?.opacity === '0'
       )
         continue
+      const matchesBlock = (rule: { selector: string; text: RegExp }) =>
+        element.matches(rule.selector) &&
+        rule.text.test((element.textContent || '').replace(/\s+/g, ' ').trim())
+      if (excludedBlocks.some(matchesBlock)) continue
+      if (stops.some(matchesBlock)) break
       if (element.tagName === 'IFRAME') {
         try {
           const child = (element as HTMLIFrameElement).contentDocument
@@ -155,7 +211,14 @@ export async function extractVisibleText(
       }
       if (element.tagName === 'IMG') {
         const alt = (element as HTMLImageElement).alt
-        if (alt && alt.length < 80) {
+        // Inline icons often repeat the adjacent link label (e.g. Kotlin's
+        // Slack link). Keep useful image descriptions without duplicating it.
+        if (
+          alt &&
+          alt.length < 80 &&
+          !/^(?:image|photo|picture|图片|图像)$/i.test(alt.trim()) &&
+          !element.parentElement?.textContent?.includes(alt)
+        ) {
           parts.push(alt)
           size += alt.length
         }
@@ -181,19 +244,24 @@ export async function extractVisibleText(
     text: cleanText(parts.join('')).slice(0, MAX_CAPTURE_LENGTH),
     truncated,
     roots,
-    nodes
+    nodes,
+    profile
   }
 }
 function hiddenAncestor(element: Element) {
   for (
-    let parent = element.parentElement;
+    let parent: Element | null =
+      element.parentElement ||
+      (element.getRootNode() as ShadowRoot).host ||
+      null;
     parent;
-    parent = parent.parentElement
+    parent =
+      parent.parentElement || (parent.getRootNode() as ShadowRoot).host || null
   ) {
     const style = parent.ownerDocument.defaultView?.getComputedStyle(parent)
     if (
-      parent.hidden ||
-      parent.isContentEditable ||
+      parent.hasAttribute('hidden') ||
+      (parent as HTMLElement).isContentEditable ||
       parent.getAttribute('aria-hidden') === 'true' ||
       style?.display === 'none' ||
       style?.visibility === 'hidden' ||
@@ -215,10 +283,21 @@ export function cleanText(text: string): string {
 // Preserve already-seen blocks when a virtualized list removes them from the DOM.
 // Session-scoped only; a different URL starts a fresh snapshot.
 export class SeenText {
+  private snapshot = ''
   private blocks = new Map<string, true>()
   private length = 0
   truncated = false
-  add(text: string) {
+  add(text: string, preserveSnapshot = false) {
+    if (preserveSnapshot) {
+      const merged = mergeArticleSnapshot(
+        this.snapshot,
+        text,
+        MAX_CAPTURE_LENGTH
+      )
+      this.snapshot = merged.text
+      this.truncated ||= merged.truncated
+      return this.snapshot
+    }
     for (const block of text.split('\n')) {
       if (!block || this.blocks.has(block)) continue
       if (this.length + block.length > MAX_CAPTURE_LENGTH) {

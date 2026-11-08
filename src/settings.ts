@@ -1,3 +1,6 @@
+import { isTwitterHost } from './twitter-url'
+import { chatSiteForHost } from './chatgpt-data'
+
 export const SETTINGS_KEY = 'settings.v2'
 export const LEGACY_KEY = 'persist:fulltextbookmark'
 export const defaults = {
@@ -8,6 +11,15 @@ export const defaults = {
   searchEngineAdaption: true,
   showOnlyBookmarkedResults: false,
   weiboSupport: true,
+  weiboAutoCapture: false,
+  twitterSupport: true,
+  twitterAutoCapture: false,
+  chatgptSupport: true,
+  chatgptAutoCapture: true,
+  geminiSupport: true,
+  geminiAutoCapture: true,
+  deepseekSupport: true,
+  deepseekAutoCapture: true,
   omniboxEnabled: true,
   tempPageExpireTime: 60 * 86400000,
   maxResults: 30,
@@ -15,7 +27,47 @@ export const defaults = {
     'https://www.google.com/*',
     'https://www.bing.com/*',
     'https://cn.bing.com/*',
-    'https://www.baidu.com/*'
+    'https://www.baidu.com/*',
+    // Webmail is private by default. Keep these rules editable like other exclusions.
+    '*://mail.google.com/*',
+    '*://outlook.live.com/*',
+    '*://outlook.office.com/*',
+    '*://outlook.office365.com/*',
+    '*://outlook.cloud.microsoft/*',
+    '*://partner.outlook.cn/*',
+    '*://mail.qq.com/*',
+    '*://*.mail.qq.com/*',
+    '*://exmail.qq.com/*',
+    '*://*.exmail.qq.com/*',
+    '*://mail.163.com/*',
+    '*://mail.126.com/*',
+    '*://mail.yeah.net/*',
+    '*://mail.188.com/*',
+    '*://vip.163.com/*',
+    '*://vip.126.com/*',
+    '*://vip.188.com/*',
+    '*://mail.sina.com.cn/*',
+    '*://mail.sina.cn/*',
+    '*://mail.sohu.com/*',
+    '*://mail.aliyun.com/*',
+    '*://qiye.aliyun.com/*',
+    '*://mail.10086.cn/*',
+    '*://*.mail.10086.cn/*',
+    '*://webmail.189.cn/*',
+    '*://mail.yahoo.com/*',
+    '*://*.mail.yahoo.com/*',
+    '*://mail.aol.com/*',
+    '*://mail.proton.me/*',
+    '*://mail.protonmail.com/*',
+    '*://app.fastmail.com/*',
+    '*://app.tuta.com/*',
+    '*://mail.tutanota.com/*',
+    '*://mail.zoho.com/*',
+    '*://mail.zoho.eu/*',
+    '*://mail.zoho.in/*',
+    '*://mail.zoho.com.cn/*',
+    // iCloud shares its host with other apps; exclude only the Mail route.
+    '/^https?:\\/\\/(www\\.|beta\\.)?icloud\\.com(\\.cn)?\\/mail([/?#]|$)/'
   ],
   fuzzySearch: true,
   remoteStore: false,
@@ -24,6 +76,20 @@ export const defaults = {
   remoteStoreKey: ''
 }
 export type Settings = typeof defaults
+
+export function allowsAutomaticCapture(
+  url: string,
+  settings: Settings
+): boolean {
+  const host = new URL(url).hostname
+  // Chat sites use their own message-aware, completion-gated capture path.
+  if (chatSiteForHost(host)) return false
+  if (/(^|\.)weibo\.(com|cn)$/.test(host))
+    return settings.weiboSupport && settings.weiboAutoCapture
+  if (isTwitterHost(host))
+    return settings.twitterSupport && settings.twitterAutoCapture
+  return true
+}
 
 export function migrateSettings(raw: unknown): Settings {
   let data: Record<string, unknown> = {}

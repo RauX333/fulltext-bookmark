@@ -1,38 +1,16 @@
 import { aliasToken, aliasMatch, canonicalQuery } from './aliases'
 import { relevanceBoost } from './ranking'
 import { db, type PageDatabase, INDEX_VERSION } from './database'
-import {
-  queryWords,
-  words,
-  normalize,
-  stem,
-  editDistance,
-  deletions,
-  makeSnippet
-} from './text'
-import type {
-  SearchRequest,
-  SearchResponse,
-  SearchResult,
-  ContentRecord,
-  PageRecord
-} from './types'
+import { parseQuery, matchFilters } from './search-query'
+import { normalize, stem, editDistance, deletions, makeSnippet } from './text'
+import type { SearchRequest, SearchResponse, SearchResult } from './types'
+export { parseQuery } from './search-query'
 const MAX_CANDIDATES = 5000
 type Field = 'titleWords' | 'contentWords' | 'urlWords'
 const weights: Record<Field, number> = {
   titleWords: 5,
   contentWords: 1,
   urlWords: 2
-}
-export function parseQuery(query: string) {
-  const phrases = [...query.matchAll(/"([^"]+)"/g)]
-    .map((m) => normalize(m[1]).replace(/\s+/g, ' ').trim())
-    .filter(Boolean)
-  const rest = query.replace(/"[^"]+"/g, ' ')
-  const terms = [
-    ...new Set([...queryWords(rest), ...phrases.flatMap((p) => words(p))])
-  ].slice(0, 24)
-  return { phrases, terms }
 }
 export async function searchPages(
   request: SearchRequest,
@@ -51,7 +29,7 @@ export async function searchPages(
   const query = String(request.query || '')
     .trim()
     .slice(0, 500)
-  const { phrases, terms } = parseQuery(query)
+  const { filters, terms } = parseQuery(query)
   const field = request.field || 'all'
   const fields: Field[] =
     field === 'title'
@@ -68,7 +46,7 @@ export async function searchPages(
     .below(INDEX_VERSION)
     .count()
   const count = await database.pages.count()
-  if (!terms.length) {
+  if (!terms.length && !filters.length) {
     const rows = database.pages.orderBy('date')
     const ordered = request.sort === 'oldest' ? rows : rows.reverse()
     const filtered = ordered.filter(
@@ -97,14 +75,10 @@ export async function searchPages(
   const plans = await Promise.all(
     terms.map(async (term, i) => {
       const variants = new Map<string, number>([[term, 1]])
-      const alias = !phrases.length && aliasToken(term)
+      const alias = aliasToken(term)
       if (alias) variants.set(alias, 0.88)
       if (stem(term) !== term) variants.set(stem(term), 0.85)
-      if (
-        request.fuzzy !== false &&
-        /^[a-z]{4,32}$/.test(term) &&
-        !phrases.length
-      ) {
+      if (request.fuzzy !== false && /^[a-z]{4,32}$/.test(term)) {
         const vocabulary = await database.terms
           .where('deletes')
           .anyOf(deletions(term))
@@ -115,8 +89,7 @@ export async function searchPages(
           if (editDistance(term, v.term) <= 1 && !variants.has(v.term))
             variants.set(v.term, 0.55)
       }
-      const prefix =
-        i === terms.length - 1 && /^[a-z\d]{2,}$/.test(term) && !phrases.length
+      const prefix = i === terms.length - 1 && /^[a-z\d]{2,}$/.test(term)
       const cjk =
         /^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]{3,}$/u.test(
           term
@@ -155,19 +128,35 @@ export async function searchPages(
         .slice(0, terms.length - minimum + 1)
     : sortedPlans.slice(0, 1)
   if (cancelled()) return empty()
-  const candidates = new Set<number>()
-  for (const clause of seeds.flatMap((seed) => seed.clauses)) {
-    const ids = await posting(clause)
-      .limit(MAX_CANDIDATES + 1)
+  let ids: number[],
+    limited = false
+  if (filters.length) {
+    // Apply structured constraints before imposing the result cap. In particular,
+    // a selective site: filter must not lose pages after a common term's cutoff.
+    const pages = database.pages.orderBy('date')
+    ids = await (request.sort === 'oldest' ? pages : pages.reverse())
+      .filter(
+        (page) =>
+          /^https?:\/\//.test(page.url) &&
+          (request.source !== 'bookmarks' || page.isBookmarked) &&
+          matchFilters(filters, page, field, true) !== undefined
+      )
       .primaryKeys()
-    ids.forEach((id) => candidates.add(id))
+  } else {
+    const candidates = new Set<number>()
+    for (const clause of seeds.flatMap((seed) => seed.clauses)) {
+      const keys = await posting(clause)
+        .limit(MAX_CANDIDATES + 1)
+        .primaryKeys()
+      keys.forEach((id) => candidates.add(id))
+    }
+    limited = candidates.size > MAX_CANDIDATES
+    ids = [...candidates].slice(0, MAX_CANDIDATES)
   }
-  const limited = candidates.size > MAX_CANDIDATES
-  const ids = [...candidates].slice(0, MAX_CANDIDATES)
   const results: SearchResult[] = []
   // Bound working memory even when saved documents are large. Verify every term
   // against each candidate's complete tokens, rather than another capped list.
-  for (let from = 0; from < ids.length; from += 64) {
+  batches: for (let from = 0; from < ids.length; from += 64) {
     if (cancelled()) return empty()
     const batch = ids.slice(from, from + 64)
     const pages = await database.pages.bulkGet(batch)
@@ -182,17 +171,23 @@ export async function searchPages(
         (request.source === 'bookmarks' && !page.isBookmarked)
       )
         continue
+      const filterHits = matchFilters(
+        filters,
+        { ...page, content: content.content },
+        field
+      )
+      if (filterHits === undefined) continue
       const texts: Record<Field, string> = {
         titleWords: page.title,
         contentWords: content.content,
         urlWords: page.url
       }
-      const matched = new Set<string>()
+      const matched = new Set<string>(filterHits.hits)
       const fieldHits: Partial<Record<Field, Set<string>>> = {}
       const tokenSets = Object.fromEntries(
         fields.map((index) => [index, new Set(content[index] || [])])
       ) as Record<Field, Set<string>>
-      let score = 0,
+      let score = filterHits.score,
         hitCount = 0,
         requiredMissing = false
       for (const plan of plans) {
@@ -263,16 +258,9 @@ export async function searchPages(
         score += termScore * Math.log(1 + count / (1 + plan.count))
       }
       if (requiredMissing || hitCount < minimum) continue
-      if (phrases.length) {
-        const haystacks = selectedText(page, content, field).map((text) =>
-          normalize(text).replace(/\s+/g, ' ')
-        )
-        if (
-          phrases.some(
-            (phrase) => !haystacks.some((text) => text.includes(phrase))
-          )
-        )
-          continue
+      if (results.length === MAX_CANDIDATES) {
+        limited = true
+        break batches
       }
       const exactBoost = normalize(page.title).includes(normalize(query))
         ? 12
@@ -292,7 +280,7 @@ export async function searchPages(
       })
     }
   }
-  if (!results.length && !partial && terms.length >= 3 && !phrases.length) {
+  if (!results.length && !partial && terms.length >= 3 && !filters.length) {
     const fallback = await searchPages(request, database, true, cancelled)
     return { ...fallback, elapsed: performance.now() - started }
   }
@@ -319,25 +307,13 @@ export async function searchPages(
     limited
   }
 }
-function selectedText(
-  page: PageRecord,
-  content: ContentRecord | undefined,
-  field: string
-) {
-  return field === 'title'
-    ? [page.title]
-    : field === 'content'
-      ? [content?.content || '']
-      : field === 'url'
-        ? [page.url]
-        : [page.title, content?.content || '', page.url]
-}
 export function searchTabs(
   tabs: chrome.tabs.Tab[],
   request: SearchRequest
 ): SearchResult[] {
-  const { terms, phrases } = parseQuery(request.query)
-  if (request.field === 'content') return []
+  const { terms, filters } = parseQuery(request.query)
+  if (request.field === 'content' && (terms.length || !filters.length))
+    return []
   return tabs
     .filter((tab) => !tab.incognito && /^https?:\/\//.test(tab.url || ''))
     .flatMap((tab) => {
@@ -352,10 +328,8 @@ export function searchTabs(
               : `${title} ${url}`
         )
       )
-      if (
-        !terms.every((t) => text.includes(t)) ||
-        !phrases.every((p) => text.includes(p))
-      )
+      const filterHits = matchFilters(filters, { title, url }, request.field)
+      if (!terms.every((t) => text.includes(t)) || filterHits === undefined)
         return []
       return [
         {
@@ -366,11 +340,13 @@ export function searchTabs(
           isBookmarked: false,
           score: 0,
           snippet: '',
-          matched: terms,
+          matched: [...terms, ...filterHits.hits],
           tabId: tab.id,
           windowId: tab.windowId
         }
       ]
     })
-    .sort((a, b) => b.date - a.date)
+    .sort((a, b) =>
+      request.sort === 'oldest' ? a.date - b.date : b.date - a.date
+    )
 }

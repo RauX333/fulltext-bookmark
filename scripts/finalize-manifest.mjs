@@ -21,12 +21,12 @@ for (const entry of manifest.web_accessible_resources || []) {
       await access(resolve(output, file))
       resources.push(file)
     } catch (error) {
-      // Plasmo 0.90.5 lists the data-base64 Weibo icon as a PNG bundle,
+      // Plasmo 0.90.5 lists the shared data-base64 Weibo icon as a PNG bundle,
       // although Parcel embeds it in capture.js and emits no separate file.
       // Leave real resources intact and fail for any other missing file.
       const inlineCaptureIcon =
         error.code === 'ENOENT' &&
-        /^capture\.[a-f0-9]+\.png$/.test(file) &&
+        /^(?:early-)?capture\.[a-f0-9]+\.png$/.test(file) &&
         contentScripts.some((code) =>
           code.includes('data:image/png;base64,')
         ) &&

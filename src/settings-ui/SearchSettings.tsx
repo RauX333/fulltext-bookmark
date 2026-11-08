@@ -2,7 +2,13 @@ import React from 'react'
 import { t, setLanguage } from '../i18n'
 import { Field, type EditorProps } from './Field'
 import type { Settings } from '../settings'
-export function SearchSettings({ settings, patch, toggle }: EditorProps) {
+export function SearchSettings({
+  settings,
+  patch,
+  toggle,
+  inputProps,
+  errors
+}: EditorProps) {
   return (
     <section className="settings-card" id="search">
       <h2>{t('搜索体验', 'Search experience')}</h2>
@@ -37,8 +43,13 @@ export function SearchSettings({ settings, patch, toggle }: EditorProps) {
           <option value="en">English</option>
         </select>
       </Field>
-      <Field title={t('每页结果数量', 'Results per page')}>
+      <Field
+        title={t('每页结果数量', 'Results per page')}
+        error={errors?.maxResults}
+        errorId="maxResults-error"
+      >
         <input
+          {...inputProps?.('maxResults')}
           type="number"
           min="5"
           max="100"

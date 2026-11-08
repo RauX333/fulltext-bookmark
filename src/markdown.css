@@ -1,0 +1,117 @@
+.markdown-preview {
+  overflow: auto;
+  min-height: 0;
+  padding: 12px 2px;
+}
+.text-preview .markdown-body {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.75;
+  color: #1e293b;
+}
+.markdown-body > :first-child {
+  margin-top: 0;
+}
+.markdown-body > :last-child {
+  margin-bottom: 0;
+}
+.markdown-body :is(h1, h2, h3, h4, h5, h6) {
+  margin: 1.2em 0 0.6em;
+  line-height: 1.35;
+  font-weight: 650;
+}
+.markdown-body h1 {
+  font-size: 1.8em;
+}
+.markdown-body h2 {
+  font-size: 1.5em;
+}
+.markdown-body h3 {
+  font-size: 1.25em;
+}
+.markdown-body :is(h4, h5, h6) {
+  font-size: 1em;
+}
+.markdown-body :is(p, ul, ol, blockquote, pre, .markdown-table) {
+  margin: 0 0 1em;
+}
+.markdown-body :is(ul, ol) {
+  padding-left: 1.8em;
+}
+.markdown-body li + li {
+  margin-top: 0.25em;
+}
+.markdown-body li > :is(ul, ol) {
+  margin-bottom: 0;
+}
+.markdown-body blockquote {
+  margin-left: 0;
+  padding-left: 1em;
+  border-left: 3px solid #b8c9d3;
+  color: #526777;
+}
+.markdown-body blockquote > :last-child {
+  margin-bottom: 0;
+}
+.markdown-body code {
+  font-family: Consolas, 'SFMono-Regular', monospace;
+  font-size: 0.92em;
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  background: #edf1f5;
+}
+.text-preview .markdown-body pre {
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+  padding: 14px;
+  border: 1px solid #e1e7ed;
+  border-radius: 8px;
+  background: #f6f8fa;
+  line-height: 1.6;
+}
+.markdown-body pre code {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+}
+.markdown-table {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.markdown-body table {
+  border-collapse: collapse;
+  font-size: inherit;
+}
+.markdown-body :is(th, td) {
+  padding: 8px 12px;
+  border: 1px solid #d8e0e8;
+  min-width: 80px;
+}
+.markdown-body th {
+  background: #f1f5f9;
+  font-weight: 600;
+}
+.markdown-body hr {
+  border: 0;
+  border-top: 1px solid #d8e0e8;
+  margin: 1.5em 0;
+}
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+}
+.markdown-body .task-list-item {
+  list-style: none;
+}
+.markdown-body .task-list-item-checkbox {
+  margin: 0 0.5em 0 -1.5em;
+  vertical-align: middle;
+}
+.markdown-body .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25em 0;
+}

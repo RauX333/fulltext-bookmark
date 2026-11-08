@@ -10,13 +10,26 @@ const licenses = {
   papaparse: ['LICENSE'],
   stemmer: ['license'],
   stopword: ['LICENSE'],
+  'markdown-it': ['LICENSE'],
+  'markdown-it/node_modules/entities': ['LICENSE'],
+  'linkify-it': ['LICENSE'],
+  mdurl: ['LICENSE'],
+  'uc.micro': ['LICENSE.txt'],
+  'punycode.js': ['LICENSE-MIT.txt'],
+  '@mdit/helper': ['LICENSE'],
+  '@mdit/plugin-tex': ['LICENSE'],
+  '@mdit/plugin-katex': ['LICENSE'],
+  '@mdit/plugin-tasklist': ['LICENSE'],
+  katex: ['LICENSE'],
+  'highlight.js': ['LICENSE'],
+  dompurify: ['LICENSE', 'LICENSE-MPL'],
   'opencc-js': ['LICENSE', 'LICENSES/Apache-2.0.txt', 'THIRD_PARTY_LICENSES.md']
 }
 for (const [name, files] of Object.entries(licenses)) {
   for (const file of files)
     await copyFile(
       resolve('node_modules', name, file),
-      join(output, name + '-' + file.replaceAll('/', '-'))
+      join(output, (name + '-' + file).replaceAll('/', '-'))
     )
 }
 await writeFile(

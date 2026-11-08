@@ -217,11 +217,8 @@ test('toolbar supports side-panel, popup and tab preferences; explicit popup doe
     const mode = settings.getByLabel(/默认搜索界面|Default search view/)
     for (const value of ['popup', 'tab', 'sidepanel']) {
       await mode.selectOption(value)
-      await settings
-        .getByRole('button', { name: /保存设置|Save settings/, exact: true })
-        .click()
-      await expect(settings.getByRole('status')).toContainText(
-        /设置已保存|Settings saved/
+      await expect(settings.getByTestId('settings-save-status')).toContainText(
+        /设置已自动保存|Settings saved automatically/
       )
       expect(
         (

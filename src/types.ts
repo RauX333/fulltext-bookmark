@@ -1,3 +1,5 @@
+import type { ChatConversation } from './chatgpt-data'
+
 export interface PageRecord {
   id?: number
   url: string
@@ -10,6 +12,7 @@ export interface PageRecord {
   titleHash?: string
   source?: 'page' | 'history' | 'bookmark' | 'import'
   truncated?: boolean
+  captureProfile?: string
 }
 export interface ContentRecord {
   pid: number
@@ -17,8 +20,11 @@ export interface ContentRecord {
   contentWords: string[]
   titleWords: string[]
   urlWords?: string[]
+  conversation?: ChatConversation
 }
 export interface PageInput {
+  captureProfile?: string
+  conversation?: ChatConversation
   mergeContent?: boolean
   url: string
   title: string

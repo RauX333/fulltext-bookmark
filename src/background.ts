@@ -6,7 +6,12 @@ import {
   deletePages,
   INDEX_VERSION
 } from './database'
-import { getSettings, saveSettings, isExcluded } from './settings'
+import {
+  allowsAutomaticCapture,
+  getSettings,
+  saveSettings,
+  isExcluded
+} from './settings'
 import { searchPages, searchTabs } from './search'
 import { normalizeUrl } from './text'
 import type { PageInput, SearchRequest } from './types'
@@ -14,8 +19,18 @@ import { setLanguage, t } from './i18n'
 import { sendRemote, testRemote } from './remote'
 import { migrateSettings } from './settings'
 import { configureAction, openSearchPopup } from './presentation'
+import { isTwitterHost, twitterStatusUrl } from './twitter-url'
+import { settingError } from './settings-validation'
+import type { Settings } from './settings'
+import {
+  chatConversationUrl,
+  readConversation,
+  type ChatSite
+} from './chatgpt-data'
+import { hashText } from './identity'
 
 const activeSearches = new Map<string, symbol>()
+let settingsWrites: Promise<unknown> = Promise.resolve()
 const internal = (sender: chrome.runtime.MessageSender) =>
   sender.id === chrome.runtime.id &&
   sender.url?.startsWith(chrome.runtime.getURL(''))
@@ -52,7 +67,16 @@ async function captureConfig(sender: chrome.runtime.MessageSender) {
       bookmarkAdaption: settings.bookmarkAdaption,
       forbiddenURLs: settings.forbiddenURLs,
       searchEngineAdaption: settings.searchEngineAdaption,
-      weiboSupport: settings.weiboSupport
+      weiboSupport: settings.weiboSupport,
+      weiboAutoCapture: settings.weiboAutoCapture,
+      twitterSupport: settings.twitterSupport,
+      twitterAutoCapture: settings.twitterAutoCapture,
+      chatgptSupport: settings.chatgptSupport && !sender.tab?.incognito,
+      chatgptAutoCapture: settings.chatgptAutoCapture,
+      geminiSupport: settings.geminiSupport && !sender.tab?.incognito,
+      geminiAutoCapture: settings.geminiAutoCapture,
+      deepseekSupport: settings.deepseekSupport && !sender.tab?.incognito,
+      deepseekAutoCapture: settings.deepseekAutoCapture
     },
     bookmarked: await isBookmark(url)
   }
@@ -86,7 +110,45 @@ async function handleMessage(
   const trusted = internal(sender)
   const settings = await getSettings()
   setLanguage(settings.language)
-  if (message.command === 'capture' || message.command === 'save-weibo') {
+  const chatSite = ['chatgpt', 'gemini', 'deepseek'].find(
+    (site) =>
+      message.command === `save-${site}` ||
+      message.command === `${site}-saved-state`
+  ) as ChatSite | undefined
+  if (chatSite && message.command === `${chatSite}-saved-state`) {
+    if (
+      !sender.tab ||
+      sender.tab.incognito ||
+      sender.frameId !== 0 ||
+      !settings[`${chatSite}Support`]
+    )
+      return { ok: true, hashes: {} }
+    const senderUrl = await senderPageUrl(sender)
+    const url = chatConversationUrl(senderUrl, chatSite)
+    if (
+      !url ||
+      isExcluded(senderUrl, settings.forbiddenURLs) ||
+      isExcluded(url, settings.forbiddenURLs)
+    )
+      return { ok: true, hashes: {} }
+    const page = await db.pages.where('url').equals(url).first()
+    const content = page?.id ? await db.contents.get(page.id) : undefined
+    return {
+      ok: true,
+      hashes: Object.fromEntries(
+        (content?.conversation?.messages || []).map((m) => [
+          m.id,
+          hashText(m.text)
+        ])
+      )
+    }
+  }
+  if (
+    message.command === 'capture' ||
+    message.command === 'save-weibo' ||
+    message.command === 'save-twitter' ||
+    (chatSite && message.command === `save-${chatSite}`)
+  ) {
     if (!sender.tab || sender.tab.incognito || sender.frameId !== 0)
       return { ok: true, saved: false }
     const input = message.data as PageInput
@@ -97,8 +159,14 @@ async function handleMessage(
     )
       throw new Error(t('网页文字格式无效', 'Invalid capture'))
     const senderUrl = normalizeUrl(await senderPageUrl(sender))
-    const url = normalizeUrl(input.url)
+    let url = normalizeUrl(input.url)
     const weibo = message.command === 'save-weibo'
+    const twitter = message.command === 'save-twitter'
+    const chatgpt = chatSite && message.command === `save-${chatSite}`
+    const post = weibo || twitter || chatgpt
+    const conversation = chatgpt
+      ? readConversation(input.conversation)
+      : undefined
     if (weibo) {
       if (
         !settings.weiboSupport ||
@@ -106,15 +174,44 @@ async function handleMessage(
         !/(^|\.)weibo\.(com|cn)$/.test(new URL(url).hostname)
       )
         throw new Error(t('微博页面来源无效', 'Invalid Weibo origin'))
+    } else if (twitter) {
+      const statusUrl = twitterStatusUrl(url)
+      if (
+        !settings.twitterSupport ||
+        !isTwitterHost(new URL(senderUrl).hostname) ||
+        !statusUrl
+      )
+        throw new Error(t('X 帖子来源无效', 'Invalid X post origin'))
+      url = statusUrl
+    } else if (chatgpt) {
+      const conversationUrl = chatConversationUrl(senderUrl, chatSite)
+      if (
+        !settings[`${chatSite!}Support`] ||
+        (message.automatic && !settings[`${chatSite!}AutoCapture`])
+      )
+        return { ok: true, saved: false }
+      if (
+        !conversation ||
+        conversation.site !== chatSite ||
+        !conversationUrl ||
+        chatConversationUrl(url, chatSite) !== conversationUrl
+      )
+        throw new Error(t('对话来源无效', 'Invalid conversation origin'))
+      url = conversationUrl
     } else if (url !== senderUrl)
       throw new Error(
         t('页面地址已变化，请重试保存', 'Page URL changed; retry capture')
       )
-    if (isExcluded(url, settings.forbiddenURLs))
-      return { ok: true, saved: false }
-    const bookmarked = weibo || (await isBookmark(url))
     if (
-      !weibo &&
+      isExcluded(senderUrl, settings.forbiddenURLs) ||
+      isExcluded(input.url, settings.forbiddenURLs) ||
+      isExcluded(url, settings.forbiddenURLs) ||
+      (!post && !allowsAutomaticCapture(senderUrl, settings))
+    )
+      return { ok: true, saved: false }
+    const bookmarked = post || (await isBookmark(url))
+    if (
+      !post &&
       !settings.storeEveryPage &&
       !(settings.bookmarkAdaption && bookmarked)
     )
@@ -123,9 +220,12 @@ async function handleMessage(
       url,
       title: String(input.title || ''),
       content: input.content,
+      conversation,
       date: Date.now(),
       isBookmarked: bookmarked || undefined,
-      mergeContent: true,
+      mergeContent: !chatgpt,
+      captureProfile:
+        message.command === 'capture' ? input.captureProfile : undefined,
       truncated: !!input.truncated
     })
     await chrome.action
@@ -177,14 +277,32 @@ async function handleMessage(
     case 'settings':
       return { ok: true, settings }
     case 'save-settings': {
-      const saved = await saveSettings(message.settings)
-      await configureAction(saved)
-      for (const tab of await chrome.tabs.query({}))
-        if (tab.id)
-          void chrome.tabs
-            .sendMessage(tab.id, { command: 'route-changed' })
-            .catch(() => {})
-      return { ok: true, settings: saved }
+      const write = settingsWrites
+        .catch(() => {})
+        .then(async () => {
+          const current = await getSettings()
+          const patch = message.patch ?? message.settings
+          if (!patch || typeof patch !== 'object' || Array.isArray(patch))
+            throw new Error(t('设置格式无效', 'Invalid settings'))
+          const keys = Object.keys(patch) as (keyof Settings)[]
+          if (keys.some((key) => !Object.hasOwn(current, key)))
+            throw new Error(t('未知设置项', 'Unknown setting'))
+          const next = { ...current, ...patch } as Settings
+          for (const key of keys) {
+            const error = settingError(key, next)
+            if (error) throw new Error(error)
+          }
+          const saved = await saveSettings(next)
+          await configureAction(saved)
+          for (const tab of await chrome.tabs.query({}))
+            if (tab.id)
+              void chrome.tabs
+                .sendMessage(tab.id, { command: 'route-changed' })
+                .catch(() => {})
+          return { ok: true, settings: saved }
+        })
+      settingsWrites = write
+      return write
     }
     case 'open-popup':
       await openSearchPopup(String(message.query || ''), message.windowId)

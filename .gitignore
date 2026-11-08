@@ -45,3 +45,20 @@ keys.json
 # typescript
 .tsbuildinfo
 .trae/rules/project_rules.md
+
+# Local, one-off live-site audit work and generated reports
+/docs/validation.md
+/docs/third-party.md
+/docs/requirements.md
+/docs/handbook.md
+/docs/live-sites-audit*.md
+/docs/live-sites-regression*.md
+/docs/blog-traffic-ranking.md
+/scripts/live-sites-*
+/scripts/assemble-live-regression.mjs
+/scripts/collect-blog-*.mjs
+/scripts/compare-live-regression.mjs
+/scripts/discover-live-articles.mjs
+/scripts/inspect-live-sites.mjs
+/scripts/probe-live-dom.mjs
+/scripts/report-live-*.mjs

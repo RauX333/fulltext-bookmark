@@ -1,4 +1,5 @@
 import { Highlight } from './Highlight'
+import { SearchHelp } from './SearchHelp'
 import Dexie from 'dexie'
 import React, { useEffect, useRef, useState } from 'react'
 import { send } from './messaging'
@@ -6,6 +7,8 @@ import { defaults, migrateSettings, type Settings } from './settings'
 import type { SearchRequest, SearchResponse, SearchResult } from './types'
 import { db } from './database'
 import { t, setLanguage } from './i18n'
+import { SavedTextPreview } from './SavedTextPreview'
+import type { SavedText } from './text-export'
 import './style.css'
 import icon from 'data-base64:../assets/icon512.png'
 
@@ -36,7 +39,7 @@ export function SearchView({
   const [offset, setOffset] = useState(0),
     [refresh, setRefresh] = useState(0),
     [ready, setReady] = useState(false)
-  const [preview, setPreview] = useState<{ title: string; content: string }>()
+  const [preview, setPreview] = useState<SavedText & { id?: number }>()
   const sequence = useRef(0),
     resultList = useRef<HTMLDivElement>(null),
     input = useRef<HTMLInputElement>(null)
@@ -169,13 +172,15 @@ export function SearchView({
   const viewText = async (result: SearchResult) => {
     const content = result.id ? await db.contents.get(result.id) : undefined
     setPreview({
+      id: result.id,
       title: result.title,
-      content:
-        content?.content ||
-        t(
-          '此条目只有标题和网址；打开网页后会保存正文。',
-          'Only the title and URL are available. Visit the page to capture its text.'
-        )
+      url: result.url,
+      date: result.date,
+      source: result.source,
+      isBookmarked: result.isBookmarked,
+      truncated: result.truncated,
+      conversation: content?.conversation,
+      content: content?.content || ''
     })
   }
   return (
@@ -188,6 +193,7 @@ export function SearchView({
           </strong>
         </div>
         <div className="header-actions">
+          <SearchHelp />
           {!sidepanel && typeof chrome.sidePanel?.open === 'function' && (
             <button
               className="open-search-panel"
@@ -302,8 +308,8 @@ export function SearchView({
           <label
             className="check"
             title={t(
-              '匹配英文单字符错字和相邻字母颠倒；中文分词、简繁和缩写匹配始终启用。',
-              'Match one-character English typos and transpositions. Chinese segmentation, traditional/simplified forms and abbreviations are always supported.'
+              '普通关键词支持英文单字符错字和相邻字母颠倒；精确短语、通配符和字段条件不做容错扩展。',
+              'Match one-character English typos and transpositions in ordinary keywords. Exact phrases, wildcards and field filters are not fuzzy.'
             )}
           >
             <input
@@ -497,29 +503,10 @@ export function SearchView({
         <span>{t('↑ ↓ 选择 · Enter 打开', '↑ ↓ Navigate · Enter Open')}</span>
       </footer>
       {preview && (
-        <div className="modal-backdrop" onClick={() => setPreview(undefined)}>
-          <section
-            className="text-preview"
-            role="dialog"
-            aria-modal="true"
-            aria-label={preview.title}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <header>
-              <h2>{preview.title}</h2>
-              <button
-                autoFocus
-                onClick={() => setPreview(undefined)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Escape') setPreview(undefined)
-                }}
-              >
-                {t('关闭', 'Close')}
-              </button>
-            </header>
-            <pre>{preview.content}</pre>
-          </section>
-        </div>
+        <SavedTextPreview
+          page={preview}
+          onClose={() => setPreview(undefined)}
+        />
       )}
     </main>
   )

@@ -570,6 +570,26 @@ fieldset {
   color: #947471;
   font-size: 12px;
 }
+.settings-notice {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 110;
+  width: min(420px, calc(100vw - 40px));
+  padding: 16px;
+  border: 1px solid #e4b3a9;
+  border-radius: 10px;
+  background: #fff7f4;
+  color: #843d30;
+  box-shadow: 0 8px 30px #102c3a25;
+  overflow-wrap: anywhere;
+}
+.settings-notice p {
+  margin: 0 0 12px;
+}
+.setting-field [aria-invalid='true'] {
+  border-color: #b74f43;
+}
 .danger-zone summary {
   cursor: pointer;
 }

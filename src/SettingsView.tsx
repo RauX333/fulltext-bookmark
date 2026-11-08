@@ -4,14 +4,16 @@ import { ConnectionSettings } from './settings-ui/ConnectionSettings'
 import { SearchSettings } from './settings-ui/SearchSettings'
 import { CaptureSettings } from './settings-ui/CaptureSettings'
 import React, { useEffect, useState } from 'react'
-import { defaults, type Settings } from './settings'
+import type { Settings } from './settings'
+import { useAutoSettings } from './settings-ui/useAutoSettings'
 import { send } from './messaging'
 import { t, setLanguage } from './i18n'
 import './style.css'
 import icon from 'data-base64:../assets/icon512.png'
 export function SettingsView() {
-  const [settings, setSettings] = useState<Settings>(defaults),
-    [ready, setReady] = useState(false)
+  const editor = useAutoSettings()
+  const { settings, patch, inputProps, errors } = editor
+  const [ready, setReady] = useState(false)
   const [status, setStatus] = useState(''),
     [error, setError] = useState(''),
     [busy, setBusy] = useState(false)
@@ -36,7 +38,7 @@ export function SettingsView() {
             ? chrome.i18n.getUILanguage()
             : v.settings.language
         document.title = t('全文书签 · 设置', 'Fulltext Bookmark · Settings')
-        setSettings(v.settings)
+        editor.initialize(v.settings)
         setReady(true)
         refresh()
       })
@@ -50,8 +52,6 @@ export function SettingsView() {
         : settings.language
     document.title = t('全文书签 · 设置', 'Fulltext Bookmark · Settings')
   }, [settings.language])
-  const patch = <K extends keyof Settings>(key: K, value: Settings[K]) =>
-    setSettings((s) => ({ ...s, [key]: value }))
   const task = async (action: () => Promise<void>) => {
     setBusy(true)
     setError('')
@@ -65,19 +65,6 @@ export function SettingsView() {
       setBusy(false)
     }
   }
-  const save = () =>
-    task(async () => {
-      if (
-        !Number.isFinite(settings.maxResults) ||
-        settings.maxResults < 5 ||
-        settings.maxResults > 100 ||
-        !Number.isFinite(settings.tempPageExpireTime) ||
-        settings.tempPageExpireTime < 0
-      )
-        throw new Error(t('请检查数字范围', 'Check the numeric ranges'))
-      await send('save-settings', { settings })
-      setStatus(t('设置已保存', 'Settings saved'))
-    })
   const toggle = (key: keyof Settings) => (
     <input
       type="checkbox"
@@ -115,8 +102,16 @@ export function SettingsView() {
               settings={settings}
               patch={patch}
               toggle={toggle}
+              inputProps={inputProps}
+              errors={errors}
             />
-            <SearchSettings settings={settings} patch={patch} toggle={toggle} />
+            <SearchSettings
+              settings={settings}
+              patch={patch}
+              toggle={toggle}
+              inputProps={inputProps}
+              errors={errors}
+            />
             <DataSettings
               stats={stats}
               storage={storage}
@@ -128,19 +123,34 @@ export function SettingsView() {
               settings={settings}
               patch={patch}
               toggle={toggle}
+              inputProps={inputProps}
+              errors={errors}
               task={task}
               setStatus={setStatus}
             />
             <AboutSettings />
           </fieldset>
           <div className="settings-save">
-            <button
-              className="primary"
-              disabled={!ready || busy}
-              onClick={() => void save()}
-            >
-              {busy ? t('处理中…', 'Working…') : t('保存设置', 'Save settings')}
-            </button>
+            <p aria-live="polite" data-testid="settings-save-status">
+              {editor.saveState === 'saved'
+                ? t('设置已自动保存', 'Settings saved automatically')
+                : editor.saveState === 'saving'
+                  ? t('正在保存…', 'Saving…')
+                  : editor.saveState === 'pending'
+                    ? t(
+                        '等待输入完成；有效设置将自动保存。',
+                        'Waiting for input; valid changes save automatically.'
+                      )
+                    : editor.saveState === 'error'
+                      ? t(
+                          '部分设置未保存，请检查输入或重试。',
+                          'Some settings are not saved. Check the input or retry.'
+                        )
+                      : t(
+                          '设置会自动保存，无需手动确认。',
+                          'Settings save automatically; no confirmation needed.'
+                        )}
+            </p>
             <p role="status">{status}</p>
             {error && (
               <p role="alert" className="error">
@@ -148,6 +158,21 @@ export function SettingsView() {
               </p>
             )}
           </div>
+          {editor.notice && (
+            <div role="alert" className="settings-notice">
+              <p>{editor.notice}</p>
+              <div className="button-row">
+                <button onClick={() => editor.setNotice('')}>
+                  {t('知道了', 'Dismiss')}
+                </button>
+                {editor.saveState === 'error' && (
+                  <button onClick={editor.retry}>
+                    {t('重新检查并保存', 'Check and retry')}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </main>

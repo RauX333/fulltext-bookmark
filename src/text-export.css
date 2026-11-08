@@ -1,0 +1,112 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: #172b38;
+  background: #f3f6f8;
+  font-family: system-ui, sans-serif;
+  line-height: 1.7;
+}
+main {
+  max-width: 860px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+.export-toolbar {
+  margin-bottom: 24px;
+}
+button {
+  padding: 8px 16px;
+  background: #fff;
+  color: #172b38;
+  border: 1px solid #b9cbd5;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.export-document {
+  background: #fff;
+  padding: 36px;
+  overflow-wrap: anywhere;
+}
+h1 {
+  margin: 0 0 12px;
+  font-size: 24px;
+  line-height: 1.4;
+}
+.export-notice {
+  font-size: 12px;
+  color: #526777;
+}
+.export-metadata {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 12px;
+  margin: 20px 0;
+}
+.export-metadata caption {
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.export-metadata th,
+.export-metadata td {
+  padding: 8px 10px;
+  border: 1px solid #d4e1e8;
+  text-align: left;
+  vertical-align: top;
+}
+.export-metadata th {
+  width: 32%;
+}
+.export-metadata code {
+  display: block;
+  font-weight: normal;
+  color: #526777;
+}
+pre {
+  margin-top: 24px;
+  white-space: pre-wrap;
+  font: inherit;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  tab-size: 4;
+}
+@page {
+  size: A4;
+  margin: 18mm;
+}
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+  main {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+  .export-toolbar {
+    display: none;
+  }
+  .export-document {
+    padding: 0;
+  }
+  h1 {
+    break-after: avoid;
+  }
+  .export-metadata tr {
+    break-inside: avoid;
+  }
+  pre {
+    font-size: 11pt;
+    orphans: 3;
+    widows: 3;
+  }
+}

@@ -3,6 +3,7 @@ import { db, type PageDatabase, savePage } from './database'
 import type { PageInput } from './types'
 import { normalizeUrl } from './identity'
 import { t } from './i18n'
+import { readConversation } from './chatgpt-data'
 export interface Backup {
   format: 'fulltext-bookmark'
   version: 2
@@ -28,7 +29,8 @@ export async function exportBackup(database = db): Promise<Backup> {
           isBookmarked: page.isBookmarked,
           source: page.source,
           truncated: page.truncated,
-          content: contents[i]?.content || ''
+          content: contents[i]?.content || '',
+          conversation: contents[i]?.conversation
         }))
       }
     }
@@ -108,7 +110,8 @@ export function parseBackup(text: string): PageInput[] {
         row.isBookmarked === true ||
         row.isBookmarked === 1 ||
         row.isBookmarked === 'true',
-      source: 'import'
+      source: 'import',
+      conversation: readConversation(row.conversation)
     }
   })
 }
@@ -140,6 +143,8 @@ export async function importPages(
               ...page,
               title: newer ? existing.title : page.title,
               isBookmarked: page.isBookmarked || existing?.isBookmarked,
+              conversation:
+                newer && old?.content ? old.conversation : page.conversation,
               content: newer && old?.content ? old.content : page.content
             },
             database

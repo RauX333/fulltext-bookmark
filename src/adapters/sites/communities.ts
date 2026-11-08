@@ -1,20 +1,22 @@
-export interface SiteAdapter {
-  id: string
-  hosts: string[]
-  content: string[]
-  title?: string[]
-}
-// These small rules select already-rendered content; they never fetch private APIs,
-// bypass access controls, or discard a page when its markup has changed.
-export const adapters: SiteAdapter[] = [
-  {
+import { defineArticle, defineAdapter } from '../define'
+import type { SiteAdapter } from '../types'
+
+export const communitiesAdapters: SiteAdapter[] = [
+  defineArticle({
+    id: 'devto-article',
+    hosts: ['dev.to'],
+    content: ['#article-body']
+  }),
+  defineAdapter({
     id: 'weixin',
+    isolate: true,
     hosts: ['mp.weixin.qq.com'],
     content: ['#js_content'],
     title: ['#activity-name']
-  },
-  {
+  }),
+  defineAdapter({
     id: 'zhihu',
+    isolate: true,
     hosts: ['zhihu.com'],
     content: [
       '.RichContent-inner',
@@ -23,8 +25,8 @@ export const adapters: SiteAdapter[] = [
       '.RichText'
     ],
     title: ['.Post-Title', '.QuestionHeader-title']
-  },
-  {
+  }),
+  defineAdapter({
     id: 'weibo',
     hosts: ['weibo.com', 'weibo.cn'],
     content: [
@@ -34,9 +36,18 @@ export const adapters: SiteAdapter[] = [
       '[node-type="feed_list_content_full"]',
       '[node-type="feed_list_content"]'
     ]
-  },
-  {
+  }),
+  defineAdapter({
+    id: 'twitter',
+    hosts: ['x.com', 'twitter.com'],
+    content: [
+      '[data-testid="tweetText"]',
+      '[data-testid="tweetArticleRichTextView"]'
+    ]
+  }),
+  defineAdapter({
     id: 'github',
+    isolate: true,
     hosts: ['github.com'],
     content: [
       'article.markdown-body',
@@ -45,9 +56,10 @@ export const adapters: SiteAdapter[] = [
       '[data-testid="issue-body"]',
       '[data-testid="issue-comment-body"]'
     ]
-  },
-  {
+  }),
+  defineAdapter({
     id: 'stackexchange',
+    isolate: true,
     hosts: [
       'stackoverflow.com',
       'stackexchange.com',
@@ -57,62 +69,53 @@ export const adapters: SiteAdapter[] = [
     ],
     content: ['.s-prose', '.js-post-body', '.comment-copy'],
     title: ['#question-header h1']
-  },
-  {
-    id: 'wikipedia',
-    hosts: ['wikipedia.org'],
-    content: ['.mw-parser-output'],
-    title: ['#firstHeading']
-  },
-  {
+  }),
+  defineAdapter({
     id: 'juejin',
+    isolate: true,
     hosts: ['juejin.cn'],
     content: ['.article-content', '.markdown-body', '.comment-content'],
     title: ['.article-title']
-  },
-  {
+  }),
+  defineAdapter({
     id: 'csdn',
+    isolate: true,
+    ignore: [
+      '.hide-article-box',
+      '.blog-extension-box',
+      '.recommend-box',
+      '.recommend-item-box',
+      '.hljs-button'
+    ],
     hosts: ['csdn.net'],
     content: ['#content_views', '.comment-list'],
     title: ['.title-article']
-  },
-  {
+  }),
+  defineAdapter({
     id: 'notion',
     hosts: ['notion.so', 'notion.site'],
     content: ['.notion-page-content']
-  },
-  {
+  }),
+  defineAdapter({
     id: 'medium',
     hosts: ['medium.com', 'substack.com'],
     content: ['article', '.available-content', '.body.markup']
-  }
+  }),
+  defineArticle({
+    id: 'cnblogs',
+    hosts: ['cnblogs.com'],
+    content: ['#cnblogs_post_body, #blog-comments-placeholder', '#post_list']
+  }),
+  defineArticle({
+    id: 'v2ex',
+    hosts: ['v2ex.com'],
+    content: ['.topic_content, .reply_content']
+  }),
+  defineArticle({
+    id: 'hackernews',
+    hosts: ['news.ycombinator.com'],
+    content: [
+      '.itemlist, tr.athing.submission, tr:has(> .subtext), .comment-tree, .toptext'
+    ]
+  })
 ]
-export function selectAdapter(host: string) {
-  return adapters.find((adapter) =>
-    adapter.hosts.some(
-      (domain) => host === domain || host.endsWith('.' + domain)
-    )
-  )
-}
-export function preferredRoots(document: Document, host: string): Element[] {
-  const selectors = selectAdapter(host)?.content || [
-    'article',
-    'main',
-    '[role="main"]'
-  ]
-  const found = [...document.querySelectorAll(selectors.join(','))]
-  return found
-    .filter(
-      (node) =>
-        !found.some((parent) => parent !== node && parent.contains(node))
-    )
-    .slice(0, 100)
-}
-export function pageTitle(document: Document, host: string) {
-  const selectors = selectAdapter(host)?.title
-  return (
-    (selectors &&
-      document.querySelector(selectors.join(','))?.textContent?.trim()) ||
-    document.title
-  )
-}
